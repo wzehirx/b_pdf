@@ -5,8 +5,12 @@ import io.github.wzehirx.bpdf.core.pdf.PdfBoxInit
 
 /** Application entry point; performs process-wide initialisation. */
 class BPdfApp : Application() {
+    lateinit var container: AppContainer
+        private set
+
     override fun onCreate() {
         super.onCreate()
         PdfBoxInit.ensure(this)
+        container = AppContainer(this)
     }
 }

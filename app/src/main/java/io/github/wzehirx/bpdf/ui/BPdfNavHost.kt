@@ -1,35 +1,23 @@
 package io.github.wzehirx.bpdf.ui
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
-import io.github.wzehirx.bpdf.R
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import io.github.wzehirx.bpdf.ui.home.HomeScreen
 
-/** Temporary host; replaced by the real navigation graph in a later task. */
-@OptIn(ExperimentalMaterial3Api::class)
+const val HOME_ROUTE = "home"
+
+/**
+ * App navigation graph. Each feature task registers its screen here with
+ * `composable(Tool.X.route) { ... }` (use `navController.popBackStack()` for back).
+ */
 @Composable
-fun BPdfNavHost() {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.app_name),
-                        modifier = Modifier.semantics { heading() },
-                    )
-                },
-            )
-        },
-    ) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding))
+fun BPdfNavHost(navController: NavHostController = rememberNavController()) {
+    NavHost(navController = navController, startDestination = HOME_ROUTE) {
+        composable(HOME_ROUTE) {
+            HomeScreen(onOpenTool = { navController.navigate(it.route) })
+        }
     }
 }
