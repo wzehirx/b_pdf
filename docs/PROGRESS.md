@@ -5,6 +5,7 @@ Plan: `docs/superpowers/plans/2026-10-21-b-pdf.md` · Spec: `docs/superpowers/sp
 
 Resume recipe: `scripts/setup-android-sdk.sh` → `export ANDROID_HOME=$HOME/android-sdk` → continue with the first unchecked task below
 (implement with a Sonnet subagent, review with a Sonnet subagent, escalate to Opus if review fails twice).
+Budget mode (user-approved): batch remaining tasks per milestone (11+12, 13+14, 15+16+17, 18+19, 20+21, 22); one review per batch; fix only Critical/Important; minors go to the final review.
 
 | Task | Status | Commit |
 |---|---|---|
