@@ -14,8 +14,8 @@ Resume recipe: `scripts/setup-android-sdk.sh` → `export ANDROID_HOME=$HOME/and
 | 3 Runner, files, a11y helpers | done | 6c05b3a..e93890b |
 | 4 Shared UI, navigation, home | done | a082f4a..b3e336b |
 | 5 CI, release, docs → v0.1.0 | next | |
-| 6 Merge | todo | |
-| 7 Split | todo | |
+| 6 Merge | done | c263686..9ed5e5d |
+| 7 Split | next | |
 | 8 Remove/Extract pages | todo | |
 | 9 Rotate → v0.2.0 | todo | |
 | 10 Thumbnails, PageGrid, Organize | todo | |
