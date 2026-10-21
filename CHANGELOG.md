@@ -5,11 +5,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-21
+
 ### Added
 - Merge PDF tool: combine several PDFs in a chosen order (reorder and remove with buttons or screen-reader actions), then save or share the result.
 - Split PDF tool: split by page ranges, every N pages, or one file per page; save all parts to a folder or as one ZIP, or share them.
 - Remove pages and Extract pages tools: type the pages to delete or keep (ranges such as 2, 4-6); extracted pages keep the order you type.
 - Rotate pages tool: turn all or selected pages 90° clockwise, 180° or 90° counter-clockwise; the turn is added to each page's existing rotation.
+
+### Security
+- Removing pages guarantees the deleted pages cannot survive inside the saved file (links, bookmarks, named destinations, form fields and other references are cleaned, and the output is verified).
 
 ## [0.1.0] - 2026-10-21
 
@@ -25,5 +30,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - GitHub Actions CI (unit tests, lint, debug build) and a tag-triggered release workflow that publishes the APK with these notes.
 - README, CONTRIBUTING, and accessibility guide (English and Turkish).
 
-[Unreleased]: https://github.com/wzehirx/b_pdf/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/wzehirx/b_pdf/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/wzehirx/b_pdf/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/wzehirx/b_pdf/releases/tag/v0.1.0
