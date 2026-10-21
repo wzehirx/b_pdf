@@ -115,7 +115,10 @@ class SplitViewModelTest {
     @Test
     fun split_withoutFile_doesNothing() {
         vm.split()
-        settled { it.operation == OperationState.Idle }
+        val s = settled { it.operation == OperationState.Idle && it.file == null && !it.importing }
+        assertEquals(0, s.failedAttempts)
+        // Nothing was started: no output file was even allocated.
+        assertTrue(File(context.cacheDir, "shared").listFiles().orEmpty().isEmpty())
     }
 
     @Test

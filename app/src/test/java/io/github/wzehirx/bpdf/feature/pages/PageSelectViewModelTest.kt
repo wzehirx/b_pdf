@@ -157,7 +157,7 @@ class PageSelectViewModelTest {
     fun blankRange_showsNoErrorUntilRunAttempted() {
         val vm = newVm(PageSelectMode.EXTRACT)
         vm.pick(3)
-        assertNull(vm.settled { true }.rangeError)
+        assertNull(vm.settled { it.file != null && it.pageCount == 3 }.rangeError)
         vm.run()
         assertEquals(RangeErrorReason.EMPTY, vm.settled { it.rangeError != null }.rangeError?.reason)
         vm.setRangeText("2")
@@ -168,7 +168,10 @@ class PageSelectViewModelTest {
     fun run_withoutFile_doesNothing() {
         val vm = newVm(PageSelectMode.REMOVE)
         vm.run()
-        vm.settled { it.operation == OperationState.Idle }
+        val s = vm.settled { it.operation == OperationState.Idle && it.file == null && !it.importing }
+        assertEquals(0, s.failedAttempts)
+        // Nothing was started: no output file was even allocated.
+        assertTrue(File(context.cacheDir, "shared").listFiles().orEmpty().isEmpty())
     }
 
     @Test

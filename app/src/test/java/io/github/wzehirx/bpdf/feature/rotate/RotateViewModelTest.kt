@@ -143,7 +143,7 @@ class RotateViewModelTest {
         val vm = newVm()
         vm.pick(3)
         vm.setScope(RotateScope.SELECTED)
-        assertNull(vm.settled { true }.rangeError)
+        assertNull(vm.settled { it.file != null && it.pageCount == 3 }.rangeError)
         vm.rotate()
         assertEquals(RangeErrorReason.EMPTY, vm.settled { it.rangeError != null }.rangeError?.reason)
         vm.setScope(RotateScope.ALL)
@@ -157,7 +157,10 @@ class RotateViewModelTest {
     fun rotate_withoutFile_doesNothing() {
         val vm = newVm()
         vm.rotate()
-        vm.settled { it.operation == OperationState.Idle }
+        val s = vm.settled { it.operation == OperationState.Idle && it.file == null && !it.importing }
+        assertEquals(0, s.failedAttempts)
+        // Nothing was started: no output file was even allocated.
+        assertTrue(File(context.cacheDir, "shared").listFiles().orEmpty().isEmpty())
     }
 
     @Test
