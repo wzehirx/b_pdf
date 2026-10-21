@@ -5,6 +5,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-21
+
+### Added
+- Compress tool: shrink a PDF by saving its pictures at lower quality and resolution (light, balanced or strong), optionally dropping title, author and keywords; the result says "Reduced from X to Y (Z%)" or that nothing could be saved.
+- Watermark tool: stamp text on all or selected pages with an adjustable size, opacity and rotation, a position (center, top, bottom or repeated) and a named color; Turkish and other special letters are drawn with a bundled Noto Sans font.
+- Page numbers tool: add numbers at one of six positions with presets such as "1 / 5" and "Page 1 of 5" (Turkish: "Sayfa 1 / 5") or a custom format, a start number and a size, on all or selected pages.
+- Size, opacity and rotation are labelled sliders that announce their value and unit and can be changed with swipes or the volume keys.
+- Third-party notice: Noto Sans Regular (SIL Open Font License 1.1) is bundled in the app.
+
 ## [0.4.0] - 2026-10-21
 
 ### Added
