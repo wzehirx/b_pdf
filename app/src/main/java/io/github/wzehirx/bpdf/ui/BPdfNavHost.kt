@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import io.github.wzehirx.bpdf.feature.merge.MergeScreen
 import io.github.wzehirx.bpdf.feature.pages.PageSelectMode
 import io.github.wzehirx.bpdf.feature.pages.PageSelectScreen
+import io.github.wzehirx.bpdf.feature.rotate.RotateScreen
 import io.github.wzehirx.bpdf.feature.split.SplitScreen
 import io.github.wzehirx.bpdf.ui.home.HomeScreen
 
@@ -34,6 +35,9 @@ fun BPdfNavHost(navController: NavHostController = rememberNavController()) {
         }
         composable(Tool.EXTRACT_PAGES.route) {
             PageSelectScreen(PageSelectMode.EXTRACT, onBack = { navController.popBackStack() })
+        }
+        composable(Tool.ROTATE.route) {
+            RotateScreen(onBack = { navController.popBackStack() })
         }
     }
 }

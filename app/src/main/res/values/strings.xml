@@ -156,4 +156,18 @@
         <item quantity="one">Extracted %1$d page</item>
         <item quantity="other">Extracted %1$d pages</item>
     </plurals>
+    <string name="rotate_instructions">Choose a PDF, pick how far to turn it and which pages, then rotate.</string>
+    <string name="rotate_need_file">Choose a PDF first</string>
+    <string name="rotate_angle_label">Rotation</string>
+    <string name="rotate_angle_cw_90">90° clockwise</string>
+    <string name="rotate_angle_180">180°</string>
+    <string name="rotate_angle_ccw_90">90° counter-clockwise</string>
+    <string name="rotate_scope_label">Pages to rotate</string>
+    <string name="rotate_scope_all">All pages</string>
+    <string name="rotate_scope_selected">Selected pages</string>
+    <string name="rotate_button">Rotate</string>
+    <plurals name="rotate_success">
+        <item quantity="one">Rotated %1$d page</item>
+        <item quantity="other">Rotated %1$d pages</item>
+    </plurals>
 </resources>

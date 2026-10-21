@@ -156,4 +156,18 @@
         <item quantity="one">%1$d sayfa çıkarıldı</item>
         <item quantity="other">%1$d sayfa çıkarıldı</item>
     </plurals>
+    <string name="rotate_instructions">Bir PDF seçin, ne kadar döneceğini ve hangi sayfaların döneceğini belirleyin, sonra döndürün.</string>
+    <string name="rotate_need_file">Önce bir PDF seçin</string>
+    <string name="rotate_angle_label">Döndürme</string>
+    <string name="rotate_angle_cw_90">Saat yönünde 90°</string>
+    <string name="rotate_angle_180">180°</string>
+    <string name="rotate_angle_ccw_90">Saat yönünün tersine 90°</string>
+    <string name="rotate_scope_label">Döndürülecek sayfalar</string>
+    <string name="rotate_scope_all">Tüm sayfalar</string>
+    <string name="rotate_scope_selected">Seçili sayfalar</string>
+    <string name="rotate_button">Döndür</string>
+    <plurals name="rotate_success">
+        <item quantity="one">%1$d sayfa döndürüldü</item>
+        <item quantity="other">%1$d sayfa döndürüldü</item>
+    </plurals>
 </resources>
