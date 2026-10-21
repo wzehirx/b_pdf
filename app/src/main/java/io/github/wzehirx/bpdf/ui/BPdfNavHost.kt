@@ -7,11 +7,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import io.github.wzehirx.bpdf.feature.images.ImagesToPdfScreen
 import io.github.wzehirx.bpdf.feature.merge.MergeScreen
+import io.github.wzehirx.bpdf.feature.metadata.MetadataScreen
 import io.github.wzehirx.bpdf.feature.organize.OrganizeScreen
 import io.github.wzehirx.bpdf.feature.pages.PageSelectMode
 import io.github.wzehirx.bpdf.feature.pages.PageSelectScreen
 import io.github.wzehirx.bpdf.feature.pdfimages.PdfToImagesScreen
 import io.github.wzehirx.bpdf.feature.protect.ProtectScreen
+import io.github.wzehirx.bpdf.feature.repair.RepairScreen
 import io.github.wzehirx.bpdf.feature.rotate.RotateScreen
 import io.github.wzehirx.bpdf.feature.split.SplitScreen
 import io.github.wzehirx.bpdf.feature.unlock.UnlockScreen
@@ -58,6 +60,12 @@ fun BPdfNavHost(navController: NavHostController = rememberNavController()) {
         }
         composable(Tool.UNLOCK.route) {
             UnlockScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Tool.METADATA.route) {
+            MetadataScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Tool.REPAIR.route) {
+            RepairScreen(onBack = { navController.popBackStack() })
         }
     }
 }

@@ -298,4 +298,34 @@
         <item quantity="one">Password removed from a PDF with %1$d page</item>
         <item quantity="other">Password removed from a PDF with %1$d pages</item>
     </plurals>
+    <string name="metadata_instructions">Choose a PDF to see what it says about itself, then change its title, author and other details.</string>
+    <string name="metadata_need_file">Choose a PDF first</string>
+    <string name="metadata_info_heading">About this file</string>
+    <plurals name="metadata_info_pages">
+        <item quantity="one">%1$d page</item>
+        <item quantity="other">%1$d pages</item>
+    </plurals>
+    <string name="metadata_info_encrypted_yes">Protected with a password</string>
+    <string name="metadata_info_encrypted_no">Not protected with a password</string>
+    <string name="metadata_info_version">PDF version %1$s</string>
+    <string name="metadata_info_producer">Made with: %1$s</string>
+    <string name="metadata_info_producer_none">The program that made it is not recorded</string>
+    <string name="metadata_edit_heading">Details you can change</string>
+    <string name="metadata_title_label">Title</string>
+    <string name="metadata_author_label">Author</string>
+    <string name="metadata_subject_label">Subject</string>
+    <string name="metadata_keywords_label">Keywords</string>
+    <string name="metadata_keywords_hint">Separate keywords with commas.</string>
+    <string name="metadata_creator_label">Created with</string>
+    <string name="metadata_encrypted_note">The saved copy will not have a password.</string>
+    <string name="metadata_button">Apply changes</string>
+    <string name="metadata_success">Details updated. Save or share the new copy.</string>
+    <string name="repair_instructions">Choose a damaged PDF that will not open or shows missing pages. b PDF reads what it can and saves a rebuilt copy.</string>
+    <string name="repair_need_file">Choose a PDF first</string>
+    <string name="repair_file_unreadable">%1$s, damaged and cannot be read as it is</string>
+    <string name="repair_button">Repair</string>
+    <plurals name="repair_success">
+        <item quantity="one">Repaired. Recovered %1$d page.</item>
+        <item quantity="other">Repaired. Recovered %1$d pages.</item>
+    </plurals>
 </resources>

@@ -298,4 +298,34 @@
         <item quantity="one">%1$d sayfalık PDF\'nin parolası kaldırıldı</item>
         <item quantity="other">%1$d sayfalık PDF\'nin parolası kaldırıldı</item>
     </plurals>
+    <string name="metadata_instructions">Bir PDF seçin, dosyanın kendisi hakkında bildirdiklerini görün, sonra başlığını, yazarını ve diğer bilgilerini değiştirin.</string>
+    <string name="metadata_need_file">Önce bir PDF seçin</string>
+    <string name="metadata_info_heading">Bu dosya hakkında</string>
+    <plurals name="metadata_info_pages">
+        <item quantity="one">%1$d sayfa</item>
+        <item quantity="other">%1$d sayfa</item>
+    </plurals>
+    <string name="metadata_info_encrypted_yes">Parola ile korunuyor</string>
+    <string name="metadata_info_encrypted_no">Parola ile korunmuyor</string>
+    <string name="metadata_info_version">PDF sürümü %1$s</string>
+    <string name="metadata_info_producer">Üreten program: %1$s</string>
+    <string name="metadata_info_producer_none">Dosyayı üreten program kayıtlı değil</string>
+    <string name="metadata_edit_heading">Değiştirebileceğiniz bilgiler</string>
+    <string name="metadata_title_label">Başlık</string>
+    <string name="metadata_author_label">Yazar</string>
+    <string name="metadata_subject_label">Konu</string>
+    <string name="metadata_keywords_label">Anahtar kelimeler</string>
+    <string name="metadata_keywords_hint">Anahtar kelimeleri virgülle ayırın.</string>
+    <string name="metadata_creator_label">Oluşturan uygulama</string>
+    <string name="metadata_encrypted_note">Kaydedilen kopyanın parolası olmayacak.</string>
+    <string name="metadata_button">Değişiklikleri uygula</string>
+    <string name="metadata_success">Bilgiler güncellendi. Yeni kopyayı kaydedin veya paylaşın.</string>
+    <string name="repair_instructions">Açılmayan veya sayfaları eksik görünen hasarlı bir PDF seçin. b PDF okuyabildiği her şeyi alır ve yeniden oluşturulmuş bir kopya kaydeder.</string>
+    <string name="repair_need_file">Önce bir PDF seçin</string>
+    <string name="repair_file_unreadable">%1$s, hasarlı ve olduğu gibi okunamıyor</string>
+    <string name="repair_button">Onar</string>
+    <plurals name="repair_success">
+        <item quantity="one">Onarıldı. %1$d sayfa kurtarıldı.</item>
+        <item quantity="other">Onarıldı. %1$d sayfa kurtarıldı.</item>
+    </plurals>
 </resources>
