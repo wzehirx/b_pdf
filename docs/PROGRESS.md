@@ -19,8 +19,8 @@ Budget mode (user-approved): batch remaining tasks per milestone (11+12, 13+14, 
 | 7 Split | done | b8dde4a..6be877a |
 | 8 Remove/Extract pages | done | eb3d865..b5b392d |
 | 9 Rotate → v0.2.0 | done | eb3d865..b5b392d |
-| 10 Thumbnails, PageGrid, Organize | next | |
-| 11 Images → PDF | todo | |
+| 10 Thumbnails, PageGrid, Organize | done | 2554fee..0b26e27 |
+| 11 Images → PDF | next | |
 | 12 PDF → Images → v0.3.0 | todo | |
 | 13 Protect, Unlock, password flow | todo | |
 | 14 Metadata, Repair → v0.4.0 | todo | |
