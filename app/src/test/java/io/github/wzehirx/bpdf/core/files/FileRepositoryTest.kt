@@ -19,6 +19,15 @@ class FileRepositoryTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val repo = FileRepository(context)
 
+    @org.junit.Before
+    fun resetFileProviderCache() {
+        // FileProvider caches its root map per authority in a static; each Robolectric test has
+        // a fresh cache dir, so drop the stale entry.
+        val f = androidx.core.content.FileProvider::class.java.getDeclaredField("sCache")
+        f.isAccessible = true
+        (f.get(null) as MutableMap<*, *>).clear()
+    }
+
     @Test
     fun suggestName_stripsExtensionAndAppendsSuffix() {
         assertEquals("report_merged.pdf", suggestName("report.pdf", "merged", "pdf"))
@@ -56,6 +65,48 @@ class FileRepositoryTest {
         assertEquals("imports", imported.file.parentFile!!.name)
         val again = repo.importToCache(Uri.fromFile(src))
         assertTrue(imported.file != again.file)
+    }
+
+    @Test
+    fun importToCache_usesGivenExtension() = runBlocking {
+        val src = File(context.cacheDir, "pic.png").apply { writeBytes(byteArrayOf(1)) }
+        val imported = repo.importToCache(Uri.fromFile(src), extension = "png")
+        assertTrue(imported.file.name.endsWith(".png"))
+    }
+
+    @Test
+    fun importToCache_failedCopyLeavesNoPartialFile() {
+        val uri = Uri.parse("content://test.broken/broken.pdf")
+        val broken = object : java.io.InputStream() {
+            var n = 0
+            override fun read(): Int = if (n++ < 10) 1 else throw java.io.IOException("disk gone")
+        }
+        org.robolectric.Shadows.shadowOf(context.contentResolver).registerInputStream(uri, broken)
+        try {
+            runBlocking { repo.importToCache(uri) }
+            org.junit.Assert.fail("expected IOException")
+        } catch (e: java.io.IOException) {
+            // expected
+        }
+        val leftovers = File(context.cacheDir, "imports").listFiles().orEmpty()
+        assertTrue(leftovers.isEmpty())
+    }
+
+    @Test
+    fun shareUri_copyKeepsCleanName() {
+        val outside = File(context.cacheDir, "tmp-result.pdf").apply { writeBytes(byteArrayOf(1, 2)) }
+        val uri = repo.shareUri(outside, displayName = "report_merged.pdf")
+        assertEquals("report_merged.pdf", uri.lastPathSegment)
+        val uri2 = repo.shareUri(outside)
+        assertEquals("tmp-result.pdf", uri2.lastPathSegment)
+        assertTrue(uri != uri2)
+    }
+
+    @Test
+    fun shareUri_displayNameCannotEscapeDirectory() {
+        val f = repo.newOutputFile("pdf").apply { writeBytes(byteArrayOf(1)) }
+        val uri = repo.shareUri(f, displayName = "../../evil.pdf")
+        assertEquals("evil.pdf", uri.lastPathSegment)
     }
 
     @Test

@@ -28,26 +28,47 @@ class OperationRunnerTest {
         assertEquals(OperationState.Success("done"), runner.state.value)
     }
 
-    @Test
-    fun progressIsReportedAndCoerced() = runTest {
-        val runner = runner()
+    private fun TestScope.progressAfter(value: Float): OperationState<String> {
+        val r = runner()
         val gate = CompletableDeferred<Unit>()
-        runner.start { progress ->
-            progress(0.5f)
-            gate.await()
-            "x"
-        }
+        r.start { p -> p(value); gate.await(); "x" }
         advanceUntilIdle()
-        assertEquals(OperationState.Running(0.5f), runner.state.value)
+        val seen = r.state.value
         gate.complete(Unit)
         advanceUntilIdle()
-        val r2 = runner()
-        val gate2 = CompletableDeferred<Unit>()
-        r2.start { p -> p(7f); gate2.await(); "y" }
+        return seen
+    }
+
+    @Test
+    fun progressIsReported() = runTest {
+        assertEquals(OperationState.Running(0.5f), progressAfter(0.5f))
+    }
+
+    @Test
+    fun progressAboveOneIsCoerced() = runTest {
+        assertEquals(OperationState.Running(1f), progressAfter(7f))
+    }
+
+    @Test
+    fun negativeProgressIsCoercedToZero() = runTest {
+        assertEquals(OperationState.Running(0f), progressAfter(-3f))
+    }
+
+    @Test
+    fun nanProgressIsTreatedAsZero() = runTest {
+        assertEquals(OperationState.Running(0f), progressAfter(Float.NaN))
+    }
+
+    @Test
+    fun staleProgressAfterCancelDoesNotOverwriteIdle() = runTest {
+        val runner = runner()
+        var report: ((Float) -> Unit)? = null
+        runner.start { p -> report = p; CompletableDeferred<Unit>().await(); "x" }
         advanceUntilIdle()
-        assertEquals(OperationState.Running(1f), r2.state.value)
-        gate2.complete(Unit)
+        runner.cancel()
+        report!!.invoke(0.9f)
         advanceUntilIdle()
+        assertEquals(OperationState.Idle, runner.state.value)
     }
 
     @Test

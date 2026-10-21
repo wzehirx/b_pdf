@@ -20,32 +20,44 @@ class OperationRunner<T>(
     private val _state = MutableStateFlow<OperationState<T>>(OperationState.Idle)
     val state: StateFlow<OperationState<T>> = _state
 
+    // All state writes and generation checks happen under [lock], so a stale (cancelled or
+    // superseded) job can never overwrite a newer state, e.g. Idle after cancel().
+    private val lock = Any()
     private var job: Job? = null
     private var generation = 0
 
+    private fun setIfCurrent(mine: Int, value: OperationState<T>) {
+        synchronized(lock) { if (mine == generation) _state.value = value }
+    }
+
     fun start(block: suspend (progress: (Float) -> Unit) -> T) {
-        job?.cancel()
-        val mine = ++generation
-        _state.value = OperationState.Running(null)
-        job = scope.launch(dispatcher) {
-            try {
-                val value = block { p ->
-                    if (mine == generation) _state.value = OperationState.Running(p.coerceIn(0f, 1f))
+        synchronized(lock) {
+            job?.cancel()
+            val mine = ++generation
+            _state.value = OperationState.Running(null)
+            job = scope.launch(dispatcher) {
+                try {
+                    // Progress is clamped to 0..1; NaN is treated as 0.
+                    val value = block { p ->
+                        setIfCurrent(mine, OperationState.Running(if (p.isNaN()) 0f else p.coerceIn(0f, 1f)))
+                    }
+                    setIfCurrent(mine, OperationState.Success(value))
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Throwable) {
+                    setIfCurrent(mine, OperationState.Failed(e))
                 }
-                if (mine == generation) _state.value = OperationState.Success(value)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Throwable) {
-                if (mine == generation) _state.value = OperationState.Failed(e)
             }
         }
     }
 
     fun cancel() {
-        generation++
-        job?.cancel()
-        job = null
-        _state.value = OperationState.Idle
+        synchronized(lock) {
+            generation++
+            job?.cancel()
+            job = null
+            _state.value = OperationState.Idle
+        }
     }
 
     fun reset() = cancel()

@@ -17,13 +17,22 @@ class FileRepository(context: Context) {
     private val sharedDir get() = File(context.cacheDir, "shared").apply { mkdirs() }
 
     /** Copies the content behind [uri] into the app cache under a unique name. */
-    suspend fun importToCache(uri: Uri): ImportedFile = withContext(Dispatchers.IO) {
-        val name = displayName(uri) ?: "document.pdf"
-        val dest = File(importsDir, UUID.randomUUID().toString() + ".pdf")
-        val input = requireNotNull(context.contentResolver.openInputStream(uri)) { "Cannot open $uri" }
-        input.use { i -> dest.outputStream().use { o -> i.copyTo(o) } }
-        ImportedFile(dest, name, dest.length())
-    }
+    suspend fun importToCache(uri: Uri, extension: String = "pdf"): ImportedFile =
+        withContext(Dispatchers.IO) {
+            val name = displayName(uri) ?: "document.$extension"
+            val dest = File(importsDir, UUID.randomUUID().toString() + ".$extension")
+            try {
+                val input = requireNotNull(context.contentResolver.openInputStream(uri)) {
+                    "Cannot open $uri"
+                }
+                input.use { i -> dest.outputStream().use { o -> i.copyTo(o) } }
+            } catch (t: Throwable) {
+                // Failed or cancelled: do not leave a partial copy behind.
+                dest.delete()
+                throw t
+            }
+            ImportedFile(dest, name, dest.length())
+        }
 
     fun displayName(uri: Uri): String? {
         val fromProvider = runCatching {
@@ -42,12 +51,21 @@ class FileRepository(context: Context) {
         out.use { o -> file.inputStream().use { it.copyTo(o) } }
     }
 
-    /** A content:// Uri for [file] via the app's FileProvider; copies into `shared/` if needed. */
-    fun shareUri(file: File): Uri {
+    /**
+     * A content:// Uri for [file] via the app's FileProvider. Files already under `shared/` are
+     * shared in place unless [displayName] is given; otherwise a copy is placed at
+     * `shared/<uuid>/<name>` so the receiving app sees a clean file name.
+     */
+    fun shareUri(file: File, displayName: String? = null): Uri {
         val shared = sharedDir.canonicalFile
-        val inShared = file.canonicalFile.parentFile == shared
-        val target = if (inShared) file else File(shared, UUID.randomUUID().toString() + "_" + file.name)
-            .also { file.copyTo(it, overwrite = true) }
+        val inShared = file.canonicalPath.startsWith(shared.path + File.separator)
+        val target = if (inShared && displayName == null) {
+            file
+        } else {
+            val name = File(displayName?.takeIf { it.isNotBlank() } ?: file.name).name
+            val dir = File(shared, UUID.randomUUID().toString()).apply { mkdirs() }
+            File(dir, name).also { file.copyTo(it, overwrite = true) }
+        }
         return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", target)
     }
 
