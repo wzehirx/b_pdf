@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import io.github.wzehirx.bpdf.feature.images.ImagesToPdfScreen
 import io.github.wzehirx.bpdf.feature.merge.MergeScreen
 import io.github.wzehirx.bpdf.feature.organize.OrganizeScreen
 import io.github.wzehirx.bpdf.feature.pages.PageSelectMode
@@ -42,6 +43,9 @@ fun BPdfNavHost(navController: NavHostController = rememberNavController()) {
         }
         composable(Tool.ROTATE.route) {
             RotateScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Tool.IMAGES_TO_PDF.route) {
+            ImagesToPdfScreen(onBack = { navController.popBackStack() })
         }
     }
 }

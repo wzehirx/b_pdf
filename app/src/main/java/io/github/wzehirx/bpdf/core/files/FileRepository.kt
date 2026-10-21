@@ -16,6 +16,7 @@ class FileRepository(context: Context) {
     internal val appContext: Context get() = context
     private val importsDir get() = File(context.cacheDir, "imports").apply { mkdirs() }
     private val sharedDir get() = File(context.cacheDir, "shared").apply { mkdirs() }
+    private val cameraDir get() = File(context.cacheDir, "camera").apply { mkdirs() }
 
     /** Copies the content behind [uri] into the app cache under a unique name. */
     suspend fun importToCache(uri: Uri, extension: String = "pdf"): ImportedFile =
@@ -70,6 +71,12 @@ class FileRepository(context: Context) {
         return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", target)
     }
 
+    /** A fresh, empty file the camera app writes a photo into (see [cameraUri]). */
+    fun newCameraFile(): File = File(cameraDir, "${UUID.randomUUID()}.jpg").also { it.createNewFile() }
+
+    /** The FileProvider Uri of a [newCameraFile], to hand to the camera app as its output. */
+    fun cameraUri(file: File): Uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+
     /** A fresh, unique output file in the shareable `shared/` directory. */
     fun newOutputFile(ext: String): File = File(sharedDir, "${UUID.randomUUID()}.$ext")
 
@@ -78,7 +85,7 @@ class FileRepository(context: Context) {
 
     /** Deletes cache entries older than [maxAgeMillis]. */
     fun purgeStale(maxAgeMillis: Long, now: Long = System.currentTimeMillis()) {
-        for (dir in listOf(importsDir, sharedDir)) {
+        for (dir in listOf(importsDir, sharedDir, cameraDir)) {
             dir.listFiles().orEmpty()
                 .filter { now - it.lastModified() > maxAgeMillis }
                 .forEach { it.deleteRecursively() }
@@ -88,5 +95,6 @@ class FileRepository(context: Context) {
     fun clearCache() {
         importsDir.deleteRecursively()
         sharedDir.deleteRecursively()
+        cameraDir.deleteRecursively()
     }
 }

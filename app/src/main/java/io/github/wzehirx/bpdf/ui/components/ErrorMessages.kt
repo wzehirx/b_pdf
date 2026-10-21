@@ -11,6 +11,7 @@ fun PdfError.toMessage(res: Resources): String = when (this) {
     is PdfError.PasswordRequired -> res.getString(R.string.err_password_required)
     is PdfError.WrongPassword -> res.getString(R.string.err_wrong_password)
     is PdfError.Corrupt -> res.getString(R.string.err_corrupt)
+    is PdfError.UnreadableImage -> res.getString(R.string.err_unreadable_image, fileName)
     is PdfError.Io -> res.getString(R.string.err_io)
     is PdfError.InvalidRange -> when (reason) {
         RangeErrorReason.EMPTY -> res.getString(R.string.err_range_empty)

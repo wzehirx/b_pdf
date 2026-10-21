@@ -24,6 +24,7 @@
     <string name="err_password_required">Bu PDF parola korumalı. Devam etmek için parolayı girin.</string>
     <string name="err_wrong_password">Parola yanlış. Yeniden deneyin.</string>
     <string name="err_corrupt">Bu PDF hasarlı veya okunamıyor.</string>
+    <string name="err_unreadable_image">\"%1$s\" okunabilen bir resim değil. Listeden çıkarıp yeniden deneyin.</string>
     <string name="err_io">Dosya okunamadı veya yazılamadı. Boş depolama alanını kontrol edip yeniden deneyin.</string>
     <string name="err_range_empty">İstediğiniz sayfaları girin, örneğin 1-3, 5.</string>
     <string name="err_range_not_number">\"%1$s\" bir sayfa numarası değil. 1-3, 5 gibi sayılar ve aralıklar kullanın.</string>
@@ -217,4 +218,27 @@
     <string name="organize_position_empty">İstediğiniz konumu girin, 1 ile %1$d arasında.</string>
     <string name="organize_position_invalid">\"%1$s\" bir konum değil. 1 ile %2$d arasında bir sayı girin.</string>
     <string name="organize_move_confirm">Taşı</string>
+    <string name="images_instructions">Galerinizden resim ekleyin ya da fotoğraf çekin, istediğiniz sıraya koyun, ardından her resim için bir sayfa içeren PDF oluşturun.</string>
+    <string name="images_choose">Resim seç</string>
+    <string name="images_take_photo">Fotoğraf çek</string>
+    <string name="images_importing">Resimler ekleniyor…</string>
+    <string name="images_no_camera">Kullanılabilir bir kamera uygulaması yok.</string>
+    <string name="images_page_size_label">Sayfa boyutu</string>
+    <string name="images_size_a4">A4</string>
+    <string name="images_size_letter">ABD Letter</string>
+    <string name="images_size_fit">Resme göre</string>
+    <string name="images_orientation_label">Sayfa yönü</string>
+    <string name="images_orientation_auto">Otomatik, her resme uyar</string>
+    <string name="images_orientation_portrait">Dikey</string>
+    <string name="images_orientation_landscape">Yatay</string>
+    <string name="images_margin_label">Kenar boşluğu</string>
+    <string name="images_margin_none">Yok</string>
+    <string name="images_margin_small">Küçük</string>
+    <string name="images_margin_large">Büyük</string>
+    <string name="images_convert_button">PDF oluştur</string>
+    <string name="images_need_images">En az 1 resim ekleyin</string>
+    <plurals name="images_success">
+        <item quantity="one">%1$d sayfalık PDF oluşturuldu</item>
+        <item quantity="other">%1$d sayfalık PDF oluşturuldu</item>
+    </plurals>
 </resources>

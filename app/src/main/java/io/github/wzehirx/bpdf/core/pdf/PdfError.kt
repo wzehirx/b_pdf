@@ -9,5 +9,7 @@ sealed class PdfError(message: String, cause: Throwable? = null) : Exception(mes
     class Corrupt(cause: Throwable?) : PdfError("Corrupt or unreadable PDF", cause)
     class InvalidRange(val reason: RangeErrorReason, val token: String) :
         PdfError("Invalid page range ($reason): '$token'")
+    /** An input image that cannot be decoded (not an image, or damaged); [fileName] is what the user picked. */
+    class UnreadableImage(val fileName: String) : PdfError("Cannot decode image '$fileName'")
     class Io(cause: Throwable?) : PdfError("I/O error", cause)
 }
