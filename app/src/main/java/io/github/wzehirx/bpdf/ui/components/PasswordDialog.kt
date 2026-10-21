@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.android.awaitFrame
 import io.github.wzehirx.bpdf.R
 
 @Composable
@@ -41,12 +42,16 @@ fun PasswordDialog(
     var visible by remember { mutableStateOf(false) }
     val wrongMessage = stringResource(R.string.err_wrong_password)
     val focus = remember { FocusRequester() }
-    LaunchedEffect(Unit) { focus.requestFocus() }
     val submit = { if (password.isNotEmpty()) onSubmit(password) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.password_title)) },
         text = {
+            // Inside the dialog's own composition so the requester is attached before use.
+            LaunchedEffect(Unit) {
+                awaitFrame()
+                runCatching { focus.requestFocus() }
+            }
             Column {
                 OutlinedTextField(
                     value = password,
