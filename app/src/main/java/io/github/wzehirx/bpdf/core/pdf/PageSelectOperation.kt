@@ -6,8 +6,6 @@ import com.tom_roush.pdfbox.cos.COSDictionary
 import com.tom_roush.pdfbox.cos.COSName
 import com.tom_roush.pdfbox.io.MemoryUsageSetting
 import com.tom_roush.pdfbox.pdmodel.PDDocument
-import com.tom_roush.pdfbox.pdmodel.PDDocumentInformation
-import com.tom_roush.pdfbox.pdmodel.common.PDMetadata
 import com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline
 import com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem
 import com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineNode
@@ -135,17 +133,6 @@ object PageSelectOperation {
     }
 
     private fun <T> identitySet(): MutableSet<T> = Collections.newSetFromMap(IdentityHashMap<T, Boolean>())
-
-    /** Document info, XMP metadata and language: what identifies the document rather than its pages. */
-    private fun copyDocumentProperties(source: PDDocument, target: PDDocument) {
-        target.documentInformation = PDDocumentInformation(COSDictionary(source.documentInformation.cosObject))
-        target.documentCatalog.language = source.documentCatalog.language
-        source.documentCatalog.metadata?.let { metadata ->
-            val xmp = PDMetadata(target)
-            xmp.importXMPMetadata(metadata.createInputStream().use { it.readBytes() })
-            target.documentCatalog.metadata = xmp
-        }
-    }
 
     /** True when [file] holds a `/Type /Page` object that is not part of its page tree. */
     private fun hasOrphanPages(file: File): Boolean = PdfLoader.load(file).use { doc ->

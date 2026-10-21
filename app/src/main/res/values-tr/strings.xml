@@ -187,4 +187,34 @@
     </plurals>
     <string name="page_grid_actions_for_page">%1$d. sayfa işlemleri</string>
     <string name="page_grid_choose_pages">Sayfaları seç</string>
+    <string name="action_move_to_position">Konuma taşı…</string>
+    <string name="action_rotate_left">Sola döndür</string>
+    <string name="action_rotate_right">Sağa döndür</string>
+    <string name="action_duplicate">Çoğalt</string>
+    <string name="action_delete">Sil</string>
+    <string name="organize_instructions">Bir PDF seçin, sonra sayfalarını taşıyın, döndürün, kopyalayın veya silin. Her sayfanın bir işlemler menüsü vardır; ekran okuyucular aynı işlemleri her sayfada bulur.</string>
+    <string name="organize_need_file">Önce bir PDF seçin</string>
+    <string name="organize_undo">Geri al</string>
+    <string name="organize_button">Düzenlenmiş PDF oluştur</string>
+    <plurals name="organize_summary">
+        <item quantity="one">Yeni PDF %1$d sayfa olacak</item>
+        <item quantity="other">Yeni PDF %1$d sayfa olacak</item>
+    </plurals>
+    <plurals name="organize_success">
+        <item quantity="one">%1$d sayfalık bir PDF oluşturuldu</item>
+        <item quantity="other">%1$d sayfalık bir PDF oluşturuldu</item>
+    </plurals>
+    <string name="organize_moved">%1$d. sayfa %2$d. konuma taşındı</string>
+    <string name="organize_rotated_right">%1$d. sayfa sağa döndürüldü</string>
+    <string name="organize_rotated_left">%1$d. sayfa sola döndürüldü</string>
+    <string name="organize_duplicated">%1$d. sayfa çoğaltıldı</string>
+    <string name="organize_deleted">%1$d. sayfa silindi. Geri alma kullanılabilir</string>
+    <string name="organize_undone">Son değişiklik geri alındı</string>
+    <string name="organize_last_page_blocked">Son sayfa silinemez. Bir PDF\'in en az bir sayfası olmalıdır.</string>
+    <string name="organize_move_title">%1$d. sayfayı taşı</string>
+    <string name="organize_position_label">Yeni konum</string>
+    <string name="organize_position_hint">1 ile %1$d arasında bir sayı girin.</string>
+    <string name="organize_position_empty">İstediğiniz konumu girin, 1 ile %1$d arasında.</string>
+    <string name="organize_position_invalid">\"%1$s\" bir konum değil. 1 ile %2$d arasında bir sayı girin.</string>
+    <string name="organize_move_confirm">Taşı</string>
 </resources>

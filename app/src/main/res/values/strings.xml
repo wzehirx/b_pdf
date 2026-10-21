@@ -187,4 +187,34 @@
     </plurals>
     <string name="page_grid_actions_for_page">Actions for page %1$d</string>
     <string name="page_grid_choose_pages">Choose pages</string>
+    <string name="action_move_to_position">Move to position…</string>
+    <string name="action_rotate_left">Rotate left</string>
+    <string name="action_rotate_right">Rotate right</string>
+    <string name="action_duplicate">Duplicate</string>
+    <string name="action_delete">Delete</string>
+    <string name="organize_instructions">Choose a PDF, then move, turn, copy or delete its pages. Every page has an actions menu, and screen readers find the same actions on each page.</string>
+    <string name="organize_need_file">Choose a PDF first</string>
+    <string name="organize_undo">Undo</string>
+    <string name="organize_button">Create organized PDF</string>
+    <plurals name="organize_summary">
+        <item quantity="one">The new PDF will have %1$d page</item>
+        <item quantity="other">The new PDF will have %1$d pages</item>
+    </plurals>
+    <plurals name="organize_success">
+        <item quantity="one">Created a PDF with %1$d page</item>
+        <item quantity="other">Created a PDF with %1$d pages</item>
+    </plurals>
+    <string name="organize_moved">Page %1$d moved to position %2$d</string>
+    <string name="organize_rotated_right">Page %1$d rotated right</string>
+    <string name="organize_rotated_left">Page %1$d rotated left</string>
+    <string name="organize_duplicated">Page %1$d duplicated</string>
+    <string name="organize_deleted">Page %1$d deleted. Undo available</string>
+    <string name="organize_undone">Last change undone</string>
+    <string name="organize_last_page_blocked">The last page cannot be deleted. A PDF needs at least one page.</string>
+    <string name="organize_move_title">Move page %1$d</string>
+    <string name="organize_position_label">New position</string>
+    <string name="organize_position_hint">Enter a number from 1 to %1$d.</string>
+    <string name="organize_position_empty">Enter the position you want, from 1 to %1$d.</string>
+    <string name="organize_position_invalid">\"%1$s\" is not a position. Enter a number from 1 to %2$d.</string>
+    <string name="organize_move_confirm">Move</string>
 </resources>

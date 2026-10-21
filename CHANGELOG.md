@@ -6,6 +6,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
+- Organize pages tool: see every page as a thumbnail, then move (up, down, to a position), rotate left or right, duplicate or delete pages with screen-reader actions or a per-page menu, undo changes, and save or share the new PDF.
 - Page thumbnails: Remove pages, Extract pages and Rotate pages can pick pages from an accessible grid (each page is one labelled, checkable item with "Select all", "Clear selection" and a selected count) instead of typing a range; both stay in sync.
 
 ## [0.2.0] - 2026-10-21

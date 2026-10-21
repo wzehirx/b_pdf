@@ -28,9 +28,11 @@ import io.github.wzehirx.bpdf.R
 fun ToolScaffold(
     title: String,
     onBack: () -> Unit,
+    snackbarHost: @Composable () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Scaffold(
+        snackbarHost = snackbarHost,
         topBar = {
             TopAppBar(
                 title = { Text(title, modifier = Modifier.semantics { heading() }) },
