@@ -17,10 +17,26 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        // Release signing comes from the environment (CI secrets). When absent, the
+        // release build falls back to the debug keystore so the APK is always installable.
+        val keystorePath = System.getenv("BPDF_KEYSTORE_FILE")
+        if (!keystorePath.isNullOrBlank()) {
+            create("release") {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("BPDF_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("BPDF_KEY_ALIAS")
+                keyPassword = System.getenv("BPDF_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // Minification stays off for now: PdfBox-Android relies on reflection/resources.
+            isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
