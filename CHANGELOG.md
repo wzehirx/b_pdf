@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-21
+
 ### Added
 - PDF to text tool: read the text of all or selected pages (each page under its own "Page N" heading), then save it as a .txt file, copy it or share it; a PDF without a text layer says so and points to text recognition (OCR).
 - Accessible reader: read a PDF one page per screen (each page is labelled "Page N of M", with a "Read page text" button) or in text mode, a list with one heading per page so screen-reader heading navigation jumps from page to page. Next page, Previous page, Go to page… and Switch to text mode are screen-reader actions on the page and also buttons; zoom with the Zoom in / Zoom out buttons or by pinching. Page changes are announced once. Text of a page is read only when it is shown, so large documents open quickly.
