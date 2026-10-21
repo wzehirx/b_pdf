@@ -131,4 +131,29 @@
         <item quantity="other">Saved %1$d files</item>
     </plurals>
     <string name="err_export_failed">Saving to the folder failed. No files were kept there.</string>
+    <string name="single_file_choose">Choose PDF</string>
+    <string name="single_file_replace">Choose another PDF</string>
+    <string name="single_file_importing">Opening file…</string>
+    <string name="single_file_remove">Remove %1$s</string>
+    <string name="single_file_remove_action">Remove file</string>
+    <plurals name="single_file_summary">
+        <item quantity="one">%1$s, %2$d page</item>
+        <item quantity="other">%1$s, %2$d pages</item>
+    </plurals>
+    <string name="pages_need_file">Choose a PDF first</string>
+    <string name="pages_remove_instructions">Choose a PDF, enter the pages to delete, then remove them.</string>
+    <string name="pages_extract_instructions">Choose a PDF, enter the pages to keep, then extract them into a new PDF.</string>
+    <string name="pages_remove_hint">Type the pages to delete, for example 2, 4-6.</string>
+    <string name="pages_extract_hint">Type the pages to keep, for example 2, 4-6. They are saved in the order you type them.</string>
+    <string name="pages_remove_all_error">You cannot remove every page. Leave at least one page.</string>
+    <string name="pages_remove_button">Remove pages</string>
+    <string name="pages_extract_button">Extract pages</string>
+    <plurals name="pages_removed_success">
+        <item quantity="one">Removed %1$d page; %2$d remain</item>
+        <item quantity="other">Removed %1$d pages; %2$d remain</item>
+    </plurals>
+    <plurals name="pages_extracted_success">
+        <item quantity="one">Extracted %1$d page</item>
+        <item quantity="other">Extracted %1$d pages</item>
+    </plurals>
 </resources>

@@ -6,17 +6,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -26,15 +19,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -50,6 +40,7 @@ import io.github.wzehirx.bpdf.ui.components.ChoiceRow
 import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PageRangeField
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
+import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
 import io.github.wzehirx.bpdf.ui.components.shareFiles
@@ -147,7 +138,13 @@ fun SplitScreenContent(
             )
         }
         if (file != null) {
-            SelectedPdfCard(name = file.displayName, pageCount = state.pageCount, enabled = !busy, onRemove = onRemoveFile)
+            SelectedPdfCard(
+                summary = pluralStringResource(R.plurals.split_file_summary, state.pageCount, file.displayName, state.pageCount),
+                removeActionLabel = stringResource(R.string.split_remove_action),
+                removeButtonDescription = stringResource(R.string.split_remove_file, file.displayName),
+                enabled = !busy,
+                onRemove = onRemoveFile,
+            )
             ChoiceRow(
                 label = stringResource(R.string.split_mode_label),
                 options = SplitModeChoice.entries,
@@ -203,29 +200,6 @@ private fun SplitModeChoice.labelRes() = when (this) {
     SplitModeChoice.RANGES -> R.string.split_mode_ranges
     SplitModeChoice.EVERY_N -> R.string.split_mode_every_n
     SplitModeChoice.EACH_PAGE -> R.string.split_mode_each_page
-}
-
-@Composable
-private fun SelectedPdfCard(name: String, pageCount: Int, enabled: Boolean, onRemove: () -> Unit) {
-    val summary = pluralStringResource(R.plurals.split_file_summary, pageCount, name, pageCount)
-    val removeLabel = stringResource(R.string.split_remove_action)
-    Card(Modifier.fillMaxWidth()) {
-        Row(
-            Modifier
-                .padding(start = 16.dp, end = 4.dp)
-                .semantics(mergeDescendants = true) {
-                    if (enabled) {
-                        customActions = listOf(CustomAccessibilityAction(removeLabel) { onRemove(); true })
-                    }
-                },
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(summary, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f).padding(vertical = 12.dp))
-            IconButton(onClick = onRemove, enabled = enabled) {
-                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.split_remove_file, name))
-            }
-        }
-    }
 }
 
 private fun everyNMessage(resources: Resources, error: EveryNError?, text: String, pageCount: Int): String? =

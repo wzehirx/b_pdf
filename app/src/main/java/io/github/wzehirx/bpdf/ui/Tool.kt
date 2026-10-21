@@ -46,8 +46,8 @@ enum class Tool(
 ) {
     MERGE("tool/merge", R.string.tool_merge_title, R.string.tool_merge_desc, Icons.Default.Add, ToolCategory.ORGANIZE, available = true),
     SPLIT("tool/split", R.string.tool_split_title, R.string.tool_split_desc, Icons.Default.Menu, ToolCategory.ORGANIZE, available = true),
-    REMOVE_PAGES("tool/remove_pages", R.string.tool_remove_pages_title, R.string.tool_remove_pages_desc, Icons.Default.Delete, ToolCategory.ORGANIZE),
-    EXTRACT_PAGES("tool/extract_pages", R.string.tool_extract_pages_title, R.string.tool_extract_pages_desc, Icons.AutoMirrored.Filled.ExitToApp, ToolCategory.ORGANIZE),
+    REMOVE_PAGES("tool/remove-pages", R.string.tool_remove_pages_title, R.string.tool_remove_pages_desc, Icons.Default.Delete, ToolCategory.ORGANIZE, available = true),
+    EXTRACT_PAGES("tool/extract-pages", R.string.tool_extract_pages_title, R.string.tool_extract_pages_desc, Icons.AutoMirrored.Filled.ExitToApp, ToolCategory.ORGANIZE, available = true),
     ORGANIZE("tool/organize", R.string.tool_organize_title, R.string.tool_organize_desc, Icons.AutoMirrored.Filled.List, ToolCategory.ORGANIZE),
     ROTATE("tool/rotate", R.string.tool_rotate_title, R.string.tool_rotate_desc, Icons.Default.Refresh, ToolCategory.ORGANIZE),
     IMAGES_TO_PDF("tool/images_to_pdf", R.string.tool_images_to_pdf_title, R.string.tool_images_to_pdf_desc, Icons.Default.AccountBox, ToolCategory.CONVERT),

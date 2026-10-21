@@ -1,12 +1,7 @@
 package io.github.wzehirx.bpdf.core.pdf
 
-import com.tom_roush.pdfbox.cos.COSArray
-import com.tom_roush.pdfbox.cos.COSBase
-import com.tom_roush.pdfbox.cos.COSDictionary
-import com.tom_roush.pdfbox.cos.COSName
 import com.tom_roush.pdfbox.io.MemoryUsageSetting
 import com.tom_roush.pdfbox.pdmodel.PDDocument
-import com.tom_roush.pdfbox.pdmodel.PDPage
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.CancellationException
@@ -74,7 +69,7 @@ object SplitOperation {
         val part = PDDocument(MemoryUsageSetting.setupTempFileOnly())
         try {
             try {
-                pages.forEach { dropPageReferences(part.importPage(source.getPage(it))) }
+                PageCopier.copyPages(source, pages, part)
                 part.save(out)
             } catch (e: IOException) {
                 throw PdfError.Io(e)
@@ -82,23 +77,5 @@ object SplitOperation {
         } finally {
             runCatching { part.close() }
         }
-    }
-
-    /**
-     * Annotations keep references to other pages of the source (`/P`, internal link destinations),
-     * and saving them would copy those pages into every part. Internal page links cannot work in a
-     * part anyway, so they are removed; external links and other annotations stay.
-     */
-    private fun dropPageReferences(page: PDPage) {
-        val kept = page.annotations.filterNot { isInternalPageLink(it.cosObject) }
-        kept.forEach { it.cosObject.removeItem(COSName.P) }
-        page.annotations = kept
-    }
-
-    private fun isInternalPageLink(annotation: COSDictionary): Boolean {
-        fun pointsAtPage(dest: COSBase?) = dest is COSArray && dest.size() > 0 && dest.getObject(0) is COSDictionary
-        if (pointsAtPage(annotation.getDictionaryObject(COSName.DEST))) return true
-        val action = annotation.getDictionaryObject(COSName.A) as? COSDictionary ?: return false
-        return pointsAtPage(action.getDictionaryObject(COSName.D))
     }
 }

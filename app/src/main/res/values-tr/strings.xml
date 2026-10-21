@@ -131,4 +131,29 @@
         <item quantity="other">%1$d dosya kaydedildi</item>
     </plurals>
     <string name="err_export_failed">Klasöre kaydetme başarısız oldu. Klasörde hiçbir dosya bırakılmadı.</string>
+    <string name="single_file_choose">PDF seç</string>
+    <string name="single_file_replace">Başka PDF seç</string>
+    <string name="single_file_importing">Dosya açılıyor…</string>
+    <string name="single_file_remove">%1$s dosyasını kaldır</string>
+    <string name="single_file_remove_action">Dosyayı kaldır</string>
+    <plurals name="single_file_summary">
+        <item quantity="one">%1$s, %2$d sayfa</item>
+        <item quantity="other">%1$s, %2$d sayfa</item>
+    </plurals>
+    <string name="pages_need_file">Önce bir PDF seçin</string>
+    <string name="pages_remove_instructions">Bir PDF seçin, silinecek sayfaları yazın, sonra silin.</string>
+    <string name="pages_extract_instructions">Bir PDF seçin, saklanacak sayfaları yazın, sonra yeni bir PDF olarak çıkarın.</string>
+    <string name="pages_remove_hint">Silinecek sayfaları yazın, örneğin 2, 4-6.</string>
+    <string name="pages_extract_hint">Saklanacak sayfaları yazın, örneğin 2, 4-6. Sayfalar yazdığınız sırayla kaydedilir.</string>
+    <string name="pages_remove_all_error">Tüm sayfalar silinemez. En az bir sayfa bırakın.</string>
+    <string name="pages_remove_button">Sayfaları sil</string>
+    <string name="pages_extract_button">Sayfaları çıkar</string>
+    <plurals name="pages_removed_success">
+        <item quantity="one">%1$d sayfa silindi; %2$d sayfa kaldı</item>
+        <item quantity="other">%1$d sayfa silindi; %2$d sayfa kaldı</item>
+    </plurals>
+    <plurals name="pages_extracted_success">
+        <item quantity="one">%1$d sayfa çıkarıldı</item>
+        <item quantity="other">%1$d sayfa çıkarıldı</item>
+    </plurals>
 </resources>
