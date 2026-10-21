@@ -223,4 +223,18 @@ class PasswordFlowTest {
         vm.remove(0)
         assertFalse(vm.state.until { it.files.size == 1 }.copyUnprotected)
     }
+
+    @Test
+    fun compress_encryptedFile_promptsThenCompressesToAnUnprotectedCopy() {
+        val vm = io.github.wzehirx.bpdf.feature.compress.CompressViewModel(repo, dispatcher)
+        vm.pickFile(listOf(locked()))
+        vm.state.until { it.passwordPrompt != null }
+        vm.submitPassword("nope")
+        vm.state.until { it.passwordPrompt?.wrong == true }
+        vm.submitPassword("right")
+        assertTrue(vm.state.until { it.file != null && it.passwordPrompt == null && !it.importing }.copyUnprotected)
+        vm.compress()
+        val done = vm.state.until { it.operation is OperationState.Success }.operation as OperationState.Success
+        assertEquals(listOf("Sec1", "Sec2"), TestPdfs.text(done.value.file))
+    }
 }

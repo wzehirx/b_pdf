@@ -329,4 +329,16 @@
     </plurals>
     <string name="password_checking">Checking password…</string>
     <string name="unprotected_output_note">The saved copy has no password.</string>
+    <string name="compress_instructions">Choose a PDF and how much to shrink it. Pictures are saved at a lower quality and resolution; text stays sharp.</string>
+    <string name="compress_need_file">Choose a PDF first</string>
+    <string name="compress_level_label">Compression</string>
+    <string name="compress_level_low">Light, best picture quality</string>
+    <string name="compress_level_medium">Balanced</string>
+    <string name="compress_level_high">Strong, smallest file</string>
+    <string name="compress_remove_metadata">Also remove document details (title, author, keywords)</string>
+    <string name="compress_metadata_removed">Will be removed</string>
+    <string name="compress_metadata_kept">Kept</string>
+    <string name="compress_button">Compress</string>
+    <string name="compress_success">Reduced from %1$s to %2$s (%3$d%%)</string>
+    <string name="compress_no_saving">This PDF could not be made smaller. It stays at %1$s, and the saved copy is the same size.</string>
 </resources>

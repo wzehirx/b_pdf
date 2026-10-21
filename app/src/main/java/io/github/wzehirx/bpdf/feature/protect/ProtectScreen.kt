@@ -43,6 +43,7 @@ import io.github.wzehirx.bpdf.ui.components.PasswordField
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
+import io.github.wzehirx.bpdf.ui.components.SwitchRow
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
 import io.github.wzehirx.bpdf.ui.components.shareFile
@@ -235,22 +236,6 @@ private fun PermissionSwitch(labelRes: Int, checked: Boolean, enabled: Boolean, 
         enabled = enabled,
         onChange = onChange,
     )
-}
-
-/** One labelled switch: the whole row toggles, and the state is spoken as text rather than "on/off". */
-@Composable
-private fun SwitchRow(label: String, checked: Boolean, stateText: String, enabled: Boolean, onChange: (Boolean) -> Unit) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .heightIn(min = 48.dp)
-            .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onChange)
-            .semantics { stateDescription = stateText },
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(label, modifier = Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = null, enabled = enabled)
-    }
 }
 
 private fun ProtectError.messageRes() = when (this) {

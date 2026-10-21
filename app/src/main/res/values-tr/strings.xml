@@ -329,4 +329,16 @@
     </plurals>
     <string name="password_checking">Parola denetleniyor…</string>
     <string name="unprotected_output_note">Kaydedilen kopyanın parolası yok.</string>
+    <string name="compress_instructions">Bir PDF seçin ve ne kadar küçülteceğini belirleyin. Resimler daha düşük kalite ve çözünürlükle kaydedilir, metin net kalır.</string>
+    <string name="compress_need_file">Önce bir PDF seçin</string>
+    <string name="compress_level_label">Sıkıştırma</string>
+    <string name="compress_level_low">Hafif, en iyi resim kalitesi</string>
+    <string name="compress_level_medium">Dengeli</string>
+    <string name="compress_level_high">Güçlü, en küçük dosya</string>
+    <string name="compress_remove_metadata">Belge bilgilerini de kaldır (başlık, yazar, anahtar sözcükler)</string>
+    <string name="compress_metadata_removed">Kaldırılacak</string>
+    <string name="compress_metadata_kept">Korunacak</string>
+    <string name="compress_button">Sıkıştır</string>
+    <string name="compress_success">%1$s boyutundan %2$s boyutuna küçültüldü (%%%3$d)</string>
+    <string name="compress_no_saving">Bu PDF daha fazla küçültülemedi. Boyutu %1$s olarak kalır, kaydedilen kopya aynı boyuttadır.</string>
 </resources>

@@ -57,7 +57,7 @@ enum class Tool(
     PROTECT("tool/protect", R.string.tool_protect_title, R.string.tool_protect_desc, Icons.Default.Lock, ToolCategory.SECURITY, available = true),
     UNLOCK("tool/unlock", R.string.tool_unlock_title, R.string.tool_unlock_desc, Icons.Default.Lock, ToolCategory.SECURITY, available = true),
     SIGN("tool/sign", R.string.tool_sign_title, R.string.tool_sign_desc, Icons.Default.Create, ToolCategory.SECURITY),
-    COMPRESS("tool/compress", R.string.tool_compress_title, R.string.tool_compress_desc, Icons.Default.KeyboardArrowDown, ToolCategory.EDIT),
+    COMPRESS("tool/compress", R.string.tool_compress_title, R.string.tool_compress_desc, Icons.Default.KeyboardArrowDown, ToolCategory.EDIT, available = true),
     WATERMARK("tool/watermark", R.string.tool_watermark_title, R.string.tool_watermark_desc, Icons.Default.Star, ToolCategory.EDIT),
     PAGE_NUMBERS("tool/page_numbers", R.string.tool_page_numbers_title, R.string.tool_page_numbers_desc, Icons.Default.DateRange, ToolCategory.EDIT),
     METADATA("tool/metadata", R.string.tool_metadata_title, R.string.tool_metadata_desc, Icons.Default.Info, ToolCategory.EDIT, available = true),
