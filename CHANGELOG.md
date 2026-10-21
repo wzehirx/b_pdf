@@ -5,6 +5,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+- PDF to text tool: read the text of all or selected pages (each page under its own "Page N" heading), then save it as a .txt file, copy it or share it; a PDF without a text layer says so and points to text recognition (OCR).
+
 ## [0.5.0] - 2026-10-21
 
 ### Added

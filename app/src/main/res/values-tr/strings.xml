@@ -402,4 +402,28 @@
         <item quantity="one">%1$d sayfa numaralandı</item>
         <item quantity="other">%1$d sayfa numaralandı</item>
     </plurals>
+
+    <string name="text_instructions">Metnini okumak için bir PDF seçin. Her sayfa kendi başlığı altında görünür. Sonra metni .txt dosyası olarak kaydedebilir, kopyalayabilir veya paylaşabilirsiniz.</string>
+    <string name="text_need_file">Önce bir PDF seçin</string>
+    <string name="text_scope_label">Okunacak sayfalar</string>
+    <string name="text_scope_all">Tüm sayfalar</string>
+    <string name="text_scope_selected">Seçili sayfalar</string>
+    <string name="text_button">Metni çıkar</string>
+    <string name="text_page_header">Sayfa %1$d</string>
+    <string name="text_page_empty">Bu sayfada metin yok. Metin resmi olabilir.</string>
+    <plurals name="text_success">
+        <item quantity="one">%1$d sayfanın metni çıkarıldı.</item>
+        <item quantity="other">%1$d sayfanın metni çıkarıldı.</item>
+    </plurals>
+    <plurals name="text_blank_pages">
+        <item quantity="one">%1$d sayfada metin yok.</item>
+        <item quantity="other">%1$d sayfada metin yok.</item>
+    </plurals>
+    <string name="text_empty_message">Metin bulunamadı. Bu PDF\'de metin katmanı yok; sayfalar taranmış resimler olabilir. Metin tanıma (OCR) bunları okuyabilir.</string>
+    <string name="text_try_ocr">Metin tanımayı dene (OCR)</string>
+    <string name="text_ocr_unavailable">Metin tanıma bu sürümde henüz yok.</string>
+    <string name="text_copy_all">Tüm metni kopyala</string>
+    <string name="text_copied">Metin kopyalandı</string>
+    <string name="text_copy_failed">Metin kopyalanamadı. Bunun yerine dosya olarak kaydedin.</string>
+    <string name="text_share_chooser_title">Metni paylaş</string>
 </resources>

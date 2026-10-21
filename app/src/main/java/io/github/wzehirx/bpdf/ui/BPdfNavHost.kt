@@ -12,6 +12,7 @@ import io.github.wzehirx.bpdf.feature.organize.OrganizeScreen
 import io.github.wzehirx.bpdf.feature.pages.PageSelectMode
 import io.github.wzehirx.bpdf.feature.pages.PageSelectScreen
 import io.github.wzehirx.bpdf.feature.pdfimages.PdfToImagesScreen
+import io.github.wzehirx.bpdf.feature.pdftext.PdfToTextScreen
 import io.github.wzehirx.bpdf.feature.protect.ProtectScreen
 import io.github.wzehirx.bpdf.feature.repair.RepairScreen
 import io.github.wzehirx.bpdf.feature.rotate.RotateScreen
@@ -57,6 +58,12 @@ fun BPdfNavHost(navController: NavHostController = rememberNavController()) {
         }
         composable(Tool.PDF_TO_IMAGES.route) {
             PdfToImagesScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Tool.PDF_TO_TEXT.route) {
+            PdfToTextScreen(
+                onBack = { navController.popBackStack() },
+                onOpenOcr = { navController.navigate(Tool.OCR.route) },
+            )
         }
         composable(Tool.PROTECT.route) {
             ProtectScreen(onBack = { navController.popBackStack() })

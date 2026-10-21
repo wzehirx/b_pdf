@@ -402,4 +402,28 @@
         <item quantity="one">Numbered %1$d page</item>
         <item quantity="other">Numbered %1$d pages</item>
     </plurals>
+
+    <string name="text_instructions">Choose a PDF to read its text. Each page appears under its own heading. You can then save the text as a .txt file, copy it or share it.</string>
+    <string name="text_need_file">Choose a PDF first</string>
+    <string name="text_scope_label">Pages to read</string>
+    <string name="text_scope_all">All pages</string>
+    <string name="text_scope_selected">Selected pages</string>
+    <string name="text_button">Extract text</string>
+    <string name="text_page_header">Page %1$d</string>
+    <string name="text_page_empty">No text on this page. It may be a picture of text.</string>
+    <plurals name="text_success">
+        <item quantity="one">Text extracted from %1$d page.</item>
+        <item quantity="other">Text extracted from %1$d pages.</item>
+    </plurals>
+    <plurals name="text_blank_pages">
+        <item quantity="one">%1$d page has no text.</item>
+        <item quantity="other">%1$d pages have no text.</item>
+    </plurals>
+    <string name="text_empty_message">No text found. This PDF has no text layer; its pages may be scanned pictures. Text recognition (OCR) can read them.</string>
+    <string name="text_try_ocr">Try text recognition (OCR)</string>
+    <string name="text_ocr_unavailable">Text recognition is not available in this version yet.</string>
+    <string name="text_copy_all">Copy all text</string>
+    <string name="text_copied">Text copied</string>
+    <string name="text_copy_failed">Could not copy the text. Save it as a file instead.</string>
+    <string name="text_share_chooser_title">Share text</string>
 </resources>
