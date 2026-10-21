@@ -5,6 +5,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-21
+
+### Added
+- Protect tool: encrypt a PDF with AES-256, a password you confirm, an optional owner password and switches to allow or block printing, copying and changing the document.
+- Unlock tool: remove the password and restrictions from a PDF you can open, saving a copy that opens without one.
+- Password prompts in all tools: choosing a password-protected PDF in Merge (per file), Split, Remove pages, Extract pages, Rotate, Organize, PDF to images and the new tools asks for the password, asks again after a wrong one, and never stores it.
+- Metadata tool: see pages, protection, PDF version and producer, and edit title, author, subject, keywords and creator (Turkish and other Unicode text is kept).
+- Repair tool: rebuild a damaged PDF from whatever can be read (broken cross-reference table, trailing garbage, truncated file).
+
 ## [0.3.0] - 2026-10-21
 
 ### Added
