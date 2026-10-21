@@ -23,6 +23,7 @@ import io.github.wzehirx.bpdf.feature.rotate.RotateScreen
 import io.github.wzehirx.bpdf.feature.compress.CompressScreen
 import io.github.wzehirx.bpdf.feature.watermark.WatermarkScreen
 import io.github.wzehirx.bpdf.feature.pagenumbers.PageNumbersScreen
+import io.github.wzehirx.bpdf.feature.sign.SignScreen
 import io.github.wzehirx.bpdf.feature.split.SplitScreen
 import io.github.wzehirx.bpdf.feature.unlock.UnlockScreen
 import io.github.wzehirx.bpdf.feature.viewer.ViewerScreen
@@ -72,6 +73,7 @@ fun BPdfNavHost(navController: NavHostController = rememberNavController()) {
         }
         toolScreen(Tool.PROTECT) { ProtectScreen(onBack = back, initialUri = it) }
         toolScreen(Tool.UNLOCK) { UnlockScreen(onBack = back, initialUri = it) }
+        toolScreen(Tool.SIGN) { SignScreen(onBack = back, initialUri = it) }
         toolScreen(Tool.COMPRESS) { CompressScreen(onBack = back, initialUri = it) }
         toolScreen(Tool.WATERMARK) { WatermarkScreen(onBack = back, initialUri = it) }
         toolScreen(Tool.PAGE_NUMBERS) { PageNumbersScreen(onBack = back, initialUri = it) }

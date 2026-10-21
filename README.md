@@ -22,6 +22,8 @@ Tools are delivered milestone by milestone. Status: v0.1.0 provides the foundati
 | v0.7 | Sign, OCR (Turkish and English) | Planned |
 | v1.0 | Polish, full accessibility audit | Planned |
 
+**Signing is visual, not cryptographic.** The Sign tool stamps your typed name or a drawn signature onto a page, like a rubber stamp. It is not a cryptographic (digital) signature: it does not prove who signed and does not detect later changes to the file. A typed signature is the default and works fully with a screen reader; drawing is optional.
+
 ## Accessibility
 
 Accessibility is the definition of done for every screen; see [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
@@ -103,6 +105,8 @@ Araçlar aşama aşama eklenir. Durum: v0.1.0 temeli sağlar; aşağıdaki araç
 | v0.6 | PDF'den metin, Erişilebilir görüntüleyici, diğer uygulamalardan açma | Planlandı |
 | v0.7 | İmzala, OCR (Türkçe ve İngilizce) | Planlandı |
 | v1.0 | Son rötuşlar, tam erişilebilirlik denetimi | Planlandı |
+
+**İmza görseldir, kriptografik değildir.** İmzala aracı yazdığınız adı ya da çizdiğiniz imzayı bir kaşe gibi sayfaya basar. Kriptografik (dijital) imza değildir: kimin imzaladığını kanıtlamaz ve dosyada sonradan yapılan değişiklikleri algılamaz. Yazılı imza varsayılandır ve ekran okuyucuyla tam çalışır; çizim isteğe bağlıdır.
 
 ### Erişilebilirlik
 

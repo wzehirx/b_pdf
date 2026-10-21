@@ -463,4 +463,33 @@
     </plurals>
     <string name="viewer_zoom_min">Minimum zoom</string>
     <string name="viewer_zoom_max">Maximum zoom</string>
+    <string name="sign_instructions">Choose a PDF, then type your name or draw your signature and place it on a page. This adds a visual signature only: your name or drawing is stamped on the page. It is not a cryptographic (digital) signature, so it does not prove who signed or that the file was not changed afterwards.</string>
+    <string name="sign_need_file">Choose a PDF first</string>
+    <string name="sign_mode_label">Signature type</string>
+    <string name="sign_mode_typed">Typed (recommended, works with a screen reader)</string>
+    <string name="sign_mode_drawn">Drawn with your finger</string>
+    <string name="sign_text_label">Your name or signature text</string>
+    <string name="sign_text_error">Type the text of your signature.</string>
+    <string name="sign_pad_title">Draw your signature in the box</string>
+    <string name="sign_pad_hint">With a screen reader on, double-tap and hold the box, then drag your finger. Typing your name is easier.</string>
+    <string name="sign_pad_empty">Drawn signature, empty</string>
+    <string name="sign_pad_not_empty">Drawn signature, not empty</string>
+    <string name="sign_pad_clear">Clear drawing</string>
+    <string name="sign_pad_cleared">Drawing cleared</string>
+    <string name="sign_pad_error">Draw your signature first.</string>
+    <string name="sign_page_label">Page to sign</string>
+    <string name="sign_page_hint">A page number from 1 to %1$d</string>
+    <string name="sign_page_error">Enter a page number from 1 to %1$d.</string>
+    <string name="sign_position_label">Position on the page</string>
+    <string name="sign_pos_top_left">Top left</string>
+    <string name="sign_pos_top_right">Top right</string>
+    <string name="sign_pos_center">Center</string>
+    <string name="sign_pos_bottom_left">Bottom left</string>
+    <string name="sign_pos_bottom_center">Bottom center</string>
+    <string name="sign_pos_bottom_right">Bottom right</string>
+    <string name="sign_date_label">Add today\'s date under the signature</string>
+    <string name="sign_date_on">Date added</string>
+    <string name="sign_date_off">No date</string>
+    <string name="sign_button">Add signature</string>
+    <string name="sign_success">Added a visual signature to page %1$d. It is not a digital signature.</string>
 </resources>

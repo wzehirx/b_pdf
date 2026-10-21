@@ -463,4 +463,33 @@
     </plurals>
     <string name="viewer_zoom_min">En küçük yakınlaştırma</string>
     <string name="viewer_zoom_max">En büyük yakınlaştırma</string>
+    <string name="sign_instructions">Bir PDF seçin, sonra adınızı yazın veya imzanızı çizin ve bir sayfaya yerleştirin. Bu yalnızca görsel bir imzadır: adınız ya da çiziminiz sayfaya damgalanır. Kriptografik (dijital) imza değildir; kimin imzaladığını veya dosyanın sonradan değişmediğini kanıtlamaz.</string>
+    <string name="sign_need_file">Önce bir PDF seçin</string>
+    <string name="sign_mode_label">İmza türü</string>
+    <string name="sign_mode_typed">Yazılı (önerilir, ekran okuyucuyla çalışır)</string>
+    <string name="sign_mode_drawn">Parmakla çizilmiş</string>
+    <string name="sign_text_label">Adınız veya imza metniniz</string>
+    <string name="sign_text_error">İmzanızın metnini yazın.</string>
+    <string name="sign_pad_title">İmzanızı kutuya çizin</string>
+    <string name="sign_pad_hint">Ekran okuyucu açıkken kutuya çift dokunup basılı tutun, sonra parmağınızı sürükleyin. Adınızı yazmak daha kolaydır.</string>
+    <string name="sign_pad_empty">Çizilmiş imza, boş</string>
+    <string name="sign_pad_not_empty">Çizilmiş imza, dolu</string>
+    <string name="sign_pad_clear">Çizimi temizle</string>
+    <string name="sign_pad_cleared">Çizim temizlendi</string>
+    <string name="sign_pad_error">Önce imzanızı çizin.</string>
+    <string name="sign_page_label">İmzalanacak sayfa</string>
+    <string name="sign_page_hint">1 ile %1$d arasında bir sayfa numarası</string>
+    <string name="sign_page_error">1 ile %1$d arasında bir sayfa numarası girin.</string>
+    <string name="sign_position_label">Sayfadaki konum</string>
+    <string name="sign_pos_top_left">Sol üst</string>
+    <string name="sign_pos_top_right">Sağ üst</string>
+    <string name="sign_pos_center">Orta</string>
+    <string name="sign_pos_bottom_left">Sol alt</string>
+    <string name="sign_pos_bottom_center">Alt orta</string>
+    <string name="sign_pos_bottom_right">Sağ alt</string>
+    <string name="sign_date_label">İmzanın altına bugünün tarihini ekle</string>
+    <string name="sign_date_on">Tarih eklenecek</string>
+    <string name="sign_date_off">Tarih yok</string>
+    <string name="sign_button">İmza ekle</string>
+    <string name="sign_success">%1$d. sayfaya görsel imza eklendi. Bu bir dijital imza değildir.</string>
 </resources>

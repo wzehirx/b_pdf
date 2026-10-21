@@ -69,6 +69,12 @@ class ToolHandOffTest {
     }
 
     @Test
+    fun sign_receivesTheFile() {
+        navigate(IncomingIntents.toolRoute(Tool.SIGN, pdf("contract.pdf", 3)))
+        waitForText("contract.pdf, 3 pages")
+    }
+
+    @Test
     fun toolOpenedFromHome_startsEmpty() {
         navigate(Tool.ROTATE.route)
         waitForText("Choose PDF")

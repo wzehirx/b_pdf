@@ -5,6 +5,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+- Sign tool: stamp a visual signature on one page of a PDF, either typed (the default; Turkish and other special letters are supported and it works fully with a screen reader) or drawn with your finger (the drawing box says "Drawn signature, empty" or "not empty" and has a Clear drawing button). Choose the page, one of six positions and optionally today's date. It is a visual signature only, not a cryptographic (digital) signature.
+
 ## [0.6.0] - 2026-10-21
 
 ### Added
