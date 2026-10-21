@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-21
+
 ### Added
 - Sign tool: stamp a visual signature on one page of a PDF, either typed (the default; Turkish and other special letters are supported and it works fully with a screen reader) or drawn with your finger (the drawing box says "Drawn signature, empty" or "not empty" and has a Clear drawing button). Choose the page, one of six positions and optionally today's date. It is a visual signature only, not a cryptographic (digital) signature.
 - Text recognition (OCR) tool: read scanned pages in Turkish and English (default), Turkish or English, entirely on the device. It announces "Recognizing page 3 of 12" as it goes, can be cancelled between pages, and shows the text under one "Page N" heading per page, ready to save as a .txt file, copy, share or save as a searchable PDF (the original pages plus an invisible text layer). The "Try text recognition (OCR)" button in PDF to text now opens it.

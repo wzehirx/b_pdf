@@ -9,17 +9,17 @@ English | [Türkçe](#türkçe)
 
 ## Features
 
-Tools are delivered milestone by milestone. Status: v0.1.0 provides the foundation; the tools below are planned.
+Tools are delivered milestone by milestone. Status: v0.7.0 adds Sign and OCR; Polish and the full accessibility audit are planned for v1.0.
 
 | Milestone | Tools | Status |
 |---|---|---|
 | v0.1 | Foundation: engine, file handling, accessibility core, home screen, CI | Released |
-| v0.2 | Merge, Split, Remove pages, Extract pages, Rotate | Planned |
-| v0.3 | Organize pages, Images to PDF, PDF to images | Planned |
-| v0.4 | Protect, Unlock, Metadata, Repair | Planned |
-| v0.5 | Compress, Watermark, Page numbers | Planned |
-| v0.6 | PDF to text, Accessible viewer, open from other apps | Planned |
-| v0.7 | Sign, OCR (Turkish and English) | Planned |
+| v0.2 | Merge, Split, Remove pages, Extract pages, Rotate | Released |
+| v0.3 | Organize pages, Images to PDF, PDF to images | Released |
+| v0.4 | Protect, Unlock, Metadata, Repair | Released |
+| v0.5 | Compress, Watermark, Page numbers | Released |
+| v0.6 | PDF to text, Accessible viewer, open from other apps | Released |
+| v0.7 | Sign, OCR (Turkish and English) | Released |
 | v1.0 | Polish, full accessibility audit | Planned |
 
 **Signing is visual, not cryptographic.** The Sign tool stamps your typed name or a drawn signature onto a page, like a rubber stamp. It is not a cryptographic (digital) signature: it does not prove who signed and does not detect later changes to the file. A typed signature is the default and works fully with a screen reader; drawing is optional.
@@ -98,17 +98,17 @@ Third-party components:
 
 ### Özellikler
 
-Araçlar aşama aşama eklenir. Durum: v0.1.0 temeli sağlar; aşağıdaki araçlar planlanmıştır.
+Araçlar aşama aşama eklenir. Durum: v0.7.0 İmzala ve OCR araçlarını ekler; son rötuşlar ve tam erişilebilirlik denetimi v1.0 için planlanmıştır.
 
 | Aşama | Araçlar | Durum |
 |---|---|---|
 | v0.1 | Temel: motor, dosya işleme, erişilebilirlik çekirdeği, ana ekran, CI | Yayınlandı |
-| v0.2 | Birleştir, Böl, Sayfa sil, Sayfa ayıkla, Döndür | Planlandı |
-| v0.3 | Sayfaları düzenle, Görüntülerden PDF, PDF'den görüntü | Planlandı |
-| v0.4 | Şifrele, Şifreyi kaldır, Üst veri, Onar | Planlandı |
-| v0.5 | Sıkıştır, Filigran, Sayfa numarası | Planlandı |
-| v0.6 | PDF'den metin, Erişilebilir görüntüleyici, diğer uygulamalardan açma | Planlandı |
-| v0.7 | İmzala, OCR (Türkçe ve İngilizce) | Planlandı |
+| v0.2 | Birleştir, Böl, Sayfa sil, Sayfa ayıkla, Döndür | Yayınlandı |
+| v0.3 | Sayfaları düzenle, Görüntülerden PDF, PDF'den görüntü | Yayınlandı |
+| v0.4 | Şifrele, Şifreyi kaldır, Üst veri, Onar | Yayınlandı |
+| v0.5 | Sıkıştır, Filigran, Sayfa numarası | Yayınlandı |
+| v0.6 | PDF'den metin, Erişilebilir görüntüleyici, diğer uygulamalardan açma | Yayınlandı |
+| v0.7 | İmzala, OCR (Türkçe ve İngilizce) | Yayınlandı |
 | v1.0 | Son rötuşlar, tam erişilebilirlik denetimi | Planlandı |
 
 **İmza görseldir, kriptografik değildir.** İmzala aracı yazdığınız adı ya da çizdiğiniz imzayı bir kaşe gibi sayfaya basar. Kriptografik (dijital) imza değildir: kimin imzaladığını kanıtlamaz ve dosyada sonradan yapılan değişiklikleri algılamaz. Yazılı imza varsayılandır ve ekran okuyucuyla tam çalışır; çizim isteğe bağlıdır.
