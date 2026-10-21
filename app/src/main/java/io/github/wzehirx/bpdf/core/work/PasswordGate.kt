@@ -13,7 +13,13 @@ import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 /** The password question a tool is asking: for [fileName], [wrong] after a failed attempt, [checking] while testing one. */
-data class PasswordPrompt(val fileName: String, val wrong: Boolean = false, val checking: Boolean = false)
+data class PasswordPrompt(
+    val fileName: String,
+    val wrong: Boolean = false,
+    val checking: Boolean = false,
+    /** Number of wrong passwords so far; each one is announced, also when [wrong] stays true. */
+    val attempt: Int = 0,
+)
 
 /**
  * Shared password flow of every tool that opens a PDF. A ViewModel calls [open] for each imported file:
@@ -53,6 +59,7 @@ class PasswordGate(
             // drop answers left over from an earlier prompt
         }
         _prompt.value = PasswordPrompt(file.displayName)
+        var wrongAttempts = 0
         try {
             while (true) {
                 val password = answers.receive() ?: return null
@@ -61,7 +68,7 @@ class PasswordGate(
                     passwords[file.file] = password
                     return pages
                 } catch (_: PdfError.WrongPassword) {
-                    _prompt.value = PasswordPrompt(file.displayName, wrong = true)
+                    _prompt.value = PasswordPrompt(file.displayName, wrong = true, attempt = ++wrongAttempts)
                 }
             }
         } finally {

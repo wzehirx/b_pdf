@@ -186,6 +186,7 @@ fun SplitScreenContent(
             successText = { result ->
                 resources.getQuantityString(R.plurals.split_success, result.files.size, result.files.size)
             },
+            unprotectedOutput = state.copyUnprotected,
             onCancel = onCancel,
             onRetry = onRetry,
             successActions = {

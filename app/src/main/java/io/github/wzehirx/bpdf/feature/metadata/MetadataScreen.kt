@@ -145,7 +145,6 @@ fun MetadataScreenContent(
             MetadataField(state.subject, onSubjectChange, R.string.metadata_subject_label, !busy)
             MetadataField(state.keywords, onKeywordsChange, R.string.metadata_keywords_label, !busy, hint = R.string.metadata_keywords_hint)
             MetadataField(state.creator, onCreatorChange, R.string.metadata_creator_label, !busy, last = true)
-            if (info.encrypted) Text(stringResource(R.string.metadata_encrypted_note))
         }
         Button(
             onClick = onWrite,
@@ -162,6 +161,7 @@ fun MetadataScreenContent(
             onSave = onSave,
             onShare = onShare,
             actionsEnabled = !state.saving,
+            unprotectedOutput = state.copyUnprotected,
             onCancel = onCancel,
             onRetry = onRetry,
         )

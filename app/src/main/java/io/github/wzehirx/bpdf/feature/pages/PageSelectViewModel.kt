@@ -66,6 +66,8 @@ data class PageSelectUiState(
     val saving: Boolean = false,
     /** Set while the user is asked for the file's password. */
     val passwordPrompt: PasswordPrompt? = null,
+    /** True when an input needed a password: the saved copy has none. */
+    val copyUnprotected: Boolean = false,
     val operation: OperationState<PageSelectResult> = OperationState.Idle,
 )
 
@@ -80,6 +82,8 @@ class PageSelectViewModel(
         val rangeText: String = "",
         val attempted: Boolean = false,
         val failedAttempts: Int = 0,
+        /** An input needed a password, so the saved copy has none. */
+        val protectedInput: Boolean = false,
         val pendingImports: Int = 0,
         val saving: Boolean = false,
         /** Import or save failure; takes precedence over the runner's state until cleared. */
@@ -103,6 +107,7 @@ class PageSelectViewModel(
             failedAttempts = l.failedAttempts,
             importing = l.pendingImports > 0,
             saving = l.saving,
+            copyUnprotected = l.protectedInput,
             passwordPrompt = prompt,
             operation = l.error?.let { OperationState.Failed(it) } ?: op,
         )
@@ -151,7 +156,7 @@ class PageSelectViewModel(
                     return@launch
                 }
                 val old = local.value.file
-                local.update { it.copy(file = imported, pageCount = pages, attempted = false) }
+                local.update { it.copy(file = imported, protectedInput = passwordGate.passwordOf(imported.file) != null, pageCount = pages, attempted = false) }
                 old?.let { passwordGate.forget(it.file); it.file.delete() }
             } catch (e: CancellationException) {
                 throw e
@@ -167,7 +172,7 @@ class PageSelectViewModel(
         val file = local.value.file ?: return
         if (busy) return
         resetResult()
-        local.update { it.copy(file = null, pageCount = 0, attempted = false) }
+        local.update { it.copy(file = null, protectedInput = false, pageCount = 0, attempted = false) }
         passwordGate.forget(file.file)
         file.file.delete()
     }

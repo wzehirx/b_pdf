@@ -317,7 +317,6 @@
     <string name="metadata_keywords_label">Anahtar kelimeler</string>
     <string name="metadata_keywords_hint">Anahtar kelimeleri virgülle ayırın.</string>
     <string name="metadata_creator_label">Oluşturan uygulama</string>
-    <string name="metadata_encrypted_note">Kaydedilen kopyanın parolası olmayacak.</string>
     <string name="metadata_button">Değişiklikleri uygula</string>
     <string name="metadata_success">Bilgiler güncellendi. Yeni kopyayı kaydedin veya paylaşın.</string>
     <string name="repair_instructions">Açılmayan veya sayfaları eksik görünen hasarlı bir PDF seçin. b PDF okuyabildiği her şeyi alır ve yeniden oluşturulmuş bir kopya kaydeder.</string>
@@ -328,4 +327,6 @@
         <item quantity="one">Onarıldı. %1$d sayfa kurtarıldı.</item>
         <item quantity="other">Onarıldı. %1$d sayfa kurtarıldı.</item>
     </plurals>
+    <string name="password_checking">Parola denetleniyor…</string>
+    <string name="unprotected_output_note">Kaydedilen kopyanın parolası yok.</string>
 </resources>

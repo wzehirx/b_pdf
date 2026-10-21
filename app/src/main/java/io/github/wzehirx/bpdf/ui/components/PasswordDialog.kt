@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.android.awaitFrame
 import io.github.wzehirx.bpdf.R
+import io.github.wzehirx.bpdf.core.a11y.rememberAnnouncer
 import io.github.wzehirx.bpdf.core.work.PasswordPrompt
 
 @Composable
@@ -39,13 +41,23 @@ fun PasswordDialog(
     wrongPassword: Boolean,
     /** Which file is asking, spoken before the field; omitted when null. */
     fileName: String? = null,
+    /** Number of wrong passwords so far; every increase announces the error again. */
+    attempt: Int = 0,
+    /** True while the last password is being tested: OK is off and "Checking" is shown. */
+    checking: Boolean = false,
 ) {
     // Deliberately not rememberSaveable: never write the password into saved instance state.
     var password by remember { mutableStateOf("") }
     var visible by remember { mutableStateOf(false) }
     val wrongMessage = stringResource(R.string.err_wrong_password)
     val focus = remember { FocusRequester() }
-    val submit = { if (password.isNotEmpty()) onSubmit(password) }
+    val announce = rememberAnnouncer()
+    val checkingText = stringResource(R.string.password_checking)
+    // The one announcement mechanism of the app: says the error on every wrong attempt, not only the first.
+    LaunchedEffect(attempt, wrongPassword) {
+        if (wrongPassword) announce(wrongMessage)
+    }
+    val submit = { if (password.isNotEmpty() && !checking) onSubmit(password) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.password_title)) },
@@ -56,6 +68,10 @@ fun PasswordDialog(
                 runCatching { focus.requestFocus() }
             }
             Column {
+                if (checking) {
+                    Text(checkingText, Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                }
                 if (fileName != null) {
                     Text(stringResource(R.string.password_prompt_for, fileName))
                 }
@@ -66,7 +82,7 @@ fun PasswordDialog(
                     singleLine = true,
                     isError = wrongPassword,
                     supportingText = if (wrongPassword) {
-                        { Text(wrongMessage, Modifier.semantics { liveRegion = LiveRegionMode.Assertive }) }
+                        { Text(wrongMessage) }
                     } else {
                         null
                     },
@@ -87,7 +103,7 @@ fun PasswordDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { submit() }, enabled = password.isNotEmpty(), modifier = Modifier.heightIn(min = 48.dp)) {
+            TextButton(onClick = { submit() }, enabled = password.isNotEmpty() && !checking, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.ok))
             }
         },
@@ -102,5 +118,5 @@ fun PasswordDialog(
 /** Shows [PasswordDialog] for [prompt] while there is one; a wrong attempt keeps the dialog and flags the field. */
 @Composable
 fun PasswordPromptDialog(prompt: PasswordPrompt?, onSubmit: (String) -> Unit, onDismiss: () -> Unit) {
-    if (prompt != null) PasswordDialog(onSubmit, onDismiss, prompt.wrong, prompt.fileName)
+    if (prompt != null) PasswordDialog(onSubmit, onDismiss, prompt.wrong, prompt.fileName, prompt.attempt, prompt.checking)
 }

@@ -62,11 +62,10 @@ class MetadataScreenTest {
     }
 
     @Test
-    fun protectedFile_showsInfoAndNote() {
+    fun protectedFile_showsInfo() {
         show(loaded.copy(info = info.copy(encrypted = true, producer = null)))
         rule.onNodeWithText("Protected with a password").performScrollTo().assertExists()
         rule.onNodeWithText("The program that made it is not recorded").performScrollTo().assertExists()
-        rule.onNodeWithText("The saved copy will not have a password.").performScrollTo().assertExists()
     }
 
     @Test

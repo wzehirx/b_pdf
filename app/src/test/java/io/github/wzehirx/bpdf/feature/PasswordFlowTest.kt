@@ -199,4 +199,28 @@ class PasswordFlowTest {
         assertTrue(rendered.all { !it.exists() })
         assertNotNull(picked.file)
     }
+
+    @Test
+    fun copyUnprotected_isFlaggedOnlyWhenAPasswordWasNeeded() {
+        val vm = RotateViewModel(repo, dispatcher)
+        vm.pickFile(listOf(uri("plain.pdf", 1, "Pln")))
+        assertFalse(vm.state.until { it.file != null && !it.importing }.copyUnprotected)
+        vm.pickFile(listOf(locked()))
+        vm.state.until { it.passwordPrompt != null }
+        vm.submitPassword("right")
+        assertTrue(vm.state.until { it.file?.displayName == "locked.pdf" && !it.importing }.copyUnprotected)
+        vm.remove()
+        assertFalse(vm.state.until { it.file == null }.copyUnprotected)
+    }
+
+    @Test
+    fun merge_copyUnprotected_followsProtectedInputs() {
+        val vm = MergeViewModel(repo, dispatcher)
+        vm.addFiles(listOf(locked(pages = 1), uri("plain.pdf", 1, "Pln")))
+        vm.state.until { it.passwordPrompt != null }
+        vm.submitPassword("right")
+        assertTrue(vm.state.until { it.files.size == 2 && !it.importing }.copyUnprotected)
+        vm.remove(0)
+        assertFalse(vm.state.until { it.files.size == 1 }.copyUnprotected)
+    }
 }

@@ -37,6 +37,8 @@ fun <T> OperationStatusPanel(
     onSave: () -> Unit = {},
     onShare: () -> Unit = {},
     actionsEnabled: Boolean = true,
+    /** True when an input needed a password: the saved copy has none, and the result text says so. */
+    unprotectedOutput: Boolean = false,
     successActions: @Composable () -> Unit = { SaveResultActions(onSave = onSave, onShare = onShare, enabled = actionsEnabled) },
 ) {
     val resources = LocalResources.current
@@ -74,7 +76,7 @@ fun <T> OperationStatusPanel(
             }
             is OperationState.Success -> {
                 Text(
-                    text = successText(state.value),
+                    text = successText(state.value).withUnprotectedNote(resources, unprotectedOutput),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = resultModifier,
                 )

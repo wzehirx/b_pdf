@@ -131,6 +131,7 @@ fun RepairScreenContent(
             onSave = onSave,
             onShare = onShare,
             actionsEnabled = !state.saving,
+            unprotectedOutput = state.copyUnprotected,
             onCancel = onCancel,
             onRetry = onRetry,
         )

@@ -96,4 +96,25 @@ class OperationStatusPanelTest {
         show(OperationState.Idle)
         rule.onAllNodes(hasText("Cancel")).assertCountEquals(0)
     }
+
+    @Test
+    fun success_withUnprotectedOutput_appendsNoteToTheFocusedResultText() {
+        rule.setContent {
+            OperationStatusPanel(
+                state = OperationState.Success("done"),
+                successText = { "Result $it." },
+                onCancel = {}, onRetry = {}, unprotectedOutput = true,
+            )
+        }
+        rule.onNodeWithText("Result done. The saved copy has no password.").assertExists()
+        rule.onNodeWithText("The saved copy has no password.").assertDoesNotExist()
+    }
+
+    @Test
+    fun success_withoutUnprotectedOutput_hasNoNote() {
+        rule.setContent {
+            OperationStatusPanel(state = OperationState.Success("done"), successText = { "Result $it." }, onCancel = {}, onRetry = {})
+        }
+        rule.onNodeWithText("Result done.").assertExists()
+    }
 }

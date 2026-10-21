@@ -49,6 +49,8 @@ data class MergeUiState(
     val saving: Boolean = false,
     /** Set while the user is asked for the password of the file being added. */
     val passwordPrompt: PasswordPrompt? = null,
+    /** True when an input needed a password: the saved copy has none. */
+    val copyUnprotected: Boolean = false,
     val operation: OperationState<MergeResult> = OperationState.Idle,
 )
 
@@ -58,6 +60,8 @@ class MergeViewModel(
 ) : ViewModel() {
     private data class Local(
         val files: List<ImportedFile> = emptyList(),
+        /** An input needed a password, so the saved copy has none. */
+        val protectedInput: Boolean = false,
         val pendingImports: Int = 0,
         val saving: Boolean = false,
         /** Import or save failure; takes precedence over the runner's state until cleared. */
@@ -74,6 +78,7 @@ class MergeViewModel(
             files = l.files,
             importing = l.pendingImports > 0,
             saving = l.saving,
+            copyUnprotected = l.protectedInput,
             passwordPrompt = prompt,
             operation = l.error?.let { OperationState.Failed(it) } ?: op,
         )
@@ -104,7 +109,9 @@ class MergeViewModel(
                         imported.file.delete()
                         throw t
                     }
-                    local.update { it.copy(files = it.files + imported) }
+                    local.update {
+                        it.copy(files = it.files + imported, protectedInput = it.protectedInput || passwordGate.passwordOf(imported.file) != null)
+                    }
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -127,8 +134,11 @@ class MergeViewModel(
         val files = local.value.files
         if (busy || index !in files.indices) return
         resetResult()
-        local.update { it.copy(files = it.files.filterIndexed { i, _ -> i != index }) }
         passwordGate.forget(files[index].file)
+        local.update {
+            val rest = it.files.filterIndexed { i, _ -> i != index }
+            it.copy(files = rest, protectedInput = rest.any { f -> passwordGate.passwordOf(f.file) != null })
+        }
         files[index].file.delete()
     }
 

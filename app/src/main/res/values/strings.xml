@@ -317,7 +317,6 @@
     <string name="metadata_keywords_label">Keywords</string>
     <string name="metadata_keywords_hint">Separate keywords with commas.</string>
     <string name="metadata_creator_label">Created with</string>
-    <string name="metadata_encrypted_note">The saved copy will not have a password.</string>
     <string name="metadata_button">Apply changes</string>
     <string name="metadata_success">Details updated. Save or share the new copy.</string>
     <string name="repair_instructions">Choose a damaged PDF that will not open or shows missing pages. b PDF reads what it can and saves a rebuilt copy.</string>
@@ -328,4 +327,6 @@
         <item quantity="one">Repaired. Recovered %1$d page.</item>
         <item quantity="other">Repaired. Recovered %1$d pages.</item>
     </plurals>
+    <string name="password_checking">Checking password…</string>
+    <string name="unprotected_output_note">The saved copy has no password.</string>
 </resources>

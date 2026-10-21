@@ -52,6 +52,8 @@ data class MetadataUiState(
     val saving: Boolean = false,
     /** Set while the user is asked for the file's password. */
     val passwordPrompt: PasswordPrompt? = null,
+    /** True when an input needed a password: the saved copy has none. */
+    val copyUnprotected: Boolean = false,
     val operation: OperationState<MetadataResult> = OperationState.Idle,
 )
 
@@ -67,6 +69,8 @@ class MetadataViewModel(
         val subject: String = "",
         val keywords: String = "",
         val creator: String = "",
+        /** An input needed a password, so the saved copy has none. */
+        val protectedInput: Boolean = false,
         val pendingImports: Int = 0,
         val saving: Boolean = false,
         /** Import or save failure; takes precedence over the runner's state until cleared. */
@@ -89,6 +93,7 @@ class MetadataViewModel(
             creator = l.creator,
             importing = l.pendingImports > 0,
             saving = l.saving,
+            copyUnprotected = l.protectedInput,
             passwordPrompt = prompt,
             operation = l.error?.let { OperationState.Failed(it) } ?: op,
         )
@@ -124,6 +129,7 @@ class MetadataViewModel(
                 val old = local.value.file
                 local.update { it.copy(
                         file = imported,
+                        protectedInput = info.encrypted || passwordGate.passwordOf(imported.file) != null,
                         info = info,
                         title = info.title.orEmpty(),
                         author = info.author.orEmpty(),
@@ -146,7 +152,7 @@ class MetadataViewModel(
         val file = local.value.file ?: return
         if (busy) return
         resetResult()
-        local.update { it.copy(file = null, info = null, title = "", author = "", subject = "", keywords = "", creator = "") }
+        local.update { it.copy(file = null, protectedInput = false, info = null, title = "", author = "", subject = "", keywords = "", creator = "") }
         passwordGate.forget(file.file)
         file.file.delete()
     }

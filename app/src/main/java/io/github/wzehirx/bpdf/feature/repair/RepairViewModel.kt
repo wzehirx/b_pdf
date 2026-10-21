@@ -48,6 +48,8 @@ data class RepairUiState(
     val saving: Boolean = false,
     /** Set while the user is asked for the file's password. */
     val passwordPrompt: PasswordPrompt? = null,
+    /** True when an input needed a password: the saved copy has none. */
+    val copyUnprotected: Boolean = false,
     val operation: OperationState<RepairOutcome> = OperationState.Idle,
 )
 
@@ -58,6 +60,8 @@ class RepairViewModel(
     private data class Local(
         val file: ImportedFile? = null,
         val pageCount: Int? = null,
+        /** An input needed a password, so the saved copy has none. */
+        val protectedInput: Boolean = false,
         val pendingImports: Int = 0,
         val saving: Boolean = false,
         /** Import or save failure; takes precedence over the runner's state until cleared. */
@@ -82,6 +86,7 @@ class RepairViewModel(
             pageCount = l.pageCount,
             importing = l.pendingImports > 0,
             saving = l.saving,
+            copyUnprotected = l.protectedInput,
             passwordPrompt = prompt,
             operation = l.error?.let { OperationState.Failed(it) } ?: op,
         )
@@ -113,7 +118,7 @@ class RepairViewModel(
                     return@launch
                 }
                 val old = local.value.file
-                local.update { it.copy(file = imported, pageCount = pages.takeIf { it != UNREADABLE }) }
+                local.update { it.copy(file = imported, protectedInput = passwordGate.passwordOf(imported.file) != null, pageCount = pages.takeIf { it != UNREADABLE }) }
                 old?.let { passwordGate.forget(it.file); it.file.delete() }
             } catch (e: CancellationException) {
                 throw e
@@ -129,7 +134,7 @@ class RepairViewModel(
         val file = local.value.file ?: return
         if (busy) return
         resetResult()
-        local.update { it.copy(file = null, pageCount = null) }
+        local.update { it.copy(file = null, protectedInput = false, pageCount = null) }
         passwordGate.forget(file.file)
         file.file.delete()
     }

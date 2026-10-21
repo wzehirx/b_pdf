@@ -51,7 +51,7 @@ class PasswordGateTest {
         val gate = gate(UnconfinedTestDispatcher(testScheduler))
         val result = async { gate.open(locked) }
         gate.submit("bad")
-        assertEquals(PasswordPrompt("locked.pdf", wrong = true), gate.prompt.value)
+        assertEquals(PasswordPrompt("locked.pdf", wrong = true, attempt = 1), gate.prompt.value)
         assertNull(gate.passwordOf(locked.file))
         gate.submit("right")
         assertEquals(7, result.await())
@@ -87,5 +87,18 @@ class PasswordGateTest {
         assertFalse(result.isCompleted)
         gate.dismiss()
         assertNull(result.await())
+    }
+
+    @Test
+    fun eachWrongPassword_raisesTheAttemptCounter() = runTest(UnconfinedTestDispatcher()) {
+        val gate = gate(UnconfinedTestDispatcher(testScheduler))
+        val result = async { gate.open(locked) }
+        gate.submit("bad")
+        assertEquals(1, gate.prompt.value!!.attempt)
+        gate.submit("bad2")
+        assertEquals(2, gate.prompt.value!!.attempt)
+        assertTrue(gate.prompt.value!!.wrong)
+        gate.dismiss()
+        result.await()
     }
 }

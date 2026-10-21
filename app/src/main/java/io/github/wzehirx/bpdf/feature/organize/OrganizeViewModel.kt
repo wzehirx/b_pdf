@@ -71,6 +71,8 @@ data class OrganizeUiState(
     val saving: Boolean = false,
     /** Set while the user is asked for the file's password. */
     val passwordPrompt: PasswordPrompt? = null,
+    /** True when an input needed a password: the saved copy has none. */
+    val copyUnprotected: Boolean = false,
     val operation: OperationState<OrganizeResult> = OperationState.Idle,
 ) {
     val canUndo: Boolean get() = undoDepth > 0
@@ -86,6 +88,8 @@ class OrganizeViewModel(
         val edits: List<PageEdit> = emptyList(),
         /** Earlier versions of [edits], oldest first. */
         val undo: List<List<PageEdit>> = emptyList(),
+        /** An input needed a password, so the saved copy has none. */
+        val protectedInput: Boolean = false,
         val pendingImports: Int = 0,
         val saving: Boolean = false,
         /** Import or save failure; takes precedence over the runner's state until cleared. */
@@ -106,6 +110,7 @@ class OrganizeViewModel(
             undoDepth = l.undo.size,
             importing = l.pendingImports > 0,
             saving = l.saving,
+            copyUnprotected = l.protectedInput,
             passwordPrompt = prompt,
             operation = l.error?.let { OperationState.Failed(it) } ?: op,
         )
@@ -141,7 +146,7 @@ class OrganizeViewModel(
                 }
                 val old = local.value.file
                 local.update {
-                    it.copy(file = imported, pageCount = pages, edits = List(pages) { i -> PageEdit(i) }, undo = emptyList())
+                    it.copy(file = imported, protectedInput = passwordGate.passwordOf(imported.file) != null, pageCount = pages, edits = List(pages) { i -> PageEdit(i) }, undo = emptyList())
                 }
                 old?.let { passwordGate.forget(it.file); it.file.delete() }
             } catch (e: CancellationException) {
@@ -158,7 +163,7 @@ class OrganizeViewModel(
         val file = local.value.file ?: return
         if (busy) return
         resetResult()
-        local.update { it.copy(file = null, pageCount = 0, edits = emptyList(), undo = emptyList()) }
+        local.update { it.copy(file = null, protectedInput = false, pageCount = 0, edits = emptyList(), undo = emptyList()) }
         passwordGate.forget(file.file)
         file.file.delete()
     }
