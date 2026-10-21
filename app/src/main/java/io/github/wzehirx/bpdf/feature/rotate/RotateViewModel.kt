@@ -123,7 +123,7 @@ class RotateViewModel(
             try {
                 val imported = fileRepository.importToCache(uri)
                 val pages = try {
-                    withContext(Dispatchers.IO) { PdfLoader.pageCount(imported.file) }
+                    withContext(ioDispatcher) { PdfLoader.pageCount(imported.file) }
                 } catch (t: Throwable) {
                     imported.file.delete()
                     throw t
@@ -180,7 +180,7 @@ class RotateViewModel(
                 val total = RotateOperation.run(
                     file.file, pages, l.angle.degrees, out, progress = progress, isCancelled = { !context.isActive },
                 )
-                RotateResult(out, pages?.size ?: total, total, name)
+                RotateResult(out, pages?.distinct()?.size ?: total, total, name)
             } catch (t: Throwable) {
                 out.delete()
                 throw t

@@ -96,24 +96,35 @@ class PageSelectScreenTest {
     }
 
     @Test
-    fun removingEveryPage_showsPoliteLiveError() {
+    fun removingEveryPage_marksFieldAsError_andDisablesButtonWithReason() {
         show(loaded(PageSelectMode.REMOVE).copy(rangeText = "1-5", removesAllPages = true))
-        val node = rule.onNodeWithText("You cannot remove every page. Leave at least one page.")
-        node.assertExists()
-        assertEquals(
-            androidx.compose.ui.semantics.LiveRegionMode.Polite,
-            node.fetchSemanticsNode().config.getOrNull(SemanticsProperties.LiveRegion),
-        )
+        val message = "You cannot remove every page. Leave at least one page."
+        // One message only: shown as the field's supporting text and exposed as its error, no extra live region.
+        rule.onNodeWithText(message).assertExists()
+        val field = rule.onNode(hasText("1-5") and androidx.compose.ui.test.hasSetTextAction()).fetchSemanticsNode().config
+        assertEquals(message, field.getOrNull(SemanticsProperties.Error))
+        assertEquals(null, rule.onNodeWithText(message).fetchSemanticsNode().config.getOrNull(SemanticsProperties.LiveRegion))
+        val button = rule.onNode(hasText("Remove pages") and androidx.compose.ui.test.hasClickAction())
+        button.assertIsNotEnabled()
+        assertEquals(message, button.fetchSemanticsNode().config.getOrNull(SemanticsProperties.StateDescription))
     }
 
     @Test
     fun success_removeAndExtract_useSpecificTexts_andSaveShare() {
         val result = PageSelectResult(File("o.pdf"), selectedCount = 2, remainingCount = 3, suggestedName = "n.pdf")
         show(loaded(PageSelectMode.REMOVE).copy(operation = OperationState.Success(result)))
-        rule.onNodeWithText("Removed 2 pages; 3 remain").assertExists()
+        rule.onNodeWithText("Removed 2 pages; 3 pages remain").assertExists()
         rule.onNodeWithText("Save").performScrollTo().performClick()
         rule.onNodeWithText("Share").performScrollTo().performClick()
         assertEquals(listOf("save", "share"), calls)
+    }
+
+    @Test
+    fun success_remove_singularRemain() {
+        show(loaded(PageSelectMode.REMOVE).copy(
+            operation = OperationState.Success(PageSelectResult(File("o.pdf"), 1, 1, "n.pdf")),
+        ))
+        rule.onNodeWithText("Removed 1 page; 1 page remains").assertExists()
     }
 
     @Test

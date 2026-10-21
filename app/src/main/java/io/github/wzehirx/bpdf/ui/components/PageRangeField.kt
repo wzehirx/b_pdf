@@ -21,9 +21,11 @@ fun PageRangeField(
     error: PdfError.InvalidRange?,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    /** A problem with the selection as a whole (not its syntax); shown and exposed like [error]. */
+    selectionError: String? = null,
 ) {
     val resources = LocalResources.current
-    val errorMessage = error?.toMessage(resources)
+    val errorMessage = error?.toMessage(resources) ?: selectionError
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,

@@ -115,7 +115,7 @@ class SplitViewModelTest {
     @Test
     fun split_withoutFile_doesNothing() {
         vm.split()
-        assertEquals(OperationState.Idle, vm.state.value.operation)
+        settled { it.operation == OperationState.Idle }
     }
 
     @Test
@@ -274,10 +274,13 @@ class SplitViewModelTest {
         slow.setMode(SplitModeChoice.EVERY_N)
         slow.remove()
         slow.pickFile(listOf(pdf(1, "b.pdf")))
-        val during = slow.state.value
-        assertEquals(SplitModeChoice.EACH_PAGE, during.mode)
-        assertEquals("a.pdf", during.file?.displayName)
-        assertFalse(during.importing)
+        // Never read `state.value` right after an intent: the collector may still be busy on another thread.
+        await {
+            slow.state.first {
+                it.mode == SplitModeChoice.EACH_PAGE && it.file?.displayName == "a.pdf" && !it.importing &&
+                    it.operation is OperationState.Running
+            }
+        }
         gate.scheduler.advanceUntilIdle()
         await { slow.state.first { it.operation is OperationState.Success } }
     }
@@ -304,10 +307,7 @@ class SplitViewModelTest {
         vm.setMode(SplitModeChoice.EVERY_N)
         vm.remove()
         vm.split()
-        val during = vm.state.value
-        assertEquals(SplitModeChoice.EACH_PAGE, during.mode)
-        assertTrue(during.file != null)
-        assertTrue(during.operation is OperationState.Success)
+        settled { it.mode == SplitModeChoice.EACH_PAGE && it.file != null && it.saving && it.operation is OperationState.Success }
         latch.countDown()
         assertEquals(3, await { vm.savedEvents.first() })
         assertFalse(settled { !it.saving }.saving)
@@ -340,9 +340,9 @@ class SplitViewModelTest {
         await {
             while (shared.listFiles().orEmpty().none { d -> d.list().orEmpty().isNotEmpty() }) kotlinx.coroutines.delay(5)
         }
-        assertTrue(realVm.state.value.operation is OperationState.Running)
+        await { realVm.state.first { it.operation is OperationState.Running } }
         realVm.cancel()
         await { while (shared.listFiles().orEmpty().isNotEmpty()) kotlinx.coroutines.delay(10) }
-        assertEquals(OperationState.Idle, realVm.state.value.operation)
+        await { realVm.state.first { it.operation == OperationState.Idle } }
     }
 }

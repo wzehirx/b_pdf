@@ -9,6 +9,11 @@ import java.util.IdentityHashMap
 
 /** Copies pages between documents without dragging the rest of the source along. */
 object PageCopier {
+    /** Annotation entries that point back into the source document's object graph. */
+    private val LINKS_TO_SOURCE = listOf(
+        COSName.P, COSName.PARENT, COSName.getPDFName("Popup"), COSName.getPDFName("IRT"),
+    )
+
     /**
      * Imports [pages] (0-based indices of [source], in the given order) into [target]. Imported
      * pages share resources with [source], which therefore has to stay open until [target] is saved.
@@ -16,7 +21,7 @@ object PageCopier {
      * Annotations keep references to other pages of the source (`/P`, internal link destinations),
      * and saving them would copy those pages into [target]. Links whose destination page is among
      * the copied pages are repointed to the imported page; links to any other page are removed.
-     * External links and other annotations are kept. The source's annotations are not modified:
+     * External links and other annotations are kept; popups and form widgets are dropped. The source's annotations are not modified:
      * the imported pages get their own copies.
      */
     fun copyPages(source: PDDocument, pages: List<Int>, target: PDDocument) {
@@ -32,7 +37,11 @@ object PageCopier {
         val kept = COSArray()
         for (i in 0 until annots.size()) {
             val original = annots.getObject(i) as? COSDictionary ?: continue
-            val copy = COSDictionary(original).apply { removeItem(COSName.P) }
+            val subtype = original.getNameAsString(COSName.SUBTYPE)
+            // Popups hang off their parent annotation and widgets off their form field; neither
+            // survives without the rest of the source, and keeping them would pull it in.
+            if (subtype == "Popup" || subtype == "Widget") continue
+            val copy = COSDictionary(original).apply { LINKS_TO_SOURCE.forEach { removeItem(it) } }
             if (remapDestinations(copy, importedFor)) kept.add(copy)
         }
         page.setItem(COSName.ANNOTS, kept)

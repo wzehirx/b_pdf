@@ -136,7 +136,7 @@ class PageSelectViewModel(
             try {
                 val imported = fileRepository.importToCache(uri)
                 val pages = try {
-                    withContext(Dispatchers.IO) { PdfLoader.pageCount(imported.file) }
+                    withContext(ioDispatcher) { PdfLoader.pageCount(imported.file) }
                 } catch (t: Throwable) {
                     imported.file.delete()
                     throw t

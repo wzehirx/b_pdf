@@ -149,9 +149,14 @@
     <string name="pages_remove_button">Remove pages</string>
     <string name="pages_extract_button">Extract pages</string>
     <plurals name="pages_removed_success">
-        <item quantity="one">Removed %1$d page; %2$d remain</item>
-        <item quantity="other">Removed %1$d pages; %2$d remain</item>
+        <item quantity="one">Removed %1$d page</item>
+        <item quantity="other">Removed %1$d pages</item>
     </plurals>
+    <plurals name="pages_remaining">
+        <item quantity="one">%1$d page remains</item>
+        <item quantity="other">%1$d pages remain</item>
+    </plurals>
+    <string name="pages_removed_summary">%1$s; %2$s</string>
     <plurals name="pages_extracted_success">
         <item quantity="one">Extracted %1$d page</item>
         <item quantity="other">Extracted %1$d pages</item>

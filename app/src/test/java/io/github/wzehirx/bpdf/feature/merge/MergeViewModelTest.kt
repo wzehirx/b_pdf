@@ -62,9 +62,15 @@ class MergeViewModelTest {
     // Imports and exports hop to the real IO dispatcher, so wait for the state instead of assuming it.
     private fun <T> await(block: suspend () -> T): T = runBlocking { withTimeout(10_000) { block() } }
 
+    // The combined state is republished by a collector that may still be busy on another thread, so
+    // never read `state.value` right after an intent: wait for the state that is expected instead.
+    private fun awaitState(vm: MergeViewModel = this.vm, condition: (MergeUiState) -> Boolean): MergeUiState =
+        await { vm.state.first(condition) }
+
     private fun add(vararg uris: Uri) {
+        val expected = vm.state.value.files.size + uris.size
         vm.addFiles(uris.toList())
-        await { vm.state.first { !it.importing } }
+        awaitState { !it.importing && it.files.size == expected }
     }
 
     private fun mergeAndAwait(): OperationState<MergeResult> {
@@ -73,24 +79,26 @@ class MergeViewModelTest {
             .operation
     }
 
-    private fun names() = vm.state.value.files.map { it.displayName }
+    private fun assertNames(vararg expected: String) {
+        awaitState { state -> state.files.map { it.displayName } == expected.toList() }
+    }
 
     @Test
     fun addFiles_importsInOrder() {
         add(pdf(1, "A", "a.pdf"), pdf(1, "B", "b.pdf"))
-        assertEquals(listOf("a.pdf", "b.pdf"), names())
-        assertFalse(vm.state.value.importing)
+        assertNames("a.pdf", "b.pdf")
+        awaitState { !it.importing }
     }
 
     @Test
     fun moveAndRemove_reorderState() {
         add(pdf(1, "A", "a.pdf"), pdf(1, "B", "b.pdf"), pdf(1, "C", "c.pdf"))
         vm.move(2, 0)
-        assertEquals(listOf("c.pdf", "a.pdf", "b.pdf"), names())
+        assertNames("c.pdf", "a.pdf", "b.pdf")
         vm.remove(1)
-        assertEquals(listOf("c.pdf", "b.pdf"), names())
+        assertNames("c.pdf", "b.pdf")
         vm.move(5, 0) // out of range is ignored
-        assertEquals(listOf("c.pdf", "b.pdf"), names())
+        assertNames("c.pdf", "b.pdf")
     }
 
     @Test
@@ -110,7 +118,7 @@ class MergeViewModelTest {
     fun merge_withOneFile_doesNothing() {
         add(pdf(1, "A", "a.pdf"))
         vm.merge()
-        assertEquals(OperationState.Idle, vm.state.value.operation)
+        awaitState { it.operation == OperationState.Idle }
     }
 
     @Test
@@ -118,7 +126,7 @@ class MergeViewModelTest {
         add(pdf(1, "A", "a.pdf"), pdf(1, "B", "b.pdf"))
         mergeAndAwait()
         vm.remove(0)
-        assertEquals(OperationState.Idle, vm.state.value.operation)
+        awaitState { it.operation == OperationState.Idle }
     }
 
     @Test
@@ -131,10 +139,10 @@ class MergeViewModelTest {
 
     @Test
     fun unreadableUri_surfacesAsFailedState_andRetryDismisses() {
-        add(pdf(1, "A", "a.pdf"), Uri.fromFile(File(dir, "missing.pdf")))
+        vm.addFiles(listOf(pdf(1, "A", "a.pdf"), Uri.fromFile(File(dir, "missing.pdf"))))
         // The combined state is published asynchronously after the IO thread's update.
-        await { vm.state.first { it.operation is OperationState.Failed } }
-        assertEquals(listOf("a.pdf"), names())
+        awaitState { it.operation is OperationState.Failed && !it.importing }
+        assertNames("a.pdf")
         vm.retry()
         await { vm.state.first { it.operation == OperationState.Idle } }
     }
@@ -209,15 +217,16 @@ class MergeViewModelTest {
         slow.addFiles(listOf(pdf(1, "A", "a.pdf"), pdf(1, "B", "b.pdf")))
         await { slow.state.first { !it.importing && it.files.size == 2 } }
         slow.merge()
-        assertTrue(slow.state.value.operation is OperationState.Running)
+        awaitState(slow) { it.operation is OperationState.Running }
         slow.move(0, 1)
         slow.remove(0)
         slow.addFiles(listOf(pdf(1, "C", "c.pdf")))
-        assertEquals(listOf("a.pdf", "b.pdf"), slow.state.value.files.map { it.displayName })
-        assertFalse(slow.state.value.importing)
-        assertTrue(slow.state.value.operation is OperationState.Running)
+        awaitState(slow) {
+            it.files.map { f -> f.displayName } == listOf("a.pdf", "b.pdf") && !it.importing &&
+                it.operation is OperationState.Running
+        }
         gate.scheduler.advanceUntilIdle()
-        assertTrue(slow.state.value.operation is OperationState.Success)
+        awaitState(slow) { it.operation is OperationState.Success }
     }
 
     @Test
@@ -229,13 +238,13 @@ class MergeViewModelTest {
         }
         org.robolectric.Shadows.shadowOf(context.contentResolver).registerInputStream(uri, stream)
         vm.addFiles(listOf(uri))
-        assertTrue(vm.state.value.importing)
+        awaitState { it.importing }
         vm.addFiles(listOf(pdf(1, "A", "a.pdf")))
         vm.merge()
         latch.countDown()
         await { vm.state.first { !it.importing } }
-        assertEquals(listOf("slow.pdf"), names())
-        assertEquals(OperationState.Idle, vm.state.value.operation)
+        assertNames("slow.pdf")
+        awaitState { it.operation == OperationState.Idle }
     }
 
     @Test
@@ -256,9 +265,10 @@ class MergeViewModelTest {
         vm.remove(0)
         vm.addFiles(listOf(pdf(1, "C", "c.pdf")))
         vm.merge()
-        val during = vm.state.value
-        assertEquals(listOf("a.pdf", "b.pdf"), during.files.map { it.displayName })
-        assertTrue(during.operation is OperationState.Success)
+        awaitState {
+            it.files.map { f -> f.displayName } == listOf("a.pdf", "b.pdf") && it.saving &&
+                it.operation is OperationState.Success
+        }
         latch.countDown()
         await { vm.savedEvents.first() }
         await { vm.state.first { !it.saving } }

@@ -157,7 +157,7 @@ class PageSelectViewModelTest {
     fun blankRange_showsNoErrorUntilRunAttempted() {
         val vm = newVm(PageSelectMode.EXTRACT)
         vm.pick(3)
-        assertNull(vm.state.value.rangeError)
+        assertNull(vm.settled { true }.rangeError)
         vm.run()
         assertEquals(RangeErrorReason.EMPTY, vm.settled { it.rangeError != null }.rangeError?.reason)
         vm.setRangeText("2")
@@ -168,7 +168,7 @@ class PageSelectViewModelTest {
     fun run_withoutFile_doesNothing() {
         val vm = newVm(PageSelectMode.REMOVE)
         vm.run()
-        assertEquals(OperationState.Idle, vm.state.value.operation)
+        vm.settled { it.operation == OperationState.Idle }
     }
 
     @Test
@@ -274,6 +274,13 @@ class PageSelectViewModelTest {
         val gate = StandardTestDispatcher()
         val slow = newVm(PageSelectMode.REMOVE, gate)
         slow.pickFile(listOf(pdf(3, "a.pdf")))
+        // The page count is read on the injected (gated) dispatcher, so keep it moving until the file is in.
+        await {
+            while (slow.state.value.file == null) {
+                gate.scheduler.advanceUntilIdle()
+                kotlinx.coroutines.delay(10)
+            }
+        }
         await { slow.state.first { !it.importing && it.file != null } }
         slow.setRangeText("1")
         slow.run()
@@ -281,10 +288,8 @@ class PageSelectViewModelTest {
         slow.setRangeText("2")
         slow.remove()
         slow.pickFile(listOf(pdf(1, "b.pdf")))
-        val during = slow.state.value
-        assertEquals("1", during.rangeText)
-        assertEquals("a.pdf", during.file?.displayName)
-        assertFalse(during.importing)
+        // Never read `state.value` right after an intent: the collector may still be busy on another thread.
+        slow.settled { it.rangeText == "1" && it.file?.displayName == "a.pdf" && !it.importing && it.operation is OperationState.Running }
         gate.scheduler.advanceUntilIdle()
         await { slow.state.first { it.operation is OperationState.Success } }
     }
@@ -294,13 +299,20 @@ class PageSelectViewModelTest {
         val gate = StandardTestDispatcher()
         val slow = newVm(PageSelectMode.EXTRACT, gate)
         slow.pickFile(listOf(pdf(3, "a.pdf")))
+        // The page count is read on the injected (gated) dispatcher, so keep it moving until the file is in.
+        await {
+            while (slow.state.value.file == null) {
+                gate.scheduler.advanceUntilIdle()
+                kotlinx.coroutines.delay(10)
+            }
+        }
         await { slow.state.first { !it.importing && it.file != null } }
         slow.setRangeText("1")
         slow.run()
         await { slow.state.first { it.operation is OperationState.Running } }
         slow.cancel()
         gate.scheduler.advanceUntilIdle()
-        assertFalse(slow.state.value.operation is OperationState.Success)
+        await { slow.state.first { it.operation == OperationState.Idle } }
         assertTrue(File(context.cacheDir, "shared").listFiles().orEmpty().isEmpty())
     }
 }

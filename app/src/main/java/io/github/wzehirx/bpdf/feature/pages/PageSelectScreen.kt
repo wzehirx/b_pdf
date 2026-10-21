@@ -55,9 +55,7 @@ fun PageSelectScreen(
     // Pressing the button with an invalid selection starts no operation, so say what is wrong.
     LaunchedEffect(state.failedAttempts) {
         if (state.failedAttempts > 0) {
-            val message = state.rangeError?.toMessage(resources)
-                ?: if (state.removesAllPages) resources.getString(R.string.pages_remove_all_error) else null
-            if (message != null) announce(message)
+            state.rangeError?.let { announce(it.toMessage(resources)) }
         }
     }
 
@@ -99,6 +97,7 @@ fun PageSelectScreenContent(
     val resources = LocalResources.current
     val removing = state.mode == PageSelectMode.REMOVE
     val needFile = stringResource(R.string.pages_need_file)
+    val removeAllError = stringResource(R.string.pages_remove_all_error)
     val busy = state.importing || state.saving || state.operation is OperationState.Running
     val file = state.file
     ToolScaffold(
@@ -137,22 +136,18 @@ fun PageSelectScreenContent(
                 pageCount = state.pageCount,
                 error = state.rangeError,
                 enabled = !busy,
+                selectionError = if (state.removesAllPages) removeAllError else null,
             )
-            if (state.removesAllPages) {
-                Text(
-                    stringResource(R.string.pages_remove_all_error),
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-                )
-            }
         }
         Button(
             onClick = onRun,
-            enabled = file != null && !busy,
+            enabled = file != null && !state.removesAllPages && !busy,
             modifier = Modifier
                 .heightIn(min = 48.dp)
-                .semantics { if (file == null) stateDescription = needFile },
+                .semantics {
+                    if (file == null) stateDescription = needFile
+                    else if (state.removesAllPages) stateDescription = removeAllError
+                },
         ) {
             Text(stringResource(if (removing) R.string.pages_remove_button else R.string.pages_extract_button))
         }
@@ -160,8 +155,10 @@ fun PageSelectScreenContent(
             state = state.operation,
             successText = { result ->
                 if (removing) {
-                    resources.getQuantityString(
-                        R.plurals.pages_removed_success, result.selectedCount, result.selectedCount, result.remainingCount,
+                    resources.getString(
+                        R.string.pages_removed_summary,
+                        resources.getQuantityString(R.plurals.pages_removed_success, result.selectedCount, result.selectedCount),
+                        resources.getQuantityString(R.plurals.pages_remaining, result.remainingCount, result.remainingCount),
                     )
                 } else {
                     resources.getQuantityString(R.plurals.pages_extracted_success, result.selectedCount, result.selectedCount)

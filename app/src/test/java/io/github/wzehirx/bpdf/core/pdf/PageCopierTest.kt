@@ -120,4 +120,68 @@ class PageCopierTest {
             }
         }
     }
+
+    /** Three pages where page 3 is heavy; page 1 carries the annotations built by [decorate]. */
+    private fun heavyFixture(decorate: (PDDocument) -> Unit): File {
+        val out = File(tmp.root, "heavy-${System.nanoTime()}.pdf")
+        PDDocument().use { doc ->
+            repeat(3) { i ->
+                val page = com.tom_roush.pdfbox.pdmodel.PDPage()
+                doc.addPage(page)
+                com.tom_roush.pdfbox.pdmodel.PDPageContentStream(doc, page).use { cs ->
+                    cs.beginText()
+                    cs.setFont(com.tom_roush.pdfbox.pdmodel.font.PDType1Font.HELVETICA, 12f)
+                    cs.newLineAtOffset(40f, 700f)
+                    repeat(if (i == 2) 4000 else 1) { cs.showText("Heavy content line number $it with filler text"); cs.newLineAtOffset(0f, -1f) }
+                    cs.endText()
+                }
+            }
+            decorate(doc)
+            doc.save(out)
+        }
+        return out
+    }
+
+    private fun assertStaysSmall(input: File) {
+        val part = copy(input, listOf(0))
+        val heavy = copy(input, listOf(2))
+        assertTrue("part is ${part.length()} bytes, page 3 alone is ${heavy.length()}", part.length() < heavy.length() / 2)
+    }
+
+    @Test
+    fun textAnnotationWithPopup_doesNotDragOtherPagesIn() {
+        val input = heavyFixture { doc ->
+            val text = com.tom_roush.pdfbox.pdmodel.interactive.annotation.PDAnnotationText()
+            text.rectangle = PDRectangle(10f, 10f, 30f, 30f)
+            text.contents = "note"
+            val popup = com.tom_roush.pdfbox.pdmodel.interactive.annotation.PDAnnotationPopup()
+            popup.rectangle = PDRectangle(50f, 50f, 150f, 150f)
+            text.popup = popup
+            popup.cosObject.setItem(COSName.PARENT, text.cosObject)
+            text.cosObject.setItem(COSName.P, doc.getPage(0).cosObject)
+            popup.cosObject.setItem(COSName.P, doc.getPage(0).cosObject)
+            doc.getPage(0).annotations = listOf(text, popup)
+        }
+        assertStaysSmall(input)
+        PDDocument.load(copy(input, listOf(0))).use { doc ->
+            // The note itself stays; the popup (and its parent chain) is gone.
+            val annotations = doc.getPage(0).annotations
+            assertEquals(listOf("Text"), annotations.map { it.subtype })
+            assertNull(annotations[0].cosObject.getDictionaryObject(COSName.getPDFName("Popup")))
+        }
+    }
+
+    @Test
+    fun widgetAnnotation_isDroppedAndDoesNotDragFieldChainIn() {
+        val input = heavyFixture { doc ->
+            val widget = com.tom_roush.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget()
+            widget.rectangle = PDRectangle(10f, 10f, 100f, 30f)
+            val field = com.tom_roush.pdfbox.cos.COSDictionary()
+            field.setItem(COSName.getPDFName("Sibling"), doc.getPage(2).cosObject)
+            widget.cosObject.setItem(COSName.PARENT, field)
+            doc.getPage(0).annotations = listOf(widget)
+        }
+        assertStaysSmall(input)
+        PDDocument.load(copy(input, listOf(0))).use { doc -> assertTrue(doc.getPage(0).annotations.isEmpty()) }
+    }
 }

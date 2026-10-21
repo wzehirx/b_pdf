@@ -149,9 +149,14 @@
     <string name="pages_remove_button">Sayfaları sil</string>
     <string name="pages_extract_button">Sayfaları çıkar</string>
     <plurals name="pages_removed_success">
-        <item quantity="one">%1$d sayfa silindi; %2$d sayfa kaldı</item>
-        <item quantity="other">%1$d sayfa silindi; %2$d sayfa kaldı</item>
+        <item quantity="one">%1$d sayfa silindi</item>
+        <item quantity="other">%1$d sayfa silindi</item>
     </plurals>
+    <plurals name="pages_remaining">
+        <item quantity="one">%1$d sayfa kaldı</item>
+        <item quantity="other">%1$d sayfa kaldı</item>
+    </plurals>
+    <string name="pages_removed_summary">%1$s; %2$s</string>
     <plurals name="pages_extracted_success">
         <item quantity="one">%1$d sayfa çıkarıldı</item>
         <item quantity="other">%1$d sayfa çıkarıldı</item>
