@@ -15,6 +15,10 @@ android {
         versionCode = providers.gradleProperty("bpdf.versionCode").get().toInt()
         versionName = providers.gradleProperty("bpdf.versionName").get()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            // Tesseract ships native libraries per ABI; 32-bit and 64-bit ARM phones and x86_64 emulators are enough.
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+        }
     }
 
     signingConfigs {
@@ -87,6 +91,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.pdfbox.android)
+    implementation(libs.tesseract4android)
 
     testImplementation(libs.junit)
     testImplementation(libs.androidx.test.ext.junit)

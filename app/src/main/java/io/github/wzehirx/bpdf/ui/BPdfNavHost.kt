@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import io.github.wzehirx.bpdf.feature.images.ImagesToPdfScreen
 import io.github.wzehirx.bpdf.feature.merge.MergeScreen
 import io.github.wzehirx.bpdf.feature.metadata.MetadataScreen
+import io.github.wzehirx.bpdf.feature.ocr.OcrScreen
 import io.github.wzehirx.bpdf.feature.organize.OrganizeScreen
 import io.github.wzehirx.bpdf.feature.pages.PageSelectMode
 import io.github.wzehirx.bpdf.feature.pages.PageSelectScreen
@@ -71,6 +72,7 @@ fun BPdfNavHost(navController: NavHostController = rememberNavController()) {
                 initialUri = it,
             )
         }
+        toolScreen(Tool.OCR) { OcrScreen(onBack = back, initialUri = it) }
         toolScreen(Tool.PROTECT) { ProtectScreen(onBack = back, initialUri = it) }
         toolScreen(Tool.UNLOCK) { UnlockScreen(onBack = back, initialUri = it) }
         toolScreen(Tool.SIGN) { SignScreen(onBack = back, initialUri = it) }

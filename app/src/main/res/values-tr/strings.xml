@@ -492,4 +492,23 @@
     <string name="sign_date_off">Tarih yok</string>
     <string name="sign_button">İmza ekle</string>
     <string name="sign_success">%1$d. sayfaya görsel imza eklendi. Bu bir dijital imza değildir.</string>
+    <string name="ocr_instructions">Metnini okumak için taranmış bir PDF seçin. Tanıma bu cihazda çalışır ve hiçbir şey yüklenmez. Her sayfa birkaç saniye sürebilir ve sonuçta hatalar olabilir; önemli ayrıntıları kontrol edin.</string>
+    <string name="ocr_need_file">Önce bir PDF seçin</string>
+    <string name="ocr_language_label">Metnin dili</string>
+    <string name="ocr_lang_tur_eng">Türkçe ve İngilizce</string>
+    <string name="ocr_lang_tur">Türkçe</string>
+    <string name="ocr_lang_eng">İngilizce</string>
+    <string name="ocr_button">Metni tanı</string>
+    <string name="ocr_progress">%1$d. sayfa okunuyor, toplam %2$d sayfa</string>
+    <plurals name="ocr_success">
+        <item quantity="one">%1$d sayfadaki metin tanındı.</item>
+        <item quantity="other">%1$d sayfadaki metin tanındı.</item>
+    </plurals>
+    <string name="ocr_empty_message">Metin tanınamadı. Dilin belgeyle uyuştuğunu ve sayfaların net taramalar olduğunu kontrol edin.</string>
+    <string name="ocr_page_empty">Bu sayfada metin tanınmadı.</string>
+    <string name="ocr_save_text">Metin dosyası olarak kaydet</string>
+    <string name="ocr_share_text">Metni paylaş</string>
+    <string name="ocr_save_pdf">Aranabilir PDF kaydet</string>
+    <string name="ocr_pdf_note">Aranabilir PDF özgün sayfalarınızı korur ve tanınan metni görünmez biçimde ekler; böylece arama, seçme ve ekran okuyucular onu kullanabilir.</string>
+    <string name="err_ocr_failed">Metin tanıma başlatılamadı. Boş depolama alanını kontrol edip yeniden deneyin.</string>
 </resources>

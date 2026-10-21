@@ -27,10 +27,11 @@ class OperationStatusPanelTest {
 
     private val calls = mutableListOf<String>()
 
-    private fun show(state: OperationState<*>) {
+    private fun show(state: OperationState<*>, runningLabel: String? = null) {
         rule.setContent {
             OperationStatusPanel(
                 state = state,
+                runningLabel = runningLabel,
                 successText = { "Saved ${it}" },
                 onSave = { calls += "save" },
                 onShare = { calls += "share" },
@@ -52,6 +53,15 @@ class OperationStatusPanelTest {
         rule.onNodeWithText("Working… 50%").assertIsDisplayed()
         rule.onNode(liveRegion(LiveRegionMode.Polite)).assertDoesNotExist()
         rule.onNode(liveRegion(LiveRegionMode.Assertive)).assertDoesNotExist()
+    }
+
+    @Test
+    fun running_withLabel_showsItAsAPoliteLiveRegion_insteadOfThePercentage() {
+        show(OperationState.Running(0.5f), runningLabel = "Recognizing page 2 of 4")
+        rule.onNode(liveRegion(LiveRegionMode.Polite) and hasText("Recognizing page 2 of 4")).assertIsDisplayed()
+        rule.onNodeWithText("Working… 50%").assertDoesNotExist()
+        rule.onNode(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo, ProgressBarRangeInfo(0.5f, 0f..1f)))
+            .assertIsDisplayed()
     }
 
     @Test

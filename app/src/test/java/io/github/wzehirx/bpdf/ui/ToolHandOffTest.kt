@@ -75,6 +75,12 @@ class ToolHandOffTest {
     }
 
     @Test
+    fun ocr_receivesTheFile() {
+        navigate(IncomingIntents.toolRoute(Tool.OCR, pdf("scan.pdf", 2)))
+        waitForText("scan.pdf, 2 pages")
+    }
+
+    @Test
     fun toolOpenedFromHome_startsEmpty() {
         navigate(Tool.ROTATE.route)
         waitForText("Choose PDF")

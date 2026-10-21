@@ -17,6 +17,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.wzehirx.bpdf.R
 import io.github.wzehirx.bpdf.core.a11y.rememberAnnouncer
@@ -39,6 +42,8 @@ fun <T> OperationStatusPanel(
     actionsEnabled: Boolean = true,
     /** True when an input needed a password: the saved copy has none, and the result text says so. */
     unprotectedOutput: Boolean = false,
+    /** What to show (and announce politely whenever it changes) instead of "Working… N%" while running, e.g. the current page. */
+    runningLabel: String? = null,
     successActions: @Composable () -> Unit = { SaveResultActions(onSave = onSave, onShare = onShare, enabled = actionsEnabled) },
 ) {
     val resources = LocalResources.current
@@ -59,11 +64,12 @@ fun <T> OperationStatusPanel(
             is OperationState.Running -> {
                 val p = state.progress?.coerceIn(0f, 1f)
                 Text(
-                    text = if (p == null) {
+                    text = runningLabel ?: if (p == null) {
                         stringResource(R.string.working)
                     } else {
                         stringResource(R.string.working_percent, (p * 100).toInt())
                     },
+                    modifier = if (runningLabel != null) Modifier.semantics { liveRegion = LiveRegionMode.Polite } else Modifier,
                 )
                 if (p == null) {
                     LinearProgressIndicator(Modifier.fillMaxWidth())

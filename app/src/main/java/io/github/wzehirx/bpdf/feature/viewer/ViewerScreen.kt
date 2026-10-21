@@ -114,7 +114,7 @@ import kotlin.math.roundToInt
 private val OPEN_WITH_TOOLS = listOf(
     Tool.SPLIT, Tool.REMOVE_PAGES, Tool.EXTRACT_PAGES, Tool.ORGANIZE, Tool.ROTATE, Tool.PDF_TO_IMAGES,
     Tool.PDF_TO_TEXT, Tool.PROTECT, Tool.UNLOCK, Tool.COMPRESS, Tool.WATERMARK, Tool.PAGE_NUMBERS,
-    Tool.METADATA, Tool.REPAIR, Tool.SIGN,
+    Tool.METADATA, Tool.REPAIR, Tool.SIGN, Tool.OCR,
 )
 
 /** Largest width a page is drawn at, in pixels, however far it is zoomed (keeps bitmaps below ~100 MB). */

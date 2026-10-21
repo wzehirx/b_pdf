@@ -233,7 +233,7 @@ fun PdfToTextScreenContent(
                 },
             )
         if (result != null && !result.allBlank) {
-            result.pages.forEach { PageTextItem(it) }
+            PageTextList(result.pages)
         }
     }
 }
@@ -253,26 +253,6 @@ private fun OcrSuggestion(available: Boolean, onOpenOcr: () -> Unit) {
             Text(stringResource(R.string.text_try_ocr))
         }
         if (!available) Text(unavailable, style = MaterialTheme.typography.bodyMedium)
-    }
-}
-
-/** One page: a heading ("Page N", so heading navigation jumps page to page) and its selectable text. */
-@Composable
-private fun PageTextItem(page: PageText) {
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-            stringResource(R.string.text_page_header, page.pageIndex + 1),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.semantics { heading() },
-        )
-        if (page.isBlank) {
-            Text(stringResource(R.string.text_page_empty), style = MaterialTheme.typography.bodyMedium)
-        } else {
-            // Long text is only built when the page nears the window; the heading above is always there.
-            ComposeWhenNear(minHeight = 48.dp) {
-                SelectionContainer { Text(page.text, style = MaterialTheme.typography.bodyLarge) }
-            }
-        }
     }
 }
 

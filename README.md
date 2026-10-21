@@ -24,6 +24,8 @@ Tools are delivered milestone by milestone. Status: v0.1.0 provides the foundati
 
 **Signing is visual, not cryptographic.** The Sign tool stamps your typed name or a drawn signature onto a page, like a rubber stamp. It is not a cryptographic (digital) signature: it does not prove who signed and does not detect later changes to the file. A typed signature is the default and works fully with a screen reader; drawing is optional.
 
+**Text recognition (OCR) runs on your device.** It reads scanned pages in Turkish, English or both, shows the text page by page, and can save it as a .txt file or as a searchable PDF (your original pages plus an invisible text layer that search and screen readers can use). The language data is bundled, so no download and no network access is needed; the first run copies it to the app's private storage. Recognition takes a few seconds per page, can be cancelled, and can contain mistakes.
+
 ## Accessibility
 
 Accessibility is the definition of done for every screen; see [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
@@ -83,7 +85,10 @@ Apache License 2.0, see [LICENSE](LICENSE).
 Third-party components:
 - [PdfBox-Android](https://github.com/TomRoush/PdfBox-Android) (Apache-2.0)
 - [Noto Sans](https://github.com/notofonts/latin-greek-cyrillic) Regular font (SIL OFL 1.1), bundled for text drawn into PDFs such as watermarks and page numbers; license text in `app/src/main/assets/fonts/NotoSans-OFL.txt`
-- Tesseract / Tesseract4Android (Apache-2.0), planned for OCR
+- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) and its [Tesseract4Android](https://github.com/adaptech-cz/Tesseract4Android) wrapper 4.9.0 (both Apache-2.0), used for OCR. The wrapper is the only dependency fetched from JitPack (`cz.adaptech.tesseract4android`).
+- [tessdata_fast](https://github.com/tesseract-ocr/tessdata_fast) language data (Apache-2.0), bundled in `app/src/main/assets/tessdata/` (license and details in `LICENSE.txt` there), commit `87416418657359cb625c412a48b6e1d6d41c29bd`:
+  - `eng.traineddata`, 4113088 bytes, SHA-256 `7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2`
+  - `tur.traineddata`, 4550554 bytes, SHA-256 `7393381111e1152420fc4092cb44eef4237580d21b92bf30d7d221aad192c6b7`
 
 ---
 
@@ -107,6 +112,8 @@ Araçlar aşama aşama eklenir. Durum: v0.1.0 temeli sağlar; aşağıdaki araç
 | v1.0 | Son rötuşlar, tam erişilebilirlik denetimi | Planlandı |
 
 **İmza görseldir, kriptografik değildir.** İmzala aracı yazdığınız adı ya da çizdiğiniz imzayı bir kaşe gibi sayfaya basar. Kriptografik (dijital) imza değildir: kimin imzaladığını kanıtlamaz ve dosyada sonradan yapılan değişiklikleri algılamaz. Yazılı imza varsayılandır ve ekran okuyucuyla tam çalışır; çizim isteğe bağlıdır.
+
+**Metin tanıma (OCR) cihazınızda çalışır.** Taranmış sayfaları Türkçe, İngilizce veya ikisi birden okur, metni sayfa sayfa gösterir ve .txt dosyası ya da aranabilir PDF olarak (özgün sayfalarınız artı arama ve ekran okuyucuların kullanabildiği görünmez bir metin katmanı) kaydedebilir. Dil verisi uygulamayla birlikte gelir; indirme ve ağ erişimi gerekmez, ilk çalıştırmada uygulamanın özel alanına kopyalanır. Tanıma sayfa başına birkaç saniye sürer, iptal edilebilir ve hata içerebilir.
 
 ### Erişilebilirlik
 
@@ -167,4 +174,7 @@ Apache License 2.0, bkz. [LICENSE](LICENSE).
 Üçüncü taraf bileşenler:
 - [PdfBox-Android](https://github.com/TomRoush/PdfBox-Android) (Apache-2.0)
 - [Noto Sans](https://github.com/notofonts/latin-greek-cyrillic) Regular yazı tipi (SIL OFL 1.1), filigran ve sayfa numarası gibi PDF'e yazılan metinler için uygulamaya dahildir; lisans metni `app/src/main/assets/fonts/NotoSans-OFL.txt` dosyasındadır
-- Tesseract / Tesseract4Android (Apache-2.0), OCR için planlandı
+- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) ve [Tesseract4Android](https://github.com/adaptech-cz/Tesseract4Android) sarmalayıcısı 4.9.0 (ikisi de Apache-2.0), OCR için kullanılır. Sarmalayıcı JitPack'ten alınan tek bağımlılıktır (`cz.adaptech.tesseract4android`).
+- [tessdata_fast](https://github.com/tesseract-ocr/tessdata_fast) dil verisi (Apache-2.0), `app/src/main/assets/tessdata/` içinde uygulamaya dahildir (lisans ve ayrıntılar oradaki `LICENSE.txt` dosyasındadır), commit `87416418657359cb625c412a48b6e1d6d41c29bd`:
+  - `eng.traineddata`, 4113088 bayt, SHA-256 `7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2`
+  - `tur.traineddata`, 4550554 bayt, SHA-256 `7393381111e1152420fc4092cb44eef4237580d21b92bf30d7d221aad192c6b7`

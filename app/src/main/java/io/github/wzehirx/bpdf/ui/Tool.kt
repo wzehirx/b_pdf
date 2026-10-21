@@ -53,7 +53,7 @@ enum class Tool(
     IMAGES_TO_PDF("tool/images_to_pdf", R.string.tool_images_to_pdf_title, R.string.tool_images_to_pdf_desc, Icons.Default.AccountBox, ToolCategory.CONVERT, available = true),
     PDF_TO_IMAGES("tool/pdf_to_images", R.string.tool_pdf_to_images_title, R.string.tool_pdf_to_images_desc, Icons.Default.Share, ToolCategory.CONVERT, available = true),
     PDF_TO_TEXT("tool/pdf_to_text", R.string.tool_pdf_to_text_title, R.string.tool_pdf_to_text_desc, Icons.Default.Edit, ToolCategory.CONVERT, available = true),
-    OCR("tool/ocr", R.string.tool_ocr_title, R.string.tool_ocr_desc, Icons.Default.Search, ToolCategory.CONVERT),
+    OCR("tool/ocr", R.string.tool_ocr_title, R.string.tool_ocr_desc, Icons.Default.Search, ToolCategory.CONVERT, available = true),
     PROTECT("tool/protect", R.string.tool_protect_title, R.string.tool_protect_desc, Icons.Default.Lock, ToolCategory.SECURITY, available = true),
     UNLOCK("tool/unlock", R.string.tool_unlock_title, R.string.tool_unlock_desc, Icons.Default.Lock, ToolCategory.SECURITY, available = true),
     SIGN("tool/sign", R.string.tool_sign_title, R.string.tool_sign_desc, Icons.Default.Create, ToolCategory.SECURITY, available = true),

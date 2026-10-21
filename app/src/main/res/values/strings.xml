@@ -492,4 +492,23 @@
     <string name="sign_date_off">No date</string>
     <string name="sign_button">Add signature</string>
     <string name="sign_success">Added a visual signature to page %1$d. It is not a digital signature.</string>
+    <string name="ocr_instructions">Choose a scanned PDF to read its text. Recognition runs on this device and nothing is uploaded. It can take a few seconds for every page, and the result can contain mistakes, so check important details.</string>
+    <string name="ocr_need_file">Choose a PDF first</string>
+    <string name="ocr_language_label">Language of the text</string>
+    <string name="ocr_lang_tur_eng">Turkish and English</string>
+    <string name="ocr_lang_tur">Turkish</string>
+    <string name="ocr_lang_eng">English</string>
+    <string name="ocr_button">Recognize text</string>
+    <string name="ocr_progress">Recognizing page %1$d of %2$d</string>
+    <plurals name="ocr_success">
+        <item quantity="one">Recognized text on %1$d page.</item>
+        <item quantity="other">Recognized text on %1$d pages.</item>
+    </plurals>
+    <string name="ocr_empty_message">No text could be recognized. Check that the language matches the document and that the pages are clear scans.</string>
+    <string name="ocr_page_empty">No text was recognized on this page.</string>
+    <string name="ocr_save_text">Save as text file</string>
+    <string name="ocr_share_text">Share text</string>
+    <string name="ocr_save_pdf">Save searchable PDF</string>
+    <string name="ocr_pdf_note">A searchable PDF keeps your original pages and adds the recognized text invisibly, so search, selection and screen readers can use it.</string>
+    <string name="err_ocr_failed">Text recognition could not start. Check the available storage and try again.</string>
 </resources>

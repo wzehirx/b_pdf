@@ -42,6 +42,12 @@ class ErrorMessagesTest {
         }
     }
 
+    @Test fun ocrFailure_hasItsOwnMessage_inBothLanguages() {
+        val error = io.github.wzehirx.bpdf.core.ocr.OcrFailed("no data")
+        assertEquals("Text recognition could not start. Check the available storage and try again.", error.toUserMessage(resources(Locale.ENGLISH)))
+        assertEquals("Metin tanıma başlatılamadı. Boş depolama alanını kontrol edip yeniden deneyin.", error.toUserMessage(resources(Locale("tr"))))
+    }
+
     @Test fun turkishMessage_isActuallyTurkish() {
         val tr = PdfError.WrongPassword().toMessage(resources(Locale("tr")))
         assertEquals("Parola yanlış. Yeniden deneyin.", tr)
