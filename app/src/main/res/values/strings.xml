@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">b PDF</string>
+    <string name="action_move_up">Move up</string>
+    <string name="action_move_down">Move down</string>
+    <string name="action_move_top">Move to top</string>
+    <string name="action_move_bottom">Move to bottom</string>
+    <string name="action_remove">Remove</string>
 </resources>

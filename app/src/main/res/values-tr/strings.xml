@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">b PDF</string>
+    <string name="action_move_up">Yukarı taşı</string>
+    <string name="action_move_down">Aşağı taşı</string>
+    <string name="action_move_top">En üste taşı</string>
+    <string name="action_move_bottom">En alta taşı</string>
+    <string name="action_remove">Kaldır</string>
 </resources>
