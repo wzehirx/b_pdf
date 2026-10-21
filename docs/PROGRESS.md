@@ -24,8 +24,8 @@ Budget mode (user-approved): batch remaining tasks per milestone (11+12, 13+14, 
 | 12 PDF → Images → v0.3.0 | done | e6e3d52..72322bb |
 | 13 Protect, Unlock, password flow | done | 2c91e2b..517d4c9 |
 | 14 Metadata, Repair → v0.4.0 | done | 2c91e2b..517d4c9 |
-| 15 Compress | next | |
-| 16 Watermark | todo | |
+| 15 Compress | done | 51255f6..c8f6e78 |
+| 16 Watermark | next | |
 | 17 Page numbers → v0.5.0 | todo | |
 | 18 PDF → Text | todo | |
 | 19 Viewer, open-with → v0.6.0 | todo | |
