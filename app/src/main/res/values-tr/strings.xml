@@ -457,4 +457,10 @@
     <string name="home_recent_remove_action">Son kullanılanlardan kaldır</string>
     <string name="home_recent_remove">%1$s dosyasını son kullanılanlardan kaldır</string>
     <string name="home_recent_removed">%1$s son kullanılanlardan kaldırıldı</string>
+    <plurals name="viewer_opened">
+        <item quantity="one">%1$s açıldı, %2$d sayfa</item>
+        <item quantity="other">%1$s açıldı, %2$d sayfa</item>
+    </plurals>
+    <string name="viewer_zoom_min">En küçük yakınlaştırma</string>
+    <string name="viewer_zoom_max">En büyük yakınlaştırma</string>
 </resources>

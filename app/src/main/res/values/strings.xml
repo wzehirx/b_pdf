@@ -457,4 +457,10 @@
     <string name="home_recent_remove_action">Remove from recent files</string>
     <string name="home_recent_remove">Remove %1$s from recent files</string>
     <string name="home_recent_removed">%1$s removed from recent files</string>
+    <plurals name="viewer_opened">
+        <item quantity="one">Opened %1$s, %2$d page</item>
+        <item quantity="other">Opened %1$s, %2$d pages</item>
+    </plurals>
+    <string name="viewer_zoom_min">Minimum zoom</string>
+    <string name="viewer_zoom_max">Maximum zoom</string>
 </resources>

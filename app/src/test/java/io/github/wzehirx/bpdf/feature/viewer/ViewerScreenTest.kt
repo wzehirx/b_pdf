@@ -10,7 +10,12 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotFocused
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
@@ -51,6 +56,27 @@ class ViewerScreenTest {
     private fun loaded(pages: Int = 5, page: Int = 0, mode: ViewerMode = ViewerMode.PAGE, zoom: Float = 1f) = ViewerUiState(
         file = ImportedFile(File("book.pdf"), "book.pdf", 1000), pageCount = pages, currentPage = page, mode = mode, zoom = zoom,
     )
+
+    /** Like the real screen: moves and mode switches update the state the content is drawn from. */
+    private fun showStateful(initial: ViewerUiState, text: suspend (Int) -> String? = { "text of page ${it + 1}" }) =
+        rule.setContent {
+            var state by androidx.compose.runtime.remember { mutableStateOf(initial) }
+            ViewerScreenContent(
+                state = state,
+                onBack = {},
+                onPickFile = {},
+                onGoTo = { gotos += it; state = state.copy(currentPage = it) },
+                onSetMode = { m, p -> modes += m to p; state = state.copy(mode = m, currentPage = p ?: state.currentPage) },
+                onZoomIn = {},
+                onZoomOut = {},
+                onSetZoom = {},
+                pageImage = { _, w -> Bitmap.createBitmap(w.coerceAtLeast(1), w.coerceAtLeast(1) * 2, Bitmap.Config.ARGB_8888) },
+                pageText = text,
+                openWithTools = emptyList(),
+                onOpenWithTool = {},
+                announce = { spoken += it },
+            )
+        }
 
     private fun show(
         state: ViewerUiState,
@@ -156,19 +182,139 @@ class ViewerScreenTest {
     }
 
     @Test
-    fun pageChange_isAnnouncedOnce_notOnFirstShow_andNotOnModeSwitch() {
+    fun opening_announcesNameAndPageCount_once_andFocusesTheFirstPage() {
+        showStateful(loaded(page = 0))
+        rule.waitForIdle()
+        assertEquals(listOf("Opened book.pdf, 5 pages"), spoken)
+        rule.onNodeWithContentDescription("Page 1 of 5").assertIsFocused()
+    }
+
+    @Test
+    fun opening_aOnePageDocument_usesTheSingularForm() {
+        showStateful(loaded(pages = 1))
+        rule.waitForIdle()
+        assertEquals(listOf("Opened book.pdf, 1 page"), spoken)
+    }
+
+    @Test
+    fun pageMode_nextAction_announcesOnce_andMovesFocusToTheNewPage() {
+        showStateful(loaded(page = 2))
+        rule.waitForIdle()
+        spoken.clear()
+        actionsOf("Page 3 of 5").run("Next page")
+        rule.waitForIdle()
+        assertEquals(listOf("Page 4 of 5"), spoken)
+        rule.onNodeWithContentDescription("Page 4 of 5").assertIsFocused()
+    }
+
+    @Test
+    fun pageMode_goToDialog_announcesOnce_andFocusesTheDestination() {
+        showStateful(loaded(page = 0))
+        rule.waitForIdle()
+        spoken.clear()
+        actionsOf("Page 1 of 5").run("Go to page…")
+        rule.onNode(hasSetTextAction()).performTextReplacement("4")
+        rule.onNodeWithText("Go").performClick()
+        rule.waitForIdle()
+        assertEquals(listOf("Page 4 of 5"), spoken)
+        rule.onNodeWithContentDescription("Page 4 of 5").assertIsFocused()
+    }
+
+    @Test
+    fun pageMode_nextButton_announcesOnce_andKeepsFocusOnTheButton() {
+        showStateful(loaded(page = 1))
+        rule.waitForIdle()
+        spoken.clear()
+        rule.onNode(hasText("Next page") and hasClickAction()).performClick()
+        rule.waitForIdle()
+        assertEquals(listOf("Page 3 of 5"), spoken)
+        rule.onNodeWithContentDescription("Page 3 of 5").assertIsNotFocused()
+    }
+
+    @Test
+    @Config(qualifiers = "w400dp-h2000dp")
+    fun textMode_nextAction_announcesOnce_andFocusesTheNextHeading() {
+        showStateful(loaded(pages = 4, mode = ViewerMode.TEXT))
+        rule.waitForIdle()
+        spoken.clear()
+        val actions = rule.onNode(isHeading() and hasText("Page 1")).fetchSemanticsNode().config
+            .getOrNull(SemanticsActions.CustomActions).orEmpty()
+        actions.run("Next page")
+        rule.waitForIdle()
+        assertEquals(listOf("Page 2 of 4"), spoken)
+        rule.onNode(isHeading() and hasText("Page 2")).assertIsFocused()
+    }
+
+    @Test
+    fun textMode_goToDialog_announcesAndFocusesTheHeading() {
+        showStateful(loaded(pages = 4, mode = ViewerMode.TEXT))
+        rule.waitForIdle()
+        spoken.clear()
+        rule.onNode(hasText("Go to page…") and hasClickAction()).performClick()
+        rule.onNode(hasSetTextAction()).performTextReplacement("3")
+        rule.onNodeWithText("Go").performClick()
+        rule.waitForIdle()
+        assertEquals(listOf("Page 3 of 4"), spoken)
+        rule.onNode(isHeading() and hasText("Page 3")).assertIsFocused()
+    }
+
+    @Test
+    fun swipingToAnotherPage_isAnnouncedOnce() {
+        showStateful(loaded(page = 0))
+        rule.waitForIdle()
+        spoken.clear()
+        rule.onNodeWithContentDescription("Page 1 of 5").performTouchInput { swipeLeft() }
+        rule.waitForIdle()
+        assertEquals(listOf("Page 2 of 5"), spoken)
+    }
+
+    @Test
+    fun externalStateChange_isNotAnnounced() {
         var state by mutableStateOf(loaded(page = 0))
         rule.setContent { Content(state) }
         rule.waitForIdle()
-        assertTrue(spoken.toString(), spoken.isEmpty())
+        spoken.clear()
         rule.runOnUiThread { state = state.copy(currentPage = 2) }
         rule.waitForIdle()
-        assertEquals(listOf("Page 3 of 5"), spoken)
-        rule.runOnUiThread { state = state.copy(mode = ViewerMode.TEXT) }
+        assertTrue(spoken.toString(), spoken.isEmpty())
+    }
+
+    @Test
+    fun textMode_all30HeadingsExistWithoutScrolling_andFarTextIsNotBuilt() {
+        val asked = mutableListOf<Int>()
+        show(loaded(pages = 30, mode = ViewerMode.TEXT), text = { asked += it; "body ${it + 1}" })
+        rule.onAllNodes(isHeading() and hasText("Page ", substring = true)).assertCountEquals(30)
+        rule.onNode(isHeading() and hasText("Page 30")).assertExists()
         rule.waitForIdle()
-        rule.runOnUiThread { state = state.copy(mode = ViewerMode.PAGE) }
-        rule.waitForIdle()
-        assertEquals(listOf("Page 3 of 5"), spoken)
+        assertTrue("asked for ${asked.size} pages", asked.size < 30 && asked.isNotEmpty())
+        rule.onNodeWithText("body 30").assertDoesNotExist()
+    }
+
+    @Test
+    @Config(fontScale = 2.0f)
+    fun largeFont_pageModeStillShowsThePage_andControlsScroll() {
+        show(loaded())
+        rule.onNodeWithContentDescription("Page 1 of 5").assertIsDisplayed()
+        val page = rule.onNodeWithContentDescription("Page 1 of 5").fetchSemanticsNode().boundsInRoot
+        val root = rule.onRoot().fetchSemanticsNode().boundsInRoot
+        assertTrue("page ${page.height} of ${root.height}", page.height >= root.height * 0.3f)
+    }
+
+    @Test
+    @Config(qualifiers = "w640dp-h320dp")
+    fun landscape_pageModeStillShowsThePage() {
+        show(loaded())
+        rule.onNodeWithContentDescription("Page 1 of 5").assertIsDisplayed()
+        val page = rule.onNodeWithContentDescription("Page 1 of 5").fetchSemanticsNode().boundsInRoot
+        assertTrue("page height ${page.height}", page.height > 100f)
+    }
+
+    @Test
+    @Config(fontScale = 2.0f, qualifiers = "w400dp-h2000dp")
+    fun largeFont_textMode_controlsAreInTheScrollingContent() {
+        show(loaded(pages = 3, mode = ViewerMode.TEXT))
+        rule.onNode(isHeading() and hasText("Page 1")).assertExists()
+        rule.onNode(hasText("Next page") and hasClickAction()).assertExists()
     }
 
     @Test
@@ -184,9 +330,10 @@ class ViewerScreenTest {
     fun zoomButtons_callBack_announceTheNewZoom_andRespectLimits() {
         show(loaded(zoom = 1f))
         rule.onNode(hasText("Zoom out") and hasClickAction()).assertIsNotEnabled()
+        assertEquals("Minimum zoom", stateDescriptionOf("Zoom out"))
         rule.onNode(hasText("Zoom in") and hasClickAction()).performClick()
         assertEquals(listOf("zoomIn"), calls)
-        assertEquals(listOf("Zoom 150%"), spoken)
+        assertEquals(listOf("Zoom 150%"), spoken.drop(1))
         rule.onNodeWithText("Zoom 100%").assertExists()
     }
 
@@ -194,9 +341,10 @@ class ViewerScreenTest {
     fun maxZoom_disablesZoomIn() {
         show(loaded(zoom = 4f))
         rule.onNode(hasText("Zoom in") and hasClickAction()).assertIsNotEnabled()
+        assertEquals("Maximum zoom", stateDescriptionOf("Zoom in"))
         rule.onNode(hasText("Zoom out") and hasClickAction()).performClick()
         assertEquals(listOf("zoomOut"), calls)
-        assertEquals(listOf("Zoom 350%"), spoken)
+        assertEquals(listOf("Zoom 350%"), spoken.drop(1))
     }
 
     @Test

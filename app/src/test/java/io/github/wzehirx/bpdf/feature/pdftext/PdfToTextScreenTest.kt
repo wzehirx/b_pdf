@@ -82,6 +82,16 @@ class PdfToTextScreenTest {
     }
 
     @Test
+    @Config(qualifiers = "w320dp-h470dp")
+    fun longResult_keepsEveryHeadingComposed_butBuildsOnlyNearbyText() {
+        val pages = (1..30).map { "body $it" }.toTypedArray()
+        show(loaded.copy(pageCount = 30, operation = OperationState.Success(result(*pages))))
+        rule.onAllNodes(isHeading() and hasText("Page ", substring = true)).assertCountEquals(30)
+        rule.onNode(isHeading() and hasText("Page 30")).assertExists()
+        rule.onNodeWithText("body 30").assertDoesNotExist()
+    }
+
+    @Test
     fun blankPageInMixedResult_saysSoUnderItsHeading_andSummaryCountsIt() {
         show(loaded.copy(operation = OperationState.Success(result("alpha", "", "gamma"))))
         rule.onNodeWithText("Text extracted from 3 pages. 1 page has no text.").assertExists()

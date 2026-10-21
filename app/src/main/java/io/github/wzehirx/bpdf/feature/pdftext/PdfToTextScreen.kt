@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -39,8 +38,9 @@ import io.github.wzehirx.bpdf.core.pdf.toPlainText
 import io.github.wzehirx.bpdf.core.work.OperationState
 import io.github.wzehirx.bpdf.ui.Tool
 import io.github.wzehirx.bpdf.ui.components.ChoiceRow
+import io.github.wzehirx.bpdf.ui.components.ComposeWhenNear
 import io.github.wzehirx.bpdf.ui.components.HandOffEffect
-import io.github.wzehirx.bpdf.ui.components.LazyToolScaffold
+import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PageChooser
 import io.github.wzehirx.bpdf.ui.components.PageRangeField
@@ -141,37 +141,30 @@ fun PdfToTextScreenContent(
     val file = state.file
     val result = (state.operation as? OperationState.Success)?.value
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
-    LazyToolScaffold(title = stringResource(R.string.tool_pdf_to_text_title), onBack = onBack) {
-        item { Text(stringResource(R.string.text_instructions)) }
-        item {
-            PickFilesButton(
+    ToolScaffold(title = stringResource(R.string.tool_pdf_to_text_title), onBack = onBack) {
+        Text(stringResource(R.string.text_instructions))
+        PickFilesButton(
                 label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
                 mimeTypes = arrayOf("application/pdf"),
                 multiple = false,
                 onPicked = onPickFile,
                 enabled = !busy,
             )
-        }
         if (state.importing) {
-            item {
-                Text(
+            Text(
                     stringResource(R.string.single_file_importing),
                     modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 )
-            }
         }
         if (file != null) {
-            item {
-                SelectedPdfCard(
+            SelectedPdfCard(
                     summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
                     removeActionLabel = stringResource(R.string.single_file_remove_action),
                     removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
                     enabled = !busy,
                     onRemove = onRemoveFile,
                 )
-            }
-            item {
-                ChoiceRow(
+            ChoiceRow(
                     label = stringResource(R.string.text_scope_label),
                     options = TextScope.entries,
                     selected = state.scope,
@@ -179,10 +172,8 @@ fun PdfToTextScreenContent(
                     onSelect = onScopeChange,
                     enabled = !busy,
                 )
-            }
             if (state.scope == TextScope.SELECTED) {
-                item {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         PageRangeField(
                             value = state.rangeText,
                             onValueChange = onRangeChange,
@@ -198,11 +189,9 @@ fun PdfToTextScreenContent(
                             enabled = !busy,
                         )
                     }
-                }
             }
         }
-        item {
-            Button(
+        Button(
                 onClick = onExtract,
                 enabled = file != null && !busy,
                 modifier = Modifier
@@ -211,9 +200,7 @@ fun PdfToTextScreenContent(
             ) {
                 Text(stringResource(R.string.text_button))
             }
-        }
-        item {
-            OperationStatusPanel(
+        OperationStatusPanel(
                 state = state.operation,
                 successText = { r ->
                     if (r.allBlank) {
@@ -245,9 +232,8 @@ fun PdfToTextScreenContent(
                     }
                 },
             )
-        }
         if (result != null && !result.allBlank) {
-            items(result.pages, key = { it.pageIndex }) { PageTextItem(it) }
+            result.pages.forEach { PageTextItem(it) }
         }
     }
 }
@@ -282,7 +268,10 @@ private fun PageTextItem(page: PageText) {
         if (page.isBlank) {
             Text(stringResource(R.string.text_page_empty), style = MaterialTheme.typography.bodyMedium)
         } else {
-            SelectionContainer { Text(page.text, style = MaterialTheme.typography.bodyLarge) }
+            // Long text is only built when the page nears the window; the heading above is always there.
+            ComposeWhenNear(minHeight = 48.dp) {
+                SelectionContainer { Text(page.text, style = MaterialTheme.typography.bodyLarge) }
+            }
         }
     }
 }

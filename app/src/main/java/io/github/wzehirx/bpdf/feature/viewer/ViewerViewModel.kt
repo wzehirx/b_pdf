@@ -148,6 +148,7 @@ class ViewerViewModel(
                     it.copy(file = imported, pageCount = pages, mode = ViewerMode.PAGE, currentPage = 0, zoom = MIN_ZOOM)
                 }
                 old?.let {
+                    closeReader()
                     loader.release(it.file)
                     passwordGate.forget(it.file)
                     it.file.delete()
@@ -227,6 +228,18 @@ class ViewerViewModel(
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Int, String>?) = size > TEXT_CACHE_PAGES
     }
 
+    /** Closes the open text reader (and forgets its pages) on the IO dispatcher, behind any extraction in progress. */
+    private fun closeReader() {
+        viewModelScope.launch(ioDispatcher) {
+            textLock.withLock {
+                runCatching { reader?.close() }
+                reader = null
+                readerFile = null
+                textCache.clear()
+            }
+        }
+    }
+
     /** Text of page [pageIndex] (empty for a page without text), or null when it cannot be read. */
     suspend fun pageText(pageIndex: Int): String? {
         val file = local.value.file ?: return null
@@ -261,7 +274,9 @@ class ViewerViewModel(
     override fun onCleared() {
         passwordGate.clear()
         loader.close()
-        runCatching { reader?.close() }
+        // Not on the main thread: closing waits for an extraction that may still be running.
+        val open = reader
+        if (open != null) Thread { runCatching { open.close() } }.start()
         local.value.file?.file?.delete()
     }
 

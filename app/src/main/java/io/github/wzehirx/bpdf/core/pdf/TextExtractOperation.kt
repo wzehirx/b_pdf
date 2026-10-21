@@ -31,7 +31,12 @@ class PdfTextReader(file: File, password: String? = null) : Closeable {
     private val doc: PDDocument = PdfLoader.load(file, password)
     private var closed = false
 
-    val pageCount: Int = doc.numberOfPages
+    val pageCount: Int = try {
+        doc.numberOfPages
+    } catch (t: Throwable) {
+        runCatching { doc.close() }
+        throw t
+    }
 
     /** Text of page [pageIndex] (0-based). Unreadable pages map to [PdfError.Corrupt]. */
     @Synchronized

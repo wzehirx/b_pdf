@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -16,16 +17,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -53,7 +52,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -68,6 +69,12 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.semantics.stateDescription
+import io.github.wzehirx.bpdf.ui.components.ComposeWhenNear
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -92,6 +99,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.wzehirx.bpdf.R
 import io.github.wzehirx.bpdf.core.a11y.rememberAnnouncer
+import io.github.wzehirx.bpdf.core.a11y.requestFocusWhenReady
 import io.github.wzehirx.bpdf.feature.organize.parsePosition
 import io.github.wzehirx.bpdf.ui.Tool
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
@@ -171,30 +179,61 @@ fun ViewerScreenContent(
     val scope = rememberCoroutineScope()
     val file = state.file
     val count = state.pageCount
+    val fileKey = file?.file?.path
     var goToOpen by rememberSaveable { mutableStateOf(false) }
     var textShown by rememberSaveable { mutableStateOf(false) }
-    // One list state per mode switch, starting at the page that was shown.
-    val textListState = key(state.mode, file?.file?.path) { rememberLazyListState(initialFirstVisibleItemIndex = state.currentPage) }
-    // The page being looked at: the shown one, or (text mode) the first one in view.
-    val viewedPage by remember(state.mode, state.currentPage, textListState) {
-        derivedStateOf { if (state.mode == ViewerMode.TEXT) textListState.firstVisibleItemIndex else state.currentPage }
-    }
-
-    // Page changes are spoken here and only here: the page node's label is not a live region, so
-    // moving with a button or action (or a swipe) says "Page N of M" exactly once.
-    val announced = remember(file?.file?.path) { mutableIntStateOf(state.currentPage) }
-    LaunchedEffect(state.currentPage, state.mode, file?.file?.path) {
-        if (file != null && state.mode == ViewerMode.PAGE && announced.intValue != state.currentPage) {
-            announce(resources.getString(R.string.viewer_page_label, state.currentPage + 1, count))
+    // The page whose node should take accessibility focus (after an action or the Go to dialog, which
+    // would otherwise drop TalkBack focus when the old page node goes away).
+    var focusPage by remember { mutableStateOf<Int?>(null) }
+    // Text mode: every heading is composed; this is where each page starts in the scrolling column.
+    val textScroll = key(state.mode, fileKey) { rememberScrollState() }
+    val headingTops = remember(fileKey, count) { mutableStateListOf<Int>().apply { repeat(count) { add(0) } } }
+    // The page being looked at: the shown one, or (text mode) the last heading at or above the top of the view.
+    val viewedPage by remember(state.mode, state.currentPage, textScroll, headingTops) {
+        derivedStateOf {
+            if (state.mode == ViewerMode.TEXT) {
+                val y = textScroll.value + 8
+                var page = 0
+                for (i in headingTops.indices) if (headingTops[i] <= y) page = i else break
+                page
+            } else {
+                state.currentPage
+            }
         }
-        announced.intValue = state.currentPage
+    }
+    var anchorJob by remember { mutableStateOf<Job?>(null) }
+    // Scrolls text mode to a page and keeps it there while pages above load and change height.
+    val scrollToHeading: (Int) -> Unit = { page ->
+        anchorJob?.cancel()
+        anchorJob = scope.launch {
+            withTimeoutOrNull(800) { snapshotFlow { headingTops.getOrElse(page) { 0 } }.collect { textScroll.scrollTo(it) } }
+        }
+    }
+    LaunchedEffect(state.mode, fileKey) {
+        if (state.mode == ViewerMode.TEXT && state.currentPage > 0) scrollToHeading(state.currentPage)
     }
 
-    val goTo: (Int) -> Unit = { target ->
+    // Opening a document: say what opened and put focus on its first page.
+    var openedFor by rememberSaveable { mutableStateOf<String?>(null) }
+    LaunchedEffect(fileKey) {
+        if (file != null && openedFor != fileKey) {
+            openedFor = fileKey
+            announce(resources.getQuantityString(R.plurals.viewer_opened, count, file.displayName, count))
+            focusPage = state.currentPage
+        }
+    }
+
+    // Moves are spoken here and only here: the page label is not a live region, so every move
+    // (button, action, dialog or swipe) says "Page N of M" exactly once. Moves from an action or
+    // the dialog also take focus to the destination; a button keeps focus on itself.
+    val label: (Int) -> String = { resources.getString(R.string.viewer_page_label, it + 1, count) }
+    val move: (Int, Boolean) -> Unit = { target, takeFocus ->
         if (count > 0) {
             val page = target.coerceIn(0, count - 1)
             onGoTo(page)
-            if (state.mode == ViewerMode.TEXT) scope.launch { textListState.scrollToItem(page) }
+            if (state.mode == ViewerMode.TEXT) scrollToHeading(page)
+            announce(label(page))
+            if (takeFocus) focusPage = page
         }
     }
     val switchMode: () -> Unit = {
@@ -202,8 +241,8 @@ fun ViewerScreenContent(
     }
     val pageActions: (Int) -> List<CustomAccessibilityAction> = { index ->
         buildList {
-            if (index < count - 1) add(CustomAccessibilityAction(resources.getString(R.string.viewer_next)) { goTo(index + 1); true })
-            if (index > 0) add(CustomAccessibilityAction(resources.getString(R.string.viewer_previous)) { goTo(index - 1); true })
+            if (index < count - 1) add(CustomAccessibilityAction(resources.getString(R.string.viewer_next)) { move(index + 1, true); true })
+            if (index > 0) add(CustomAccessibilityAction(resources.getString(R.string.viewer_previous)) { move(index - 1, true); true })
             add(CustomAccessibilityAction(resources.getString(R.string.viewer_go_to)) { goToOpen = true; true })
             add(
                 CustomAccessibilityAction(
@@ -218,7 +257,7 @@ fun ViewerScreenContent(
         GoToPageDialog(
             count = count,
             current = viewedPage + 1,
-            onConfirm = { goToOpen = false; goTo(it - 1) },
+            onConfirm = { goToOpen = false; move(it - 1, true) },
             onDismiss = { goToOpen = false },
         )
     }
@@ -255,45 +294,17 @@ fun ViewerScreenContent(
             )
         },
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
-            val errorFocus = remember { FocusRequester() }
-            val error = state.error
-            if (error != null) {
-                LaunchedEffect(error) { errorFocus.requestFocus() }
-                val message = error.toUserMessage(resources) +
-                    if (state.removedFromRecents) " " + stringResource(R.string.viewer_removed_from_recents) else ""
-                Text(
-                    message,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.fillMaxWidth().padding(16.dp).focusRequester(errorFocus).focusable(),
-                )
-            }
-            if (state.importing) {
-                Text(
-                    stringResource(R.string.single_file_importing),
-                    modifier = Modifier.padding(16.dp).semantics { liveRegion = LiveRegionMode.Polite },
-                )
-            }
-            if (file == null) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(stringResource(R.string.viewer_instructions))
-                    PickFilesButton(
-                        label = stringResource(R.string.single_file_choose),
-                        mimeTypes = arrayOf("application/pdf"),
-                        multiple = false,
-                        onPicked = onPickFile,
-                        enabled = !state.importing,
-                    )
-                }
-            } else {
+        BoxWithConstraints(Modifier.fillMaxSize().padding(padding)) {
+            // Large fonts or a short (landscape) window: the controls scroll inside this share, so the page keeps the rest.
+            val controlsMaxHeight = maxHeight * 0.45f
+            val controls: @Composable () -> Unit = {
                 Controls(
                     viewedPage = viewedPage,
                     count = count,
                     mode = state.mode,
                     zoom = state.zoom,
-                    onPrevious = { goTo(viewedPage - 1) },
-                    onNext = { goTo(viewedPage + 1) },
+                    onPrevious = { move(viewedPage - 1, false) },
+                    onNext = { move(viewedPage + 1, false) },
                     onGoToDialog = { goToOpen = true },
                     onSwitchMode = switchMode,
                     onZoomIn = {
@@ -305,7 +316,40 @@ fun ViewerScreenContent(
                         announce(resources.getString(R.string.viewer_zoom_value, (ViewerViewModel.zoomOutTarget(state.zoom) * 100).roundToInt()))
                     },
                 )
-                if (state.mode == ViewerMode.PAGE) {
+            }
+            Column(Modifier.fillMaxSize()) {
+                val errorFocus = remember { FocusRequester() }
+                val error = state.error
+                if (error != null) {
+                    LaunchedEffect(error) { errorFocus.requestFocus() }
+                    val message = error.toUserMessage(resources) +
+                        if (state.removedFromRecents) " " + stringResource(R.string.viewer_removed_from_recents) else ""
+                    Text(
+                        message,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.fillMaxWidth().padding(16.dp).focusRequester(errorFocus).focusable(),
+                    )
+                }
+                if (state.importing) {
+                    Text(
+                        stringResource(R.string.single_file_importing),
+                        modifier = Modifier.padding(16.dp).semantics { liveRegion = LiveRegionMode.Polite },
+                    )
+                }
+                if (file == null) {
+                    Column(Modifier.padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text(stringResource(R.string.viewer_instructions))
+                        PickFilesButton(
+                            label = stringResource(R.string.single_file_choose),
+                            mimeTypes = arrayOf("application/pdf"),
+                            multiple = false,
+                            onPicked = onPickFile,
+                            enabled = !state.importing,
+                        )
+                    }
+                } else if (state.mode == ViewerMode.PAGE) {
+                    Box(Modifier.heightIn(max = controlsMaxHeight).verticalScroll(rememberScrollState())) { controls() }
                     PagePager(
                         state = state,
                         textShown = textShown,
@@ -313,16 +357,22 @@ fun ViewerScreenContent(
                         pageImage = pageImage,
                         pageText = pageText,
                         pageActions = pageActions,
-                        onGoTo = onGoTo,
+                        onSwipedTo = { page -> onGoTo(page); announce(label(page)) },
                         onSetZoom = onSetZoom,
+                        focusPage = focusPage,
+                        onFocusHandled = { focusPage = null },
                         modifier = Modifier.weight(1f).fillMaxWidth(),
                     )
                 } else {
                     TextPages(
                         count = count,
-                        listState = textListState,
+                        scrollState = textScroll,
+                        headingTops = headingTops,
                         pageText = pageText,
                         pageActions = pageActions,
+                        focusPage = focusPage,
+                        onFocusHandled = { focusPage = null },
+                        controls = controls,
                         modifier = Modifier.weight(1f).fillMaxWidth(),
                     )
                 }
@@ -381,6 +431,8 @@ private fun Controls(
     onZoomIn: () -> Unit,
     onZoomOut: () -> Unit,
 ) {
+    val minZoom = stringResource(R.string.viewer_zoom_min)
+    val maxZoom = stringResource(R.string.viewer_zoom_max)
     Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         // Plain text, not a live region: page changes are announced once by the screen.
         Text(
@@ -411,12 +463,14 @@ private fun Controls(
                 OutlinedButton(
                     onClick = onZoomOut,
                     enabled = zoom > ViewerViewModel.MIN_ZOOM,
-                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                    modifier = Modifier.weight(1f).heightIn(min = 48.dp)
+                        .semantics { if (zoom <= ViewerViewModel.MIN_ZOOM) stateDescription = minZoom },
                 ) { Text(stringResource(R.string.viewer_zoom_out), textAlign = TextAlign.Center) }
                 OutlinedButton(
                     onClick = onZoomIn,
                     enabled = zoom < ViewerViewModel.MAX_ZOOM,
-                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                    modifier = Modifier.weight(1f).heightIn(min = 48.dp)
+                        .semantics { if (zoom >= ViewerViewModel.MAX_ZOOM) stateDescription = maxZoom },
                 ) { Text(stringResource(R.string.viewer_zoom_in), textAlign = TextAlign.Center) }
             }
             Text(
@@ -436,19 +490,21 @@ private fun PagePager(
     pageImage: suspend (Int, Int) -> Bitmap?,
     pageText: suspend (Int) -> String?,
     pageActions: (Int) -> List<CustomAccessibilityAction>,
-    onGoTo: (Int) -> Unit,
+    onSwipedTo: (Int) -> Unit,
     onSetZoom: (Float) -> Unit,
+    focusPage: Int?,
+    onFocusHandled: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pagerState = key(state.file?.file?.path) { rememberPagerState(initialPage = state.currentPage) { state.pageCount } }
-    val currentOnGoTo by rememberUpdatedState(onGoTo)
+    val currentOnSwiped by rememberUpdatedState(onSwipedTo)
     val shownPage by rememberUpdatedState(state.currentPage)
     // The ViewModel decides the page; the pager follows it, and reports swipes back.
     LaunchedEffect(state.currentPage, pagerState) {
         if (pagerState.currentPage != state.currentPage) pagerState.scrollToPage(state.currentPage)
     }
     LaunchedEffect(pagerState) {
-        androidx.compose.runtime.snapshotFlow { pagerState.settledPage }.collect { if (it != shownPage) currentOnGoTo(it) }
+        snapshotFlow { pagerState.settledPage }.collect { if (it != shownPage) currentOnSwiped(it) }
     }
     HorizontalPager(
         state = pagerState,
@@ -467,6 +523,8 @@ private fun PagePager(
             pageText = pageText,
             actions = pageActions(index),
             onSetZoom = onSetZoom,
+            takeFocus = focusPage == index,
+            onFocusHandled = onFocusHandled,
         )
     }
 }
@@ -482,8 +540,17 @@ private fun ViewerPage(
     pageText: suspend (Int) -> String?,
     actions: List<CustomAccessibilityAction>,
     onSetZoom: (Float) -> Unit,
+    takeFocus: Boolean,
+    onFocusHandled: () -> Unit,
 ) {
     val label = stringResource(R.string.viewer_page_label, index + 1, count)
+    val pageFocus = remember { FocusRequester() }
+    LaunchedEffect(takeFocus) {
+        if (takeFocus) {
+            pageFocus.requestFocusWhenReady()
+            onFocusHandled()
+        }
+    }
     val currentZoom by rememberUpdatedState(zoom)
     BoxWithConstraints(
         Modifier.fillMaxSize().pinchToZoom { factor -> onSetZoom(currentZoom * factor) },
@@ -509,6 +576,8 @@ private fun ViewerPage(
                 Box(
                     Modifier
                         .width(pageWidth)
+                        .focusRequester(pageFocus)
+                        .focusable()
                         .semantics {
                             contentDescription = label
                             role = Role.Image
@@ -555,34 +624,57 @@ private fun Modifier.pinchToZoom(onZoom: (Float) -> Unit): Modifier = pointerInp
     }
 }
 
-/** Every page as a heading ("Page N") with its text, so heading navigation jumps from page to page. */
+/**
+ * Every page as a heading ("Page N") with its text. The column is not lazy on purpose: all headings
+ * stay composed, so a screen reader's heading navigation reaches every page, however far away. Under
+ * each heading the text is only built and loaded when the page comes near the window.
+ */
 @Composable
 private fun TextPages(
     count: Int,
-    listState: LazyListState,
+    scrollState: ScrollState,
+    headingTops: SnapshotStateList<Int>,
     pageText: suspend (Int) -> String?,
     pageActions: (Int) -> List<CustomAccessibilityAction>,
+    focusPage: Int?,
+    onFocusHandled: () -> Unit,
+    controls: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LazyColumn(
-        state = listState,
-        modifier = modifier,
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-    ) {
-        items((0 until count).toList(), key = { it }) { index ->
-            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(modifier.verticalScroll(scrollState).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        controls()
+        for (index in 0 until count) {
+            val headingFocus = remember { FocusRequester() }
+            LaunchedEffect(focusPage) {
+                if (focusPage == index) {
+                    headingFocus.requestFocusWhenReady()
+                    onFocusHandled()
+                }
+            }
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { c ->
+                        val top = c.positionInParent().y.roundToInt()
+                        if (index < headingTops.size && headingTops[index] != top) headingTops[index] = top
+                    },
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 Text(
                     stringResource(R.string.text_page_header, index + 1),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.semantics {
-                        heading()
-                        customActions = pageActions(index)
-                    },
+                    modifier = Modifier
+                        .focusRequester(headingFocus)
+                        .focusable()
+                        .semantics {
+                            heading()
+                            customActions = pageActions(index)
+                        },
                 )
-                PageTextBlock(index, pageText)
+                ComposeWhenNear(minHeight = 96.dp) { PageTextBlock(index, pageText) }
             }
         }
+        Spacer(Modifier.height(16.dp))
     }
 }
 
@@ -613,8 +705,8 @@ private sealed interface LoadedText {
 /** Asks for a page number; an empty or invalid entry shows a specific error on the field and keeps the dialog open. */
 @Composable
 private fun GoToPageDialog(count: Int, current: Int, onConfirm: (page: Int) -> Unit, onDismiss: () -> Unit) {
-    var text by remember { mutableStateOf(current.toString()) }
-    var attempted by remember { mutableStateOf(false) }
+    var text by rememberSaveable { mutableStateOf(current.toString()) }
+    var attempted by rememberSaveable { mutableStateOf(false) }
     val page = parsePosition(text, count)
     val message = when {
         page != null -> null
