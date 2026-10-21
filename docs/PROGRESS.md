@@ -29,6 +29,6 @@ Budget mode (user-approved): batch remaining tasks per milestone (11+12, 13+14, 
 | 17 Page numbers → v0.5.0 | done | 51255f6..c8f6e78 |
 | 18 PDF → Text | done | 62a6981..6be734f |
 | 19 Viewer, open-with → v0.6.0 | done | 62a6981..6be734f |
-| 20 Sign | next | |
-| 21 OCR → v0.7.0 | todo | |
+| 20 Sign | done | e26a9d0..c28981e |
+| 21 OCR → v0.7.0 | next | |
 | 22 Settings, polish, audit → v1.0.0 | todo | |
