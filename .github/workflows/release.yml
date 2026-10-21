@@ -15,6 +15,12 @@ on:
 permissions:
   contents: write
 
+# Pushes in quick succession must not race to publish the same tag: run one at a time,
+# so later runs see the tag the earlier one created and skip.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: ubuntu-latest
