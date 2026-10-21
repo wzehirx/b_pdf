@@ -139,7 +139,7 @@ class HomeScreenTest {
 
     @Test
     fun toolEnum_listsAllTools_withUniqueRoutes() {
-        assertEquals(19, Tool.entries.size)
+        assertEquals(21, Tool.entries.size)
         assertEquals(Tool.entries.size, Tool.entries.map { it.route }.toSet().size)
     }
 }

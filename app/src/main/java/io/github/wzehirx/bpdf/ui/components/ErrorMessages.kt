@@ -5,6 +5,7 @@ import io.github.wzehirx.bpdf.R
 import io.github.wzehirx.bpdf.core.files.ExportFailed
 import io.github.wzehirx.bpdf.core.files.SourceUnavailable
 import io.github.wzehirx.bpdf.core.ocr.OcrFailed
+import io.github.wzehirx.bpdf.core.pdf.DocumentUnreadable
 import io.github.wzehirx.bpdf.core.pdf.PdfError
 import io.github.wzehirx.bpdf.core.pdf.RangeErrorReason
 
@@ -27,6 +28,7 @@ fun PdfError.toMessage(res: Resources): String = when (this) {
 /** Message for any failure: PDF errors are specific, everything else is generic. */
 fun Throwable.toUserMessage(res: Resources): String = when (this) {
     is PdfError -> toMessage(res)
+    is DocumentUnreadable -> res.getString(R.string.err_document_unreadable, fileName)
     is OcrFailed -> res.getString(R.string.err_ocr_failed)
     is ExportFailed -> res.getString(R.string.err_export_failed)
     is SourceUnavailable -> res.getString(R.string.err_source_unavailable)

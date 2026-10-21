@@ -5,6 +5,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
@@ -54,6 +56,8 @@ enum class Tool(
     PDF_TO_IMAGES("tool/pdf_to_images", R.string.tool_pdf_to_images_title, R.string.tool_pdf_to_images_desc, Icons.Default.Share, ToolCategory.CONVERT, available = true),
     PDF_TO_TEXT("tool/pdf_to_text", R.string.tool_pdf_to_text_title, R.string.tool_pdf_to_text_desc, Icons.Default.Edit, ToolCategory.CONVERT, available = true),
     OCR("tool/ocr", R.string.tool_ocr_title, R.string.tool_ocr_desc, Icons.Default.Search, ToolCategory.CONVERT, available = true),
+    PDF_TO_DOCUMENT("tool/pdf_to_document", R.string.tool_pdf_to_document_title, R.string.tool_pdf_to_document_desc, Icons.Default.Done, ToolCategory.CONVERT, available = true),
+    DOCUMENT_TO_PDF("tool/document_to_pdf", R.string.tool_document_to_pdf_title, R.string.tool_document_to_pdf_desc, Icons.Default.Check, ToolCategory.CONVERT, available = true),
     PROTECT("tool/protect", R.string.tool_protect_title, R.string.tool_protect_desc, Icons.Default.Lock, ToolCategory.SECURITY, available = true),
     UNLOCK("tool/unlock", R.string.tool_unlock_title, R.string.tool_unlock_desc, Icons.Default.Lock, ToolCategory.SECURITY, available = true),
     SIGN("tool/sign", R.string.tool_sign_title, R.string.tool_sign_desc, Icons.Default.Create, ToolCategory.SECURITY, available = true),
