@@ -237,4 +237,32 @@ class MergeViewModelTest {
         assertEquals(listOf("slow.pdf"), names())
         assertEquals(OperationState.Idle, vm.state.value.operation)
     }
+
+    @Test
+    fun whileSaving_secondSaveAndEditsAreIgnored_untilSaveFinishes() {
+        add(pdf(1, "A", "a.pdf"), pdf(1, "B", "b.pdf"))
+        mergeAndAwait()
+        val latch = java.util.concurrent.CountDownLatch(1)
+        val uri = Uri.parse("content://test.slow/one.pdf")
+        val stream = object : java.io.OutputStream() {
+            override fun write(b: Int) { latch.await() }
+            override fun write(b: ByteArray, off: Int, len: Int) { latch.await() }
+        }
+        org.robolectric.Shadows.shadowOf(context.contentResolver).registerOutputStream(uri, stream)
+        vm.save(uri)
+        await { vm.state.first { it.saving } }
+        vm.save(uri) // ignored
+        vm.move(0, 1)
+        vm.remove(0)
+        vm.addFiles(listOf(pdf(1, "C", "c.pdf")))
+        vm.merge()
+        val during = vm.state.value
+        assertEquals(listOf("a.pdf", "b.pdf"), during.files.map { it.displayName })
+        assertTrue(during.operation is OperationState.Success)
+        latch.countDown()
+        await { vm.savedEvents.first() }
+        await { vm.state.first { !it.saving } }
+        vm.move(0, 1)
+        await { vm.state.first { it.files.map { f -> f.displayName } == listOf("b.pdf", "a.pdf") } }
+    }
 }

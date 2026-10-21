@@ -36,7 +36,8 @@ fun <T> OperationStatusPanel(
     modifier: Modifier = Modifier,
     onSave: () -> Unit = {},
     onShare: () -> Unit = {},
-    successActions: @Composable () -> Unit = { SaveResultActions(onSave = onSave, onShare = onShare) },
+    actionsEnabled: Boolean = true,
+    successActions: @Composable () -> Unit = { SaveResultActions(onSave = onSave, onShare = onShare, enabled = actionsEnabled) },
 ) {
     val resources = LocalResources.current
     val focus = remember { FocusRequester() }

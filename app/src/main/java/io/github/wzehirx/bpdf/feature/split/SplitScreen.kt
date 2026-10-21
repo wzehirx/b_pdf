@@ -129,7 +129,7 @@ fun SplitScreenContent(
 ) {
     val resources = LocalResources.current
     val needFile = stringResource(R.string.split_need_file)
-    val busy = state.importing || state.operation is OperationState.Running
+    val busy = state.importing || state.saving || state.operation is OperationState.Running
     val file = state.file
     ToolScaffold(title = stringResource(R.string.tool_split_title), onBack = onBack) {
         Text(stringResource(R.string.split_instructions))
@@ -153,7 +153,8 @@ fun SplitScreenContent(
                 options = SplitModeChoice.entries,
                 selected = state.mode,
                 optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = { if (!busy) onModeChange(it) },
+                onSelect = onModeChange,
+                enabled = !busy,
             )
             when (state.mode) {
                 SplitModeChoice.RANGES -> {
@@ -187,7 +188,12 @@ fun SplitScreenContent(
             onCancel = onCancel,
             onRetry = onRetry,
             successActions = {
-                SplitResultActions(onSaveToFolder = onSaveToFolder, onSaveZip = onSaveZip, onShare = onShare)
+                SplitResultActions(
+                    onSaveToFolder = onSaveToFolder,
+                    onSaveZip = onSaveZip,
+                    onShare = onShare,
+                    enabled = !state.saving,
+                )
             },
         )
     }
@@ -251,15 +257,15 @@ private fun EveryNField(state: SplitUiState, onChange: (String) -> Unit, enabled
 }
 
 @Composable
-private fun SplitResultActions(onSaveToFolder: () -> Unit, onSaveZip: () -> Unit, onShare: () -> Unit) {
+private fun SplitResultActions(onSaveToFolder: () -> Unit, onSaveZip: () -> Unit, onShare: () -> Unit, enabled: Boolean) {
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Button(onClick = onSaveToFolder, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+        Button(onClick = onSaveToFolder, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
             Text(stringResource(R.string.split_save_folder))
         }
-        Button(onClick = onSaveZip, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+        Button(onClick = onSaveZip, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
             Text(stringResource(R.string.split_save_zip))
         }
-        OutlinedButton(onClick = onShare, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+        OutlinedButton(onClick = onShare, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
             Text(stringResource(R.string.share))
         }
     }

@@ -198,4 +198,34 @@ class SplitScreenTest {
 
     private fun androidx.compose.ui.test.junit4.ComposeContentTestRule.onNodeWithContentDescriptionCompat(d: String) =
         onNode(androidx.compose.ui.test.hasContentDescription(d))
+
+    @Test
+    fun busy_disablesModeRadios() {
+        show(loaded.copy(saving = true))
+        rule.onNodeWithText("By page ranges").assertIsNotEnabled()
+        rule.onNodeWithText("Every N pages").assertIsNotEnabled()
+        rule.onNodeWithText("Split").assertIsNotEnabled()
+    }
+
+    @Test
+    fun idle_modeRadiosAreEnabled() {
+        show(loaded)
+        rule.onNodeWithText("Every N pages").assertIsEnabled()
+    }
+
+    @Test
+    fun saving_disablesResultButtons() {
+        val files = listOf(File("book_1.pdf"))
+        show(loaded.copy(saving = true, operation = OperationState.Success(SplitResult(files, File("d"), "z.zip"))))
+        for (label in listOf("Save to folder", "Save as ZIP", "Share")) {
+            rule.onNodeWithText(label).performScrollTo().assertIsNotEnabled()
+        }
+    }
+
+    @Test
+    fun exportFailed_showsClearMessage() {
+        val error = io.github.wzehirx.bpdf.core.files.ExportFailed(1, java.io.IOException("x"))
+        show(loaded.copy(operation = OperationState.Failed(error)))
+        rule.onNodeWithText("Saving to the folder failed. No files were kept there.").assertIsFocused()
+    }
 }

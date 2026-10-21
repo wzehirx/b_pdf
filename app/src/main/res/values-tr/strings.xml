@@ -130,4 +130,5 @@
         <item quantity="one">%1$d dosya kaydedildi</item>
         <item quantity="other">%1$d dosya kaydedildi</item>
     </plurals>
+    <string name="err_export_failed">Klasöre kaydetme başarısız oldu. Klasörde hiçbir dosya bırakılmadı.</string>
 </resources>

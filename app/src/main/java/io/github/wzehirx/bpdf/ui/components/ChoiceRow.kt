@@ -26,6 +26,7 @@ fun <T> ChoiceRow(
     optionLabel: (T) -> String,
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Column(modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(label, style = MaterialTheme.typography.titleSmall)
@@ -34,12 +35,12 @@ fun <T> ChoiceRow(
                 Modifier
                     .fillMaxWidth()
                     .heightIn(min = 48.dp)
-                    .selectable(selected = option == selected, role = Role.RadioButton) { onSelect(option) }
+                    .selectable(selected = option == selected, enabled = enabled, role = Role.RadioButton) { onSelect(option) }
                     .padding(horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                RadioButton(selected = option == selected, onClick = null)
+                RadioButton(selected = option == selected, onClick = null, enabled = enabled)
                 Text(optionLabel(option))
             }
         }

@@ -130,4 +130,5 @@
         <item quantity="one">Saved %1$d file</item>
         <item quantity="other">Saved %1$d files</item>
     </plurals>
+    <string name="err_export_failed">Saving to the folder failed. No files were kept there.</string>
 </resources>

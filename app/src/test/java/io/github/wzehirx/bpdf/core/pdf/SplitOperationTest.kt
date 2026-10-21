@@ -136,4 +136,33 @@ class SplitOperationTest {
             }
         }
     }
+
+    @Test
+    fun internalLinkAnnotation_doesNotDragOtherPagesIntoThePart() {
+        val input = File(tmp.root, "linked.pdf")
+        com.tom_roush.pdfbox.pdmodel.PDDocument().use { doc ->
+            repeat(3) { i ->
+                val page = com.tom_roush.pdfbox.pdmodel.PDPage()
+                doc.addPage(page)
+                com.tom_roush.pdfbox.pdmodel.PDPageContentStream(doc, page).use { cs ->
+                    cs.beginText()
+                    cs.setFont(com.tom_roush.pdfbox.pdmodel.font.PDType1Font.HELVETICA, 12f)
+                    cs.newLineAtOffset(40f, 700f)
+                    // Page 3 is heavy; a part without it must stay small.
+                    repeat(if (i == 2) 4000 else 1) { cs.showText("Heavy content line number $it with filler text"); cs.newLineAtOffset(0f, -1f) }
+                    cs.endText()
+                }
+            }
+            val link = com.tom_roush.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink()
+            link.rectangle = com.tom_roush.pdfbox.pdmodel.common.PDRectangle(10f, 10f, 100f, 30f)
+            val dest = com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitDestination()
+            dest.page = doc.getPage(2)
+            link.destination = dest
+            doc.getPage(0).annotations = listOf(link)
+            doc.save(input)
+        }
+        val files = SplitOperation.run(input, SplitMode.EachPage, outDir(), "doc")
+        assertEquals(1, TestPdfs.text(files[0]).size)
+        assertTrue("part 1 is ${files[0].length()} bytes, page 3 alone is bigger", files[0].length() < files[2].length() / 2)
+    }
 }

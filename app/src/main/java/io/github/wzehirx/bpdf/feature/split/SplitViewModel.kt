@@ -58,6 +58,8 @@ data class SplitUiState(
     /** Number of times Split was pressed with invalid input; the screen announces each one. */
     val failedAttempts: Int = 0,
     val importing: Boolean = false,
+    /** True while a save/export is writing the result; edits and further saves are ignored. */
+    val saving: Boolean = false,
     val operation: OperationState<SplitResult> = OperationState.Idle,
 )
 
@@ -74,6 +76,7 @@ class SplitViewModel(
         val attempted: Boolean = false,
         val failedAttempts: Int = 0,
         val pendingImports: Int = 0,
+        val saving: Boolean = false,
         /** Import or save failure; takes precedence over the runner's state until cleared. */
         val error: Throwable? = null,
     )
@@ -103,6 +106,7 @@ class SplitViewModel(
             },
             failedAttempts = l.failedAttempts,
             importing = l.pendingImports > 0,
+            saving = l.saving,
             operation = l.error?.let { OperationState.Failed(it) } ?: op,
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, SplitUiState())
@@ -111,7 +115,7 @@ class SplitViewModel(
     val savedEvents: Flow<Int> = saved.receiveAsFlow()
 
     private val busy: Boolean
-        get() = local.value.pendingImports > 0 || runner.state.value is OperationState.Running
+        get() = local.value.pendingImports > 0 || local.value.saving || runner.state.value is OperationState.Running
 
     /** Takes the first of [uris]. Ignored while importing or splitting. */
     fun pickFile(uris: List<Uri>) {
@@ -175,11 +179,11 @@ class SplitViewModel(
                 else SplitMode.EveryN(l.everyNText.trim().toInt())
             SplitModeChoice.EACH_PAGE -> SplitMode.EachPage
         }
-        val outDir = fileRepository.newOutputDir()
         val zipName = suggestName(file.displayName, "split", "zip")
         val base = baseNameOf(file.displayName)
         runner.start { progress ->
             val context = currentCoroutineContext()
+            val outDir = fileRepository.newOutputDir()
             try {
                 val files = SplitOperation.run(
                     file.file, mode, outDir, base, progress = progress, isCancelled = { !context.isActive },
@@ -204,12 +208,14 @@ class SplitViewModel(
     /** Writes every part into the folder chosen with the system folder picker. */
     fun saveToFolder(treeUri: Uri) {
         val result = successValue() ?: return
+        if (busy) return
         launchSave { fileRepository.exportToTree(result.files, treeUri) }
     }
 
     /** Writes all parts as one zip to [target]. */
     fun saveZip(target: Uri) {
         val result = successValue() ?: return
+        if (busy) return
         launchSave {
             val zip = fileRepository.newOutputFile("zip")
             try {
@@ -223,6 +229,8 @@ class SplitViewModel(
     }
 
     private fun launchSave(block: suspend () -> Int) {
+        // Marked before launching so a second tap in the same frame is already ignored.
+        local.update { it.copy(saving = true) }
         viewModelScope.launch {
             try {
                 saved.send(block())
@@ -230,6 +238,8 @@ class SplitViewModel(
                 throw e
             } catch (e: Throwable) {
                 local.update { it.copy(error = e) }
+            } finally {
+                local.update { it.copy(saving = false) }
             }
         }
     }
@@ -240,7 +250,9 @@ class SplitViewModel(
         return withContext(ioDispatcher) { result.files.map { fileRepository.shareUri(it) } }
     }
 
-    fun clearResult() = resetResult()
+    fun clearResult() {
+        if (!local.value.saving) resetResult()
+    }
 
     private fun successValue() = (runner.state.value as? OperationState.Success)?.value
 

@@ -1,8 +1,11 @@
 package io.github.wzehirx.bpdf.core.files
 
 import android.net.Uri
+import android.webkit.MimeTypeMap
 import androidx.documentfile.provider.DocumentFile
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
@@ -25,33 +28,38 @@ fun zipFiles(files: List<File>, out: File) {
     }
 }
 
+/** Saving to a folder failed; every document created by this batch was removed again (best effort). */
+class ExportFailed(val writtenBeforeFailure: Int, cause: Throwable) : IOException("Export failed", cause)
+
 /**
  * Creates one document per file inside the folder chosen with `OpenDocumentTree` ([treeUri]) and
- * copies the contents. Returns the number of files written. A document that fails midway is
- * deleted again before the error propagates.
+ * copies the contents. Returns the number of files written. If any file fails, the documents
+ * created so far are deleted and [ExportFailed] is thrown; cancellation also cleans up and
+ * rethrows the [kotlinx.coroutines.CancellationException].
  */
 suspend fun FileRepository.exportToTree(files: List<File>, treeUri: Uri): Int =
     withContext(Dispatchers.IO) {
         val tree = DocumentFile.fromTreeUri(appContext, treeUri)
-            ?: throw IOException("Cannot write to $treeUri")
-        var count = 0
-        for (file in files) {
-            val isPdf = file.extension.equals("pdf", ignoreCase = true)
-            // Providers append the extension for a known mime type, so pass the bare name then.
-            val doc = tree.createFile(
-                if (isPdf) "application/pdf" else "application/octet-stream",
-                if (isPdf) file.nameWithoutExtension else file.name,
-            ) ?: throw IOException("Cannot create ${file.name}")
-            try {
+            ?: throw ExportFailed(0, IOException("Cannot write to $treeUri"))
+        val created = ArrayList<DocumentFile>()
+        var written = 0
+        try {
+            for (file in files) {
+                ensureActive()
+                val mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension.lowercase())
+                    ?: "application/octet-stream"
+                val doc = tree.createFile(mime, file.name) ?: throw IOException("Cannot create ${file.name}")
+                created += doc
                 val out = requireNotNull(appContext.contentResolver.openOutputStream(doc.uri, "wt")) {
                     "Cannot open ${doc.uri}"
                 }
                 out.use { o -> file.inputStream().use { it.copyTo(o) } }
-            } catch (t: Throwable) {
-                doc.delete()
-                throw t
+                written++
             }
-            count++
+            written
+        } catch (t: Throwable) {
+            created.forEach { runCatching { it.delete() } }
+            if (t is CancellationException) throw t
+            throw ExportFailed(written, t)
         }
-        count
     }

@@ -43,6 +43,8 @@ data class MergeResult(
 data class MergeUiState(
     val files: List<ImportedFile> = emptyList(),
     val importing: Boolean = false,
+    /** True while the result is being written to its target; edits and further saves are ignored. */
+    val saving: Boolean = false,
     val operation: OperationState<MergeResult> = OperationState.Idle,
 )
 
@@ -53,6 +55,7 @@ class MergeViewModel(
     private data class Local(
         val files: List<ImportedFile> = emptyList(),
         val pendingImports: Int = 0,
+        val saving: Boolean = false,
         /** Import or save failure; takes precedence over the runner's state until cleared. */
         val error: Throwable? = null,
     )
@@ -65,6 +68,7 @@ class MergeViewModel(
         MergeUiState(
             files = l.files,
             importing = l.pendingImports > 0,
+            saving = l.saving,
             operation = l.error?.let { OperationState.Failed(it) } ?: op,
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, MergeUiState())
@@ -73,7 +77,7 @@ class MergeViewModel(
     val savedEvents: Flow<Unit> = saved.receiveAsFlow()
 
     private val busy: Boolean
-        get() = local.value.pendingImports > 0 || runner.state.value is OperationState.Running
+        get() = local.value.pendingImports > 0 || local.value.saving || runner.state.value is OperationState.Running
 
     /** Ignored while importing or merging: the inputs must not change under a running operation. */
     fun addFiles(uris: List<Uri>) {
@@ -140,6 +144,8 @@ class MergeViewModel(
 
     fun save(target: Uri) {
         val result = (runner.state.value as? OperationState.Success)?.value ?: return
+        if (busy) return
+        local.update { it.copy(saving = true) }
         viewModelScope.launch {
             try {
                 fileRepository.export(result.file, target)
@@ -148,6 +154,8 @@ class MergeViewModel(
                 throw e
             } catch (e: Throwable) {
                 local.update { it.copy(error = e) }
+            } finally {
+                local.update { it.copy(saving = false) }
             }
         }
     }
@@ -158,7 +166,9 @@ class MergeViewModel(
         return withContext(ioDispatcher) { fileRepository.shareUri(result.file, result.suggestedName) }
     }
 
-    fun clearResult() = resetResult()
+    fun clearResult() {
+        if (!local.value.saving) resetResult()
+    }
 
     private fun resetResult() {
         // Drop the result (and its output file) the inputs no longer match.

@@ -83,7 +83,7 @@ fun MergeScreenContent(
     val resources = LocalResources.current
     val needTwo = stringResource(R.string.merge_need_two_files)
     val tooFew = state.files.size < 2
-    val busy = state.importing || state.operation is OperationState.Running
+    val busy = state.importing || state.saving || state.operation is OperationState.Running
     ToolScaffold(title = stringResource(R.string.tool_merge_title), onBack = onBack) {
         Text(stringResource(R.string.merge_instructions))
         PickFilesButton(
@@ -116,6 +116,7 @@ fun MergeScreenContent(
             },
             onSave = onSave,
             onShare = onShare,
+            actionsEnabled = !state.saving,
             onCancel = onCancel,
             onRetry = onRetry,
         )

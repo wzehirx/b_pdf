@@ -281,4 +281,68 @@ class SplitViewModelTest {
         gate.scheduler.advanceUntilIdle()
         await { slow.state.first { it.operation is OperationState.Success } }
     }
+
+    private fun blockedTarget(name: String, latch: java.util.concurrent.CountDownLatch, sink: java.io.ByteArrayOutputStream = java.io.ByteArrayOutputStream()): Uri {
+        val uri = Uri.parse("content://test.slow/$name")
+        val stream = object : java.io.OutputStream() {
+            override fun write(b: Int) { latch.await(); sink.write(b) }
+            override fun write(b: ByteArray, off: Int, len: Int) { latch.await(); sink.write(b, off, len) }
+        }
+        org.robolectric.Shadows.shadowOf(context.contentResolver).registerOutputStream(uri, stream)
+        return uri
+    }
+
+    @Test
+    fun whileSaving_secondSaveAndEditsAreIgnored_untilSaveFinishes() {
+        pick(3)
+        vm.setMode(SplitModeChoice.EACH_PAGE)
+        success()
+        val latch = java.util.concurrent.CountDownLatch(1)
+        vm.saveZip(blockedTarget("one.zip", latch))
+        assertTrue(settled { it.saving }.saving)
+        vm.saveZip(blockedTarget("two.zip", latch)) // ignored
+        vm.setMode(SplitModeChoice.EVERY_N)
+        vm.remove()
+        vm.split()
+        val during = vm.state.value
+        assertEquals(SplitModeChoice.EACH_PAGE, during.mode)
+        assertTrue(during.file != null)
+        assertTrue(during.operation is OperationState.Success)
+        latch.countDown()
+        assertEquals(3, await { vm.savedEvents.first() })
+        assertFalse(settled { !it.saving }.saving)
+        // Back to normal: edits work again.
+        vm.setMode(SplitModeChoice.EVERY_N)
+        assertEquals(SplitModeChoice.EVERY_N, settled { it.mode == SplitModeChoice.EVERY_N }.mode)
+    }
+
+    @Test
+    fun saveToFolder_failure_surfacesExportFailed_andLeavesResult() {
+        pick(2)
+        vm.setMode(SplitModeChoice.EACH_PAGE)
+        val result = success()
+        vm.saveToFolder(Uri.parse("content://no.such.provider/tree/root")) // nothing can create documents there
+        val op = settled { it.operation is OperationState.Failed }.operation as OperationState.Failed
+        assertTrue(op.error is io.github.wzehirx.bpdf.core.files.ExportFailed)
+        assertTrue(result.files.all { it.exists() })
+        assertFalse(settled { !it.saving }.saving)
+    }
+
+    @Test
+    fun cancelMidRun_removesOutputDirectory() {
+        val big = TestPdfs.create(dir, 400, "P")
+        val shared = File(context.cacheDir, "shared")
+        val realVm = SplitViewModel(repo) // real IO dispatcher so the run really is in flight
+        realVm.pickFile(listOf(Uri.fromFile(big)))
+        await { realVm.state.first { it.file != null && !it.importing } }
+        realVm.setMode(SplitModeChoice.EACH_PAGE)
+        realVm.split()
+        await {
+            while (shared.listFiles().orEmpty().none { d -> d.list().orEmpty().isNotEmpty() }) kotlinx.coroutines.delay(5)
+        }
+        assertTrue(realVm.state.value.operation is OperationState.Running)
+        realVm.cancel()
+        await { while (shared.listFiles().orEmpty().isNotEmpty()) kotlinx.coroutines.delay(10) }
+        assertEquals(OperationState.Idle, realVm.state.value.operation)
+    }
 }
