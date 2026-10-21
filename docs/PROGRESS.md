@@ -22,8 +22,8 @@ Budget mode (user-approved): batch remaining tasks per milestone (11+12, 13+14, 
 | 10 Thumbnails, PageGrid, Organize | done | 2554fee..0b26e27 |
 | 11 Images → PDF | done | e6e3d52..72322bb |
 | 12 PDF → Images → v0.3.0 | done | e6e3d52..72322bb |
-| 13 Protect, Unlock, password flow | next | |
-| 14 Metadata, Repair → v0.4.0 | todo | |
+| 13 Protect, Unlock, password flow | done | 2c91e2b..517d4c9 |
+| 14 Metadata, Repair → v0.4.0 | next | |
 | 15 Compress | todo | |
 | 16 Watermark | todo | |
 | 17 Page numbers → v0.5.0 | todo | |
