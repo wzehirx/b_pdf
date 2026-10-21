@@ -265,4 +265,8 @@
         <item quantity="other">%1$d resim kaydedildi</item>
     </plurals>
     <string name="images_share_chooser_title">Resimleri paylaş</string>
+    <plurals name="images_added_announcement">
+        <item quantity="one">%1$d resim eklendi</item>
+        <item quantity="other">%1$d resim eklendi</item>
+    </plurals>
 </resources>

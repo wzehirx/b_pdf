@@ -108,6 +108,16 @@ class ImagesToPdfViewModelTest {
     }
 
     @Test
+    fun addedEvents_reportGalleryCountAndCameraPhoto() {
+        vm.addImages(listOf(picture("a.jpg"), picture("b.jpg")))
+        assertEquals(2, await { vm.addedEvents.first() })
+        vm.prepareCamera()
+        File(context.cacheDir, "camera").listFiles().orEmpty().single().writeBytes(byteArrayOf(1))
+        vm.cameraResult(true)
+        assertEquals(1, await { vm.addedEvents.first() })
+    }
+
+    @Test
     fun convert_buildsOnePagePerImage_withSuggestedName() {
         add(picture("trip.jpg"), picture("b.jpg"))
         val op = convertAndAwait()

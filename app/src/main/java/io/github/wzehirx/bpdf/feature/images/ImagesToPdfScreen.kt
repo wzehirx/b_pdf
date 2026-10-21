@@ -63,6 +63,12 @@ fun ImagesToPdfScreen(onBack: () -> Unit, viewModel: ImagesToPdfViewModel = view
         viewModel.savedEvents.collect { announce(resources.getString(R.string.saved_announcement)) }
     }
 
+    LaunchedEffect(viewModel) {
+        viewModel.addedEvents.collect { n ->
+            announce(resources.getQuantityString(R.plurals.images_added_announcement, n, n))
+        }
+    }
+
     ImagesToPdfScreenContent(
         state = state,
         onBack = onBack,

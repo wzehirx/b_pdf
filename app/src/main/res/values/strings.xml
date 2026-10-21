@@ -265,4 +265,8 @@
         <item quantity="other">Saved %1$d pictures</item>
     </plurals>
     <string name="images_share_chooser_title">Share pictures</string>
+    <plurals name="images_added_announcement">
+        <item quantity="one">%1$d picture added</item>
+        <item quantity="other">%1$d pictures added</item>
+    </plurals>
 </resources>

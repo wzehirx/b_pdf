@@ -10,7 +10,8 @@ enum class ImageFormat(val extension: String, val mimeType: String) {
     PNG("png", "image/png"),
 }
 
-/** Saves PDF pages as picture files named `<baseName>_p<page>.jpg` or `.png` (page numbers are 1-based). */
+/** Saves PDF pages as picture files named `<baseName>_p<page>.jpg` or `.png` (page numbers are 1-based and
+ * zero-padded to the width of the largest one, so `_p02` sorts before `_p10`). */
 object PdfToImagesOperation {
     private const val JPEG_QUALITY = 90
 
@@ -35,6 +36,7 @@ object PdfToImagesOperation {
     ): List<File> {
         require(pages.isNotEmpty()) { "At least one page is required" }
         require(dpi > 0) { "dpi must be positive" }
+        val digits = (pages.max() + 1).toString().length
         val written = ArrayList<File>()
         var success = false
         try {
@@ -48,7 +50,7 @@ object PdfToImagesOperation {
                 } catch (e: Exception) {
                     throw PdfError.Corrupt(e)
                 }
-                val out = File(outDir, "${baseName}_p${page + 1}.${format.extension}")
+                val out = File(outDir, "${baseName}_p${(page + 1).toString().padStart(digits, '0')}.${format.extension}")
                 written += out
                 try {
                     out.outputStream().buffered().use { stream ->

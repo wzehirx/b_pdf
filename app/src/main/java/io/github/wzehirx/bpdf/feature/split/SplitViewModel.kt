@@ -10,10 +10,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import io.github.wzehirx.bpdf.BPdfApp
 import io.github.wzehirx.bpdf.core.files.FileRepository
 import io.github.wzehirx.bpdf.core.files.ImportedFile
+import io.github.wzehirx.bpdf.core.files.MultiFileSaver
 import io.github.wzehirx.bpdf.core.files.baseNameOf
-import io.github.wzehirx.bpdf.core.files.exportToTree
 import io.github.wzehirx.bpdf.core.files.suggestName
-import io.github.wzehirx.bpdf.core.files.zipFiles
 import io.github.wzehirx.bpdf.core.pdf.PageRanges
 import io.github.wzehirx.bpdf.core.pdf.PdfError
 import io.github.wzehirx.bpdf.core.pdf.PdfLoader
@@ -84,6 +83,7 @@ class SplitViewModel(
     private val local = MutableStateFlow(Local())
     private val runner = OperationRunner<SplitResult>(viewModelScope, ioDispatcher)
     private val saved = Channel<Int>(Channel.BUFFERED)
+    private val saver = MultiFileSaver(fileRepository, ioDispatcher)
 
     val state: StateFlow<SplitUiState> = combine(local, runner.state) { l, op ->
         SplitUiState(
@@ -209,40 +209,23 @@ class SplitViewModel(
     fun saveToFolder(treeUri: Uri) {
         val result = successValue() ?: return
         if (busy) return
-        launchSave { fileRepository.exportToTree(result.files, treeUri) }
+        local.update { it.copy(saving = true) } // marked before launching so a second tap is already ignored
+        saver.toFolder(viewModelScope, result.files, treeUri, saveCallbacks)
     }
 
     /** Writes all parts as one zip to [target]. */
     fun saveZip(target: Uri) {
         val result = successValue() ?: return
         if (busy) return
-        launchSave {
-            val zip = fileRepository.newOutputFile("zip")
-            try {
-                withContext(Dispatchers.IO) { zipFiles(result.files, zip) }
-                fileRepository.export(zip, target)
-            } finally {
-                zip.delete()
-            }
-            result.files.size
-        }
+        local.update { it.copy(saving = true) }
+        saver.toZip(viewModelScope, result.files, target, saveCallbacks)
     }
 
-    private fun launchSave(block: suspend () -> Int) {
-        // Marked before launching so a second tap in the same frame is already ignored.
-        local.update { it.copy(saving = true) }
-        viewModelScope.launch {
-            try {
-                saved.send(block())
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Throwable) {
-                local.update { it.copy(error = e) }
-            } finally {
-                local.update { it.copy(saving = false) }
-            }
-        }
-    }
+    private val saveCallbacks = MultiFileSaver.Callbacks(
+        onSaved = { saved.send(it) },
+        onError = { e -> local.update { it.copy(error = e) } },
+        onFinished = { local.update { it.copy(saving = false) } },
+    )
 
     /** Content Uris for sharing all parts, empty when there is no result. */
     suspend fun prepareShare(): List<Uri> {

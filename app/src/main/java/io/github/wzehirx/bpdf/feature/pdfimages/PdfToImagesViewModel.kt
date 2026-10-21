@@ -10,10 +10,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import io.github.wzehirx.bpdf.BPdfApp
 import io.github.wzehirx.bpdf.core.files.FileRepository
 import io.github.wzehirx.bpdf.core.files.ImportedFile
+import io.github.wzehirx.bpdf.core.files.MultiFileSaver
 import io.github.wzehirx.bpdf.core.files.baseNameOf
-import io.github.wzehirx.bpdf.core.files.exportToTree
 import io.github.wzehirx.bpdf.core.files.suggestName
-import io.github.wzehirx.bpdf.core.files.zipFiles
 import io.github.wzehirx.bpdf.core.pdf.AndroidPageRasterizer
 import io.github.wzehirx.bpdf.core.pdf.ImageFormat
 import io.github.wzehirx.bpdf.core.pdf.PageRanges
@@ -92,6 +91,7 @@ class PdfToImagesViewModel(
     private val local = MutableStateFlow(Local())
     private val runner = OperationRunner<PdfToImagesResult>(viewModelScope, ioDispatcher)
     private val saved = Channel<Int>(Channel.BUFFERED)
+    private val saver = MultiFileSaver(fileRepository, ioDispatcher)
 
     val state: StateFlow<PdfToImagesUiState> = combine(local, runner.state) { l, op ->
         PdfToImagesUiState(
@@ -215,44 +215,27 @@ class PdfToImagesViewModel(
 
     fun cancel() = runner.cancel()
 
-    /** Writes every picture into the folder chosen with the system folder picker. */
+    /** Writes every part into the folder chosen with the system folder picker. */
     fun saveToFolder(treeUri: Uri) {
         val result = successValue() ?: return
         if (busy) return
-        launchSave { fileRepository.exportToTree(result.files, treeUri) }
+        local.update { it.copy(saving = true) } // marked before launching so a second tap is already ignored
+        saver.toFolder(viewModelScope, result.files, treeUri, saveCallbacks)
     }
 
-    /** Writes all pictures as one zip to [target]. */
+    /** Writes all parts as one zip to [target]. */
     fun saveZip(target: Uri) {
         val result = successValue() ?: return
         if (busy) return
-        launchSave {
-            val zip = fileRepository.newOutputFile("zip")
-            try {
-                withContext(Dispatchers.IO) { zipFiles(result.files, zip) }
-                fileRepository.export(zip, target)
-            } finally {
-                zip.delete()
-            }
-            result.files.size
-        }
+        local.update { it.copy(saving = true) }
+        saver.toZip(viewModelScope, result.files, target, saveCallbacks)
     }
 
-    private fun launchSave(block: suspend () -> Int) {
-        // Marked before launching so a second tap in the same frame is already ignored.
-        local.update { it.copy(saving = true) }
-        viewModelScope.launch {
-            try {
-                saved.send(block())
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Throwable) {
-                local.update { it.copy(error = e) }
-            } finally {
-                local.update { it.copy(saving = false) }
-            }
-        }
-    }
+    private val saveCallbacks = MultiFileSaver.Callbacks(
+        onSaved = { saved.send(it) },
+        onError = { e -> local.update { it.copy(error = e) } },
+        onFinished = { local.update { it.copy(saving = false) } },
+    )
 
     /** Content Uris for sharing all pictures, empty when there is no result. */
     suspend fun prepareShare(): List<Uri> {

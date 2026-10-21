@@ -47,6 +47,13 @@ class PdfToImagesOperationTest {
     }
 
     @Test
+    fun pageNumbers_areZeroPaddedToTheLargestPageNumber() {
+        val files = PdfToImagesOperation.run(input, listOf(0, 8, 9, 11), ImageFormat.JPEG, 72, outDir(), "doc", FakeRasterizer())
+        assertEquals(listOf("doc_p01.jpg", "doc_p09.jpg", "doc_p10.jpg", "doc_p12.jpg"), files.map { it.name })
+        assertEquals(files.map { it.name }, files.map { it.name }.sorted())
+    }
+
+    @Test
     fun png_writesPngSignature() {
         val files = PdfToImagesOperation.run(input, listOf(0), ImageFormat.PNG, 150, outDir(), "doc", FakeRasterizer())
         assertEquals("doc_p1.png", files.single().name)

@@ -71,6 +71,7 @@ class ImagesToPdfViewModel(
     private val local = MutableStateFlow(Local())
     private val runner = OperationRunner<ImagesToPdfResult>(viewModelScope, ioDispatcher)
     private val saved = Channel<Unit>(Channel.BUFFERED)
+    private val added = Channel<Int>(Channel.BUFFERED)
 
     /** The file the camera app is currently writing to; kept here so it survives rotation. */
     private var pendingCamera: File? = null
@@ -91,6 +92,9 @@ class ImagesToPdfViewModel(
     /** Emits once each time [save] has written the result to its target. */
     val savedEvents: Flow<Unit> = saved.receiveAsFlow()
 
+    /** Emits how many pictures were just added (gallery import or camera), so the screen can announce it. */
+    val addedEvents: Flow<Int> = added.receiveAsFlow()
+
     private val busy: Boolean
         get() = local.value.pendingImports > 0 || local.value.saving || runner.state.value is OperationState.Running
 
@@ -100,10 +104,12 @@ class ImagesToPdfViewModel(
         resetResult()
         local.update { it.copy(pendingImports = it.pendingImports + 1) }
         viewModelScope.launch {
+            var count = 0
             try {
                 for (uri in uris) {
                     val imported = fileRepository.importToCache(uri, "img")
                     local.update { it.copy(images = it.images + imported) }
+                    count++
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -111,6 +117,7 @@ class ImagesToPdfViewModel(
                 local.update { it.copy(error = e) }
             } finally {
                 local.update { it.copy(pendingImports = it.pendingImports - 1) }
+                if (count > 0) added.trySend(count)
             }
         }
     }
@@ -135,6 +142,7 @@ class ImagesToPdfViewModel(
         resetResult()
         val name = "photo_${++photoCount}.jpg"
         local.update { it.copy(images = it.images + ImportedFile(file, name, file.length())) }
+        added.trySend(1)
     }
 
     fun move(from: Int, to: Int) {
