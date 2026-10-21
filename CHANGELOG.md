@@ -5,6 +5,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+- Merge PDF tool: combine several PDFs in a chosen order (reorder and remove with buttons or screen-reader actions), then save or share the result.
+
 ## [0.1.0] - 2026-10-21
 
 ### Added

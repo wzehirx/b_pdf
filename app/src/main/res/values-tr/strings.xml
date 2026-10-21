@@ -84,4 +84,15 @@
     <string name="password_toggle">Şifreyi göster</string>
     <string name="password_state_visible">Görünür</string>
     <string name="password_state_hidden">Gizli</string>
+    <string name="merge_instructions">İki veya daha fazla PDF dosyası ekleyin, istediğiniz sıraya koyun ve tek bir belgede birleştirin.</string>
+    <string name="merge_add_files">PDF dosyası ekle</string>
+    <string name="merge_importing">Dosyalar ekleniyor…</string>
+    <string name="merge_button">Birleştir</string>
+    <string name="merge_need_two_files">En az 2 dosya ekleyin</string>
+    <plurals name="merge_success">
+        <item quantity="one">%1$d dosya %2$d sayfada birleştirildi</item>
+        <item quantity="other">%1$d dosya %2$d sayfada birleştirildi</item>
+    </plurals>
+    <string name="saved_announcement">Kaydedildi</string>
+    <string name="share_chooser_title">PDF paylaş</string>
 </resources>

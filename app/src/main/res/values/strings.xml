@@ -84,4 +84,15 @@
     <string name="password_toggle">Show password</string>
     <string name="password_state_visible">Visible</string>
     <string name="password_state_hidden">Hidden</string>
+    <string name="merge_instructions">Add two or more PDF files, put them in the order you want, then merge them into one document.</string>
+    <string name="merge_add_files">Add PDF files</string>
+    <string name="merge_importing">Adding files…</string>
+    <string name="merge_button">Merge</string>
+    <string name="merge_need_two_files">Add at least 2 files</string>
+    <plurals name="merge_success">
+        <item quantity="one">Merged %1$d files into %2$d page</item>
+        <item quantity="other">Merged %1$d files into %2$d pages</item>
+    </plurals>
+    <string name="saved_announcement">Saved</string>
+    <string name="share_chooser_title">Share PDF</string>
 </resources>

@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import io.github.wzehirx.bpdf.feature.merge.MergeScreen
 import io.github.wzehirx.bpdf.ui.home.HomeScreen
 
 const val HOME_ROUTE = "home"
@@ -18,6 +19,9 @@ fun BPdfNavHost(navController: NavHostController = rememberNavController()) {
     NavHost(navController = navController, startDestination = HOME_ROUTE) {
         composable(HOME_ROUTE) {
             HomeScreen(onOpenTool = { navController.navigate(it.route) })
+        }
+        composable(Tool.MERGE.route) {
+            MergeScreen(onBack = { navController.popBackStack() })
         }
     }
 }
