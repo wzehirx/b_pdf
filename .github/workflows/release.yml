@@ -1,9 +1,16 @@
 name: Release
 
+# A release is published whenever the version in gradle.properties has no tag yet:
+# bumping bpdf.versionName (with a matching CHANGELOG section) on a pushed branch cuts the
+# release and this workflow creates the tag. Pushing a v* tag manually works too.
 on:
   push:
+    branches:
+      - main
+      - 'ccr-*'
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -13,17 +20,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            TAG="${GITHUB_REF_NAME}"
+          else
+            TAG="v$(grep '^bpdf.versionName=' gradle.properties | cut -d= -f2)"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          if [ "${GITHUB_REF_TYPE}" != "tag" ] && git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "${TAG} is already released; nothing to do."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/setup-java@v4
+        if: steps.tag.outputs.skip != 'true'
         with:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
+        if: steps.tag.outputs.skip != 'true'
       - uses: android-actions/setup-android@v3
+        if: steps.tag.outputs.skip != 'true'
         with:
           packages: 'platforms;android-36 build-tools;36.0.0'
       - name: Run unit tests
+        if: steps.tag.outputs.skip != 'true'
         run: ./gradlew --max-workers=2 testDebugUnitTest
       - name: Decode signing keystore
+        if: steps.tag.outputs.skip != 'true'
         env:
           SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
         run: |
@@ -37,10 +66,12 @@ jobs:
             echo "No signing keystore secret; release APK will be debug-signed."
           fi
       - name: Build release APK
+        if: steps.tag.outputs.skip != 'true'
         run: ./gradlew --max-workers=2 assembleRelease
       - name: Prepare asset and release notes
+        if: steps.tag.outputs.skip != 'true'
         env:
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ steps.tag.outputs.tag }}
         run: |
           VERSION="${TAG#v}"
           cp app/build/outputs/apk/release/*.apk "b-pdf-${TAG}.apk"
@@ -51,7 +82,11 @@ jobs:
           ' CHANGELOG.md > release-notes.md
           if [ ! -s release-notes.md ]; then echo "Release ${TAG}" > release-notes.md; fi
       - name: Publish GitHub Release
+        if: steps.tag.outputs.skip != 'true'
         uses: softprops/action-gh-release@v2
         with:
-          files: b-pdf-${{ github.ref_name }}.apk
+          tag_name: ${{ steps.tag.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: b PDF ${{ steps.tag.outputs.tag }}
+          files: b-pdf-${{ steps.tag.outputs.tag }}.apk
           body_path: release-notes.md
