@@ -38,6 +38,7 @@ class HomeScreenTest {
 
     private val openedRecents = mutableListOf<String>()
     private val removedRecents = mutableListOf<String>()
+    private var settingsOpened = 0
 
     private fun show(available: Set<Tool> = emptySet(), recents: List<RecentFile> = emptyList()) {
         rule.setContent {
@@ -48,6 +49,7 @@ class HomeScreenTest {
                     recents = recents,
                     onOpenRecent = { openedRecents += it.name },
                     onRemoveRecent = { removedRecents += it.name },
+                    onOpenSettings = { settingsOpened++ },
                 )
             }
         }
@@ -135,6 +137,17 @@ class HomeScreenTest {
             .fetchSemanticsNode().touchBoundsInRoot
         val min = 48 * rule.density.density
         org.junit.Assert.assertTrue("${bounds.width}x${bounds.height} < $min", bounds.width >= min - 0.5f && bounds.height >= min - 0.5f)
+    }
+
+    @Test
+    fun settingsAction_isLabelled_48dp_andOpensSettings() {
+        show()
+        val node = rule.onNodeWithContentDescription("Settings")
+        node.performClick()
+        assertEquals(1, settingsOpened)
+        val bounds = node.fetchSemanticsNode().touchBoundsInRoot
+        val min = 48 * rule.density.density
+        assertTrue("${bounds.width}x${bounds.height}", bounds.width >= min - 0.5f && bounds.height >= min - 0.5f)
     }
 
     @Test

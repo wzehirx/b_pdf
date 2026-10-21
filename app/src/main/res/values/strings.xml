@@ -512,4 +512,46 @@
     <string name="ocr_pdf_note">A searchable PDF keeps your original pages and adds the recognized text invisibly, so search, selection and screen readers can use it. Search highlights may not line up with the words on the page.</string>
     <string name="err_ocr_failed">Text recognition could not start. Check the available storage and try again.</string>
     <string name="ocr_building_pdf">Building searchable PDF…</string>
+
+    <!-- Settings and About -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">Follow system</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_high_contrast">High contrast</string>
+    <string name="settings_high_contrast_hint">Uses black and white with strong colors so text is easy to read (contrast of at least 7 to 1). It replaces the wallpaper colors.</string>
+    <string name="settings_on">On</string>
+    <string name="settings_off">Off</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_label">App language</string>
+    <string name="settings_language_system">Follow system</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_tr">Türkçe</string>
+    <string name="settings_language_unsupported">This version of Android has no per-app language. b PDF uses the system language. You can change it in the system language settings.</string>
+    <string name="settings_language_open_system">Open system language settings</string>
+    <string name="settings_saving">Saving results</string>
+    <string name="settings_save_behavior">Default save behavior</string>
+    <string name="settings_save_ask">Ask each time</string>
+    <string name="settings_save_share">Share first</string>
+    <string name="settings_save_behavior_hint">Save and Share are always offered. With Share first, Share becomes the main button and comes before Save.</string>
+    <string name="settings_storage">Storage</string>
+    <string name="settings_cache_hint">b PDF keeps temporary working copies while you use a tool and removes old ones automatically. Clear them now to free space.</string>
+    <string name="settings_clear_cache">Clear cache</string>
+    <string name="settings_cache_cleared">Cache cleared. Freed %1$s.</string>
+    <string name="settings_cache_empty">The cache was already empty.</string>
+    <string name="settings_open_about">About b PDF</string>
+    <string name="about_title">About</string>
+    <string name="about_version">Version %1$s (build %2$d)</string>
+    <string name="about_tagline">An accessible, offline toolkit for PDF files. Everything happens on your device.</string>
+    <string name="about_privacy">b PDF has no internet access, no accounts and no tracking.</string>
+    <string name="about_license_heading">License</string>
+    <string name="about_license_text">b PDF is free software under the Apache License 2.0.</string>
+    <string name="about_license_open">Read the Apache License 2.0</string>
+    <string name="about_source_heading">Source code</string>
+    <string name="about_source_open">Open the source code on GitHub</string>
+    <string name="about_third_party_heading">Open-source licenses</string>
+    <string name="about_open_project_page">Open project page</string>
+    <string name="about_no_browser">No app was found to open this link.</string>
 </resources>

@@ -19,6 +19,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,6 +56,7 @@ import io.github.wzehirx.bpdf.ui.ToolCategory
 fun HomeRoute(
     onOpenTool: (Tool) -> Unit,
     onOpenRecent: (RecentFile) -> Unit,
+    onOpenSettings: () -> Unit,
     viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory),
 ) {
     val recents by viewModel.recents.collectAsStateWithLifecycle()
@@ -64,6 +66,7 @@ fun HomeRoute(
         onOpenTool = onOpenTool,
         recents = recents,
         onOpenRecent = onOpenRecent,
+        onOpenSettings = onOpenSettings,
         onRemoveRecent = {
             viewModel.remove(it)
             announce(resources.getString(R.string.home_recent_removed, it.name))
@@ -80,6 +83,7 @@ fun HomeScreen(
     recents: List<RecentFile> = emptyList(),
     onOpenRecent: (RecentFile) -> Unit = {},
     onRemoveRecent: (RecentFile) -> Unit = {},
+    onOpenSettings: () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -90,6 +94,11 @@ fun HomeScreen(
                         text = stringResource(R.string.app_name),
                         modifier = Modifier.semantics { heading() },
                     )
+                },
+                actions = {
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings_title))
+                    }
                 },
             )
         },

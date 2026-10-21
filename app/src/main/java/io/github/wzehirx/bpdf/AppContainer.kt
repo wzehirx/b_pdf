@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.preferencesDataStoreFile
 import io.github.wzehirx.bpdf.core.files.FileRepository
 import io.github.wzehirx.bpdf.core.files.RecentFilesStore
+import io.github.wzehirx.bpdf.core.settings.SettingsStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,6 +22,16 @@ class AppContainer(context: Context) {
             PreferenceDataStoreFactory.create(
                 scope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
                 produceFile = { appContext.preferencesDataStoreFile("recent_files") },
+            ),
+        )
+    }
+
+    /** Theme, high contrast and default save behavior. */
+    val settings: SettingsStore by lazy {
+        SettingsStore(
+            PreferenceDataStoreFactory.create(
+                scope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+                produceFile = { appContext.preferencesDataStoreFile("settings") },
             ),
         )
     }

@@ -65,3 +65,16 @@ fun Context.shareFiles(uris: List<Uri>, mimeType: String, chooserTitle: String):
         false
     }
 }
+
+/** Opens [url] in the browser (or any app that handles it). Returns false when nothing can. */
+fun Context.openUrl(url: String): Boolean {
+    val view = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+        if (this@openUrl !is Activity) addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    return try {
+        startActivity(view)
+        true
+    } catch (_: ActivityNotFoundException) {
+        false
+    }
+}

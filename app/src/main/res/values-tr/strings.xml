@@ -512,4 +512,46 @@
     <string name="ocr_pdf_note">Aranabilir PDF özgün sayfalarınızı korur ve tanınan metni görünmez biçimde ekler; böylece arama, seçme ve ekran okuyucular onu kullanabilir. Arama vurguları sayfadaki sözcüklerle hizalı olmayabilir.</string>
     <string name="err_ocr_failed">Metin tanıma başlatılamadı. Boş depolama alanını kontrol edip yeniden deneyin.</string>
     <string name="ocr_building_pdf">Aranabilir PDF hazırlanıyor…</string>
+
+    <!-- Settings and About -->
+    <string name="settings_title">Ayarlar</string>
+    <string name="settings_appearance">Görünüm</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_system">Sistemi izle</string>
+    <string name="settings_theme_light">Açık</string>
+    <string name="settings_theme_dark">Koyu</string>
+    <string name="settings_high_contrast">Yüksek karşıtlık</string>
+    <string name="settings_high_contrast_hint">Metinlerin kolay okunması için siyah, beyaz ve güçlü renkler kullanır; karşıtlık oranı en az 7 olur. Duvar kağıdı renklerinin yerine geçer.</string>
+    <string name="settings_on">Açık</string>
+    <string name="settings_off">Kapalı</string>
+    <string name="settings_language">Dil</string>
+    <string name="settings_language_label">Uygulama dili</string>
+    <string name="settings_language_system">Sistemi izle</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_tr">Türkçe</string>
+    <string name="settings_language_unsupported">Bu Android sürümünde uygulama başına dil seçimi yok. b PDF sistem dilini kullanır. Dili sistem dil ayarlarından değiştirebilirsiniz.</string>
+    <string name="settings_language_open_system">Sistem dil ayarlarını aç</string>
+    <string name="settings_saving">Sonuçları kaydetme</string>
+    <string name="settings_save_behavior">Varsayılan kaydetme davranışı</string>
+    <string name="settings_save_ask">Her seferinde sor</string>
+    <string name="settings_save_share">Önce paylaş</string>
+    <string name="settings_save_behavior_hint">Kaydet ve Paylaş her zaman sunulur. Önce paylaş seçilirse Paylaş ana düğme olur ve Kaydet düğmesinden önce gelir.</string>
+    <string name="settings_storage">Depolama</string>
+    <string name="settings_cache_hint">b PDF, bir aracı kullanırken geçici çalışma kopyaları tutar ve eskileri kendiliğinden siler. Yer açmak için şimdi temizleyebilirsiniz.</string>
+    <string name="settings_clear_cache">Önbelleği temizle</string>
+    <string name="settings_cache_cleared">Önbellek temizlendi. %1$s yer açıldı.</string>
+    <string name="settings_cache_empty">Önbellek zaten boştu.</string>
+    <string name="settings_open_about">b PDF hakkında</string>
+    <string name="about_title">Hakkında</string>
+    <string name="about_version">Sürüm %1$s (derleme %2$d)</string>
+    <string name="about_tagline">PDF dosyaları için erişilebilir, çevrimdışı bir araç takımı. Her şey cihazınızda olur.</string>
+    <string name="about_privacy">b PDF\'in internet erişimi, hesabı ve izleme özelliği yoktur.</string>
+    <string name="about_license_heading">Lisans</string>
+    <string name="about_license_text">b PDF, Apache Lisansı 2.0 altında özgür yazılımdır.</string>
+    <string name="about_license_open">Apache Lisansı 2.0\'ı oku</string>
+    <string name="about_source_heading">Kaynak kodu</string>
+    <string name="about_source_open">Kaynak kodunu GitHub\'da aç</string>
+    <string name="about_third_party_heading">Açık kaynak lisansları</string>
+    <string name="about_open_project_page">Proje sayfasını aç</string>
+    <string name="about_no_browser">Bu bağlantıyı açacak bir uygulama bulunamadı.</string>
 </resources>

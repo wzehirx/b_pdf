@@ -1,0 +1,52 @@
+[
+  {
+    "name": "PdfBox-Android",
+    "license": "Apache-2.0",
+    "url": "https://github.com/TomRoush/PdfBox-Android"
+  },
+  {
+    "name": "Tesseract4Android",
+    "license": "Apache-2.0",
+    "url": "https://github.com/adaptech-cz/Tesseract4Android"
+  },
+  {
+    "name": "Tesseract OCR",
+    "license": "Apache-2.0",
+    "url": "https://github.com/tesseract-ocr/tesseract"
+  },
+  {
+    "name": "tessdata_fast (English and Turkish language data)",
+    "license": "Apache-2.0",
+    "url": "https://github.com/tesseract-ocr/tessdata_fast"
+  },
+  {
+    "name": "Noto Sans",
+    "license": "OFL-1.1",
+    "url": "https://github.com/notofonts/latin-greek-cyrillic"
+  },
+  {
+    "name": "AndroidX libraries (Core, Activity, Lifecycle, Navigation, DocumentFile)",
+    "license": "Apache-2.0",
+    "url": "https://developer.android.com/jetpack/androidx"
+  },
+  {
+    "name": "Jetpack Compose and Material 3",
+    "license": "Apache-2.0",
+    "url": "https://developer.android.com/jetpack/compose"
+  },
+  {
+    "name": "AndroidX ExifInterface",
+    "license": "Apache-2.0",
+    "url": "https://developer.android.com/jetpack/androidx/releases/exifinterface"
+  },
+  {
+    "name": "AndroidX DataStore",
+    "license": "Apache-2.0",
+    "url": "https://developer.android.com/jetpack/androidx/releases/datastore"
+  },
+  {
+    "name": "Kotlin and kotlinx.coroutines",
+    "license": "Apache-2.0",
+    "url": "https://github.com/Kotlin/kotlinx.coroutines"
+  }
+]

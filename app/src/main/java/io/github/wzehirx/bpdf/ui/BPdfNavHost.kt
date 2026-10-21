@@ -9,6 +9,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import io.github.wzehirx.bpdf.feature.about.AboutScreen
+import io.github.wzehirx.bpdf.feature.settings.SettingsScreen
 import io.github.wzehirx.bpdf.feature.images.ImagesToPdfScreen
 import io.github.wzehirx.bpdf.feature.merge.MergeScreen
 import io.github.wzehirx.bpdf.feature.metadata.MetadataScreen
@@ -32,6 +34,8 @@ import io.github.wzehirx.bpdf.feature.viewer.ViewerViewModel
 import io.github.wzehirx.bpdf.ui.home.HomeRoute
 
 const val HOME_ROUTE = "home"
+const val SETTINGS_ROUTE = "settings"
+const val ABOUT_ROUTE = "about"
 
 /**
  * App navigation graph. Each feature task registers its screen here with
@@ -55,8 +59,11 @@ fun BPdfNavHost(navController: NavHostController = rememberNavController()) {
             HomeRoute(
                 onOpenTool = { navController.navigate(it.route) },
                 onOpenRecent = { navController.navigate(IncomingIntents.viewerRoute(Uri.parse(it.uri))) },
+                onOpenSettings = { navController.navigate(SETTINGS_ROUTE) },
             )
         }
+        composable(SETTINGS_ROUTE) { SettingsScreen(onBack = back, onOpenAbout = { navController.navigate(ABOUT_ROUTE) }) }
+        composable(ABOUT_ROUTE) { AboutScreen(onBack = back) }
         composable(Tool.MERGE.route) { MergeScreen(onBack = back) }
         toolScreen(Tool.SPLIT) { SplitScreen(onBack = back, initialUri = it) }
         toolScreen(Tool.REMOVE_PAGES) { PageSelectScreen(PageSelectMode.REMOVE, onBack = back, initialUri = it) }

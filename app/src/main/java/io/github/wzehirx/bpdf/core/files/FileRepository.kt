@@ -132,10 +132,15 @@ class FileRepository(context: Context) {
         }
     }
 
-    fun clearCache() {
-        importsDir.deleteRecursively()
-        sharedDir.deleteRecursively()
-        cameraDir.deleteRecursively()
-        renderDirs.forEach { it.deleteRecursively() }
+    /** Bytes currently held in the working directories (imports, results, camera, render copies). */
+    fun cacheSize(): Long = workDirs().sumOf { dir -> dir.walkBottomUp().filter { it.isFile }.sumOf { it.length() } }
+
+    /** Deletes every working copy and returns how many bytes that freed. */
+    fun clearCache(): Long {
+        val freed = cacheSize()
+        workDirs().forEach { it.deleteRecursively() }
+        return freed
     }
+
+    private fun workDirs() = listOf(importsDir, sharedDir, cameraDir) + renderDirs
 }

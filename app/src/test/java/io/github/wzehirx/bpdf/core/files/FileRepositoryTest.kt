@@ -149,6 +149,16 @@ class FileRepositoryTest {
     }
 
     @Test
+    fun clearCache_returnsTheBytesFreed_andNothingTheSecondTime() {
+        repo.newOutputFile("pdf").writeBytes(ByteArray(100))
+        File(repo.newOutputDir(), "page.png").writeBytes(ByteArray(23))
+        assertEquals(123L, repo.cacheSize())
+        assertEquals(123L, repo.clearCache())
+        assertEquals(0L, repo.cacheSize())
+        assertEquals(0L, repo.clearCache())
+    }
+
+    @Test
     fun purgeStale_deletesOnlyOldEntriesInImportsAndShared() {
         // Real timestamps: the Application's own background purge (24h) must not touch these.
         val now = System.currentTimeMillis()
