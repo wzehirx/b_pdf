@@ -80,7 +80,7 @@ Apache License 2.0, see [LICENSE](LICENSE).
 
 Third-party components:
 - [PdfBox-Android](https://github.com/TomRoush/PdfBox-Android) (Apache-2.0)
-- Noto Sans font (SIL OFL 1.1), planned for text drawn into PDFs
+- [Noto Sans](https://github.com/notofonts/latin-greek-cyrillic) Regular font (SIL OFL 1.1), bundled for text drawn into PDFs such as watermarks and page numbers; license text in `app/src/main/assets/fonts/NotoSans-OFL.txt`
 - Tesseract / Tesseract4Android (Apache-2.0), planned for OCR
 
 ---
@@ -162,5 +162,5 @@ Apache License 2.0, bkz. [LICENSE](LICENSE).
 
 Üçüncü taraf bileşenler:
 - [PdfBox-Android](https://github.com/TomRoush/PdfBox-Android) (Apache-2.0)
-- Noto Sans yazı tipi (SIL OFL 1.1), PDF'e yazılan metinler için planlandı
+- [Noto Sans](https://github.com/notofonts/latin-greek-cyrillic) Regular yazı tipi (SIL OFL 1.1), filigran ve sayfa numarası gibi PDF'e yazılan metinler için uygulamaya dahildir; lisans metni `app/src/main/assets/fonts/NotoSans-OFL.txt` dosyasındadır
 - Tesseract / Tesseract4Android (Apache-2.0), OCR için planlandı

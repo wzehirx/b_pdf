@@ -341,4 +341,37 @@
     <string name="compress_button">Compress</string>
     <string name="compress_success">Reduced from %1$s to %2$s (%3$d%%)</string>
     <string name="compress_no_saving">This PDF could not be made smaller. It stays at %1$s, and the saved copy is the same size.</string>
+    <string name="pages_scope_all">All pages</string>
+    <string name="pages_scope_selected">Selected pages</string>
+    <string name="text_size_label">Text size</string>
+    <plurals name="text_size_value">
+        <item quantity="one">%1$d point</item>
+        <item quantity="other">%1$d points</item>
+    </plurals>
+    <string name="color_gray">Gray</string>
+    <string name="color_red">Red</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_black">Black</string>
+    <string name="watermark_instructions">Choose a PDF, type the text to stamp on its pages and set how it looks, then add it. Turkish and other special letters are supported.</string>
+    <string name="watermark_need_file">Choose a PDF first</string>
+    <string name="watermark_text_label">Watermark text</string>
+    <string name="watermark_text_error">Enter the watermark text.</string>
+    <string name="watermark_opacity_label">Opacity</string>
+    <string name="watermark_opacity_value">%1$d percent</string>
+    <string name="watermark_rotation_label">Rotation</string>
+    <string name="watermark_rotation_ccw">%1$d degrees counter-clockwise</string>
+    <string name="watermark_rotation_cw">%1$d degrees clockwise</string>
+    <string name="watermark_rotation_none">0 degrees, horizontal</string>
+    <string name="watermark_position_label">Position</string>
+    <string name="watermark_position_center">Center</string>
+    <string name="watermark_position_top">Top</string>
+    <string name="watermark_position_bottom">Bottom</string>
+    <string name="watermark_position_tiled">Repeated across the page</string>
+    <string name="watermark_color_label">Color</string>
+    <string name="watermark_scope_label">Pages to stamp</string>
+    <string name="watermark_button">Add watermark</string>
+    <plurals name="watermark_success">
+        <item quantity="one">Added the watermark to %1$d page</item>
+        <item quantity="other">Added the watermark to %1$d pages</item>
+    </plurals>
 </resources>

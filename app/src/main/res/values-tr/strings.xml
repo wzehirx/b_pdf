@@ -341,4 +341,37 @@
     <string name="compress_button">Sıkıştır</string>
     <string name="compress_success">%1$s boyutundan %2$s boyutuna küçültüldü (%%%3$d)</string>
     <string name="compress_no_saving">Bu PDF daha fazla küçültülemedi. Boyutu %1$s olarak kalır, kaydedilen kopya aynı boyuttadır.</string>
+    <string name="pages_scope_all">Tüm sayfalar</string>
+    <string name="pages_scope_selected">Seçili sayfalar</string>
+    <string name="text_size_label">Yazı boyutu</string>
+    <plurals name="text_size_value">
+        <item quantity="one">%1$d punto</item>
+        <item quantity="other">%1$d punto</item>
+    </plurals>
+    <string name="color_gray">Gri</string>
+    <string name="color_red">Kırmızı</string>
+    <string name="color_blue">Mavi</string>
+    <string name="color_black">Siyah</string>
+    <string name="watermark_instructions">Bir PDF seçin, sayfalara basılacak metni yazın ve görünümünü ayarlayın, sonra ekleyin. Türkçe ve diğer özel harfler desteklenir.</string>
+    <string name="watermark_need_file">Önce bir PDF seçin</string>
+    <string name="watermark_text_label">Filigran metni</string>
+    <string name="watermark_text_error">Filigran metnini girin.</string>
+    <string name="watermark_opacity_label">Opaklık</string>
+    <string name="watermark_opacity_value">yüzde %1$d</string>
+    <string name="watermark_rotation_label">Döndürme</string>
+    <string name="watermark_rotation_ccw">Saat yönünün tersine %1$d derece</string>
+    <string name="watermark_rotation_cw">Saat yönünde %1$d derece</string>
+    <string name="watermark_rotation_none">0 derece, yatay</string>
+    <string name="watermark_position_label">Konum</string>
+    <string name="watermark_position_center">Orta</string>
+    <string name="watermark_position_top">Üst</string>
+    <string name="watermark_position_bottom">Alt</string>
+    <string name="watermark_position_tiled">Sayfa boyunca tekrarlanır</string>
+    <string name="watermark_color_label">Renk</string>
+    <string name="watermark_scope_label">Damgalanacak sayfalar</string>
+    <string name="watermark_button">Filigran ekle</string>
+    <plurals name="watermark_success">
+        <item quantity="one">Filigran %1$d sayfaya eklendi</item>
+        <item quantity="other">Filigran %1$d sayfaya eklendi</item>
+    </plurals>
 </resources>

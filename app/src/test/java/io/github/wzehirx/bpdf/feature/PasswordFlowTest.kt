@@ -224,6 +224,8 @@ class PasswordFlowTest {
         assertFalse(vm.state.until { it.files.size == 1 }.copyUnprotected)
     }
 
+    private val fontLoader = { context.assets.open(io.github.wzehirx.bpdf.core.pdf.Fonts.ASSET_PATH) }
+
     @Test
     fun compress_encryptedFile_promptsThenCompressesToAnUnprotectedCopy() {
         val vm = io.github.wzehirx.bpdf.feature.compress.CompressViewModel(repo, dispatcher)
@@ -236,5 +238,36 @@ class PasswordFlowTest {
         vm.compress()
         val done = vm.state.until { it.operation is OperationState.Success }.operation as OperationState.Success
         assertEquals(listOf("Sec1", "Sec2"), TestPdfs.text(done.value.file))
+    }
+
+    @Test
+    fun watermark_encryptedFile_promptsThenStampsAnUnprotectedCopy() {
+        val vm = io.github.wzehirx.bpdf.feature.watermark.WatermarkViewModel(repo, fontLoader, dispatcher)
+        vm.pickFile(listOf(locked()))
+        vm.state.until { it.passwordPrompt != null }
+        vm.submitPassword("nope")
+        vm.state.until { it.passwordPrompt?.wrong == true }
+        vm.submitPassword("right")
+        assertTrue(vm.state.until { it.file != null && it.passwordPrompt == null && !it.importing }.copyUnprotected)
+        vm.setText("DRAFT")
+        vm.setRotation(0)
+        vm.addWatermark()
+        val done = vm.state.until { it.operation is OperationState.Success }.operation as OperationState.Success
+        assertTrue(TestPdfs.text(done.value.file).all { it.contains("DRAFT") && it.contains("Sec") })
+    }
+
+    @Test
+    fun newTools_dismissedPrompt_discardsFileWithoutError() {
+        val compress = io.github.wzehirx.bpdf.feature.compress.CompressViewModel(repo, dispatcher)
+        compress.pickFile(listOf(locked("a.pdf")))
+        compress.state.until { it.passwordPrompt != null }
+        compress.dismissPassword()
+        assertNull(compress.state.until { it.passwordPrompt == null && !it.importing }.file)
+        val watermark = io.github.wzehirx.bpdf.feature.watermark.WatermarkViewModel(repo, fontLoader, dispatcher)
+        watermark.pickFile(listOf(locked("b.pdf")))
+        watermark.state.until { it.passwordPrompt != null }
+        watermark.dismissPassword()
+        assertNull(watermark.state.until { it.passwordPrompt == null && !it.importing }.file)
+        assertEquals(emptyList<String>(), File(context.cacheDir, "imports").list().orEmpty().toList())
     }
 }

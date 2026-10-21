@@ -16,6 +16,7 @@ import io.github.wzehirx.bpdf.feature.protect.ProtectScreen
 import io.github.wzehirx.bpdf.feature.repair.RepairScreen
 import io.github.wzehirx.bpdf.feature.rotate.RotateScreen
 import io.github.wzehirx.bpdf.feature.compress.CompressScreen
+import io.github.wzehirx.bpdf.feature.watermark.WatermarkScreen
 import io.github.wzehirx.bpdf.feature.split.SplitScreen
 import io.github.wzehirx.bpdf.feature.unlock.UnlockScreen
 import io.github.wzehirx.bpdf.ui.home.HomeScreen
@@ -64,6 +65,9 @@ fun BPdfNavHost(navController: NavHostController = rememberNavController()) {
         }
         composable(Tool.COMPRESS.route) {
             CompressScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Tool.WATERMARK.route) {
+            WatermarkScreen(onBack = { navController.popBackStack() })
         }
         composable(Tool.METADATA.route) {
             MetadataScreen(onBack = { navController.popBackStack() })
