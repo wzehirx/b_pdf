@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
 /** Single-choice radio group with a plain (non-heading) [label] as its title. */
@@ -27,6 +29,8 @@ fun <T> ChoiceRow(
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    /** Optional text a screen reader speaks instead of [optionLabel] (for labels that contain symbols such as "/"). */
+    optionDescription: ((T) -> String?)? = null,
 ) {
     Column(modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(label, style = MaterialTheme.typography.titleSmall)
@@ -36,7 +40,8 @@ fun <T> ChoiceRow(
                     .fillMaxWidth()
                     .heightIn(min = 48.dp)
                     .selectable(selected = option == selected, enabled = enabled, role = Role.RadioButton) { onSelect(option) }
-                    .padding(horizontal = 4.dp),
+                    .padding(horizontal = 4.dp)
+                    .semantics { optionDescription?.invoke(option)?.let { contentDescription = it } },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {

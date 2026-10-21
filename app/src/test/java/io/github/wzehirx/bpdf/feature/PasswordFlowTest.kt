@@ -257,6 +257,21 @@ class PasswordFlowTest {
     }
 
     @Test
+    fun pageNumbers_encryptedFile_promptsThenNumbersAnUnprotectedCopy() {
+        val vm = io.github.wzehirx.bpdf.feature.pagenumbers.PageNumbersViewModel(repo, fontLoader, { "Page {n} of {total}" }, dispatcher)
+        vm.pickFile(listOf(locked()))
+        vm.state.until { it.passwordPrompt != null }
+        vm.submitPassword("nope")
+        vm.state.until { it.passwordPrompt?.wrong == true }
+        vm.submitPassword("right")
+        assertTrue(vm.state.until { it.file != null && it.passwordPrompt == null && !it.importing }.copyUnprotected)
+        vm.setFormat(io.github.wzehirx.bpdf.feature.pagenumbers.NumberFormat.LOCALIZED)
+        vm.addPageNumbers()
+        val done = vm.state.until { it.operation is OperationState.Success }.operation as OperationState.Success
+        assertTrue(TestPdfs.text(done.value.file)[1].contains("Page 2 of 2"))
+    }
+
+    @Test
     fun newTools_dismissedPrompt_discardsFileWithoutError() {
         val compress = io.github.wzehirx.bpdf.feature.compress.CompressViewModel(repo, dispatcher)
         compress.pickFile(listOf(locked("a.pdf")))
@@ -268,6 +283,11 @@ class PasswordFlowTest {
         watermark.state.until { it.passwordPrompt != null }
         watermark.dismissPassword()
         assertNull(watermark.state.until { it.passwordPrompt == null && !it.importing }.file)
+        val numbers = io.github.wzehirx.bpdf.feature.pagenumbers.PageNumbersViewModel(repo, fontLoader, { "{n}" }, dispatcher)
+        numbers.pickFile(listOf(locked("c.pdf")))
+        numbers.state.until { it.passwordPrompt != null }
+        numbers.dismissPassword()
+        assertNull(numbers.state.until { it.passwordPrompt == null && !it.importing }.file)
         assertEquals(emptyList<String>(), File(context.cacheDir, "imports").list().orEmpty().toList())
     }
 }

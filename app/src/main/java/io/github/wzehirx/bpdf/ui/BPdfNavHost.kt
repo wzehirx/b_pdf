@@ -17,6 +17,7 @@ import io.github.wzehirx.bpdf.feature.repair.RepairScreen
 import io.github.wzehirx.bpdf.feature.rotate.RotateScreen
 import io.github.wzehirx.bpdf.feature.compress.CompressScreen
 import io.github.wzehirx.bpdf.feature.watermark.WatermarkScreen
+import io.github.wzehirx.bpdf.feature.pagenumbers.PageNumbersScreen
 import io.github.wzehirx.bpdf.feature.split.SplitScreen
 import io.github.wzehirx.bpdf.feature.unlock.UnlockScreen
 import io.github.wzehirx.bpdf.ui.home.HomeScreen
@@ -68,6 +69,9 @@ fun BPdfNavHost(navController: NavHostController = rememberNavController()) {
         }
         composable(Tool.WATERMARK.route) {
             WatermarkScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Tool.PAGE_NUMBERS.route) {
+            PageNumbersScreen(onBack = { navController.popBackStack() })
         }
         composable(Tool.METADATA.route) {
             MetadataScreen(onBack = { navController.popBackStack() })

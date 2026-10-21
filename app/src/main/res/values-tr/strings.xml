@@ -374,4 +374,32 @@
         <item quantity="one">Filigran %1$d sayfaya eklendi</item>
         <item quantity="other">Filigran %1$d sayfaya eklendi</item>
     </plurals>
+    <string name="page_numbers_instructions">Bir PDF seçin, sayfa numarasının nereye geleceğini ve nasıl yazılacağını belirleyin, sonra numaraları ekleyin.</string>
+    <string name="page_numbers_need_file">Önce bir PDF seçin</string>
+    <string name="page_numbers_position_label">Konum</string>
+    <string name="page_numbers_pos_top_left">Sol üst</string>
+    <string name="page_numbers_pos_top_center">Üst orta</string>
+    <string name="page_numbers_pos_top_right">Sağ üst</string>
+    <string name="page_numbers_pos_bottom_left">Sol alt</string>
+    <string name="page_numbers_pos_bottom_center">Alt orta</string>
+    <string name="page_numbers_pos_bottom_right">Sağ alt</string>
+    <string name="page_numbers_format_label">Numara biçimi</string>
+    <string name="page_numbers_fmt_number">Yalnızca sayı (1)</string>
+    <string name="page_numbers_fmt_number_total">Sayı ve toplam (1 / %1$d)</string>
+    <string name="page_numbers_fmt_number_total_spoken">Sayı ve toplam (1 bölü %1$d)</string>
+    <string name="page_numbers_fmt_localized">Sayfa 1 / %1$d</string>
+    <string name="page_numbers_fmt_localized_spoken">Sayfa 1 bölü %1$d</string>
+    <string name="page_numbers_fmt_custom">Özel biçim</string>
+    <string name="page_numbers_format_localized">Sayfa {n} / {total}</string>
+    <string name="page_numbers_custom_label">Özel biçim</string>
+    <string name="page_numbers_custom_hint">Sayfa numarasının geleceği yere {n}, son numara için {total} yazın.</string>
+    <string name="page_numbers_format_error">Bir biçim girin, örneğin {n}.</string>
+    <string name="page_numbers_start_label">İlk numara</string>
+    <string name="page_numbers_start_error">1 ile 99999 arasında bir tam sayı girin.</string>
+    <string name="page_numbers_scope_label">Numaralanacak sayfalar</string>
+    <string name="page_numbers_button">Sayfa numarası ekle</string>
+    <plurals name="page_numbers_success">
+        <item quantity="one">%1$d sayfa numaralandı</item>
+        <item quantity="other">%1$d sayfa numaralandı</item>
+    </plurals>
 </resources>
