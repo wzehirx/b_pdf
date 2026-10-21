@@ -31,19 +31,18 @@
     <string name="err_range_reversed">\"%1$s\" aralığı tersten yazılmış. Önce küçük sayfa numarasını yazın, örneğin 2-5.</string>
     <string name="err_range_incomplete">\"%1$s\" aralığı eksik. İlk ve son sayfayı yazın, örneğin 2-5.</string>
     <string name="pick_files_pdf">PDF seç</string>
-    <string name="file_position">%1$d / %2$d</string>
+    <string name="file_position">%2$d dosyadan %1$d.</string>
     <string name="file_move_up_named">%1$s yukarı taşı</string>
     <string name="file_move_down_named">%1$s aşağı taşı</string>
     <string name="file_remove_named">%1$s kaldır</string>
     <string name="file_moved_announcement">%1$s %3$d dosyadan %2$d. sıraya taşındı</string>
     <string name="page_range_label">Sayfalar</string>
-    <string name="page_range_hint">Örneğin 1-3, 5. Belgede %1$d sayfa var.</string>
+    <plurals name="page_range_hint">
+        <item quantity="one">Örneğin 1-3, 5. Belgede %1$d sayfa var.</item>
+        <item quantity="other">Örneğin 1-3, 5. Belgede %1$d sayfa var.</item>
+    </plurals>
     <string name="password_title">Parola gerekli</string>
     <string name="password_label">Parola</string>
-    <string name="password_show">Parolayı göster</string>
-    <string name="password_hide">Parolayı gizle</string>
-    <string name="password_state_hidden">Parola gizli</string>
-    <string name="password_state_visible">Parola görünür</string>
     <string name="tool_merge_title">PDF birleştir</string>
     <string name="tool_merge_desc">Birden çok PDF dosyasını tek dosyada birleştirir.</string>
     <string name="tool_split_title">PDF böl</string>
@@ -82,4 +81,7 @@
     <string name="tool_repair_desc">Hasarlı bir PDF dosyasını onarmayı dener.</string>
     <string name="tool_viewer_title">Erişilebilir okuyucu</string>
     <string name="tool_viewer_desc">Bir PDF dosyasını metin olarak sayfa sayfa okur.</string>
+    <string name="password_toggle">Şifreyi göster</string>
+    <string name="password_state_visible">Görünür</string>
+    <string name="password_state_hidden">Gizli</string>
 </resources>

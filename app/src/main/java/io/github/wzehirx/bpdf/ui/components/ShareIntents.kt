@@ -1,5 +1,6 @@
 package io.github.wzehirx.bpdf.ui.components
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -32,7 +33,7 @@ fun Context.shareFile(uri: Uri, mimeType: String, chooserTitle: String): Boolean
         clipData = android.content.ClipData.newRawUri(null, uri)
     }
     val chooser = Intent.createChooser(send, chooserTitle).apply {
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (this@shareFile !is Activity) addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
     return try {
         startActivity(chooser)

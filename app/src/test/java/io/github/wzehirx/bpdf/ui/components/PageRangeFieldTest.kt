@@ -41,4 +41,10 @@ class PageRangeFieldTest {
         rule.onNode(hasError).assertDoesNotExist()
         rule.onNodeWithText("For example 1-3, 5. The document has 10 pages.", useUnmergedTree = true).assertIsDisplayed()
     }
+
+    @Test
+    fun hint_usesSingularForOnePage() {
+        rule.setContent { PageRangeField("", {}, pageCount = 1, error = null) }
+        rule.onNodeWithText("For example 1-3, 5. The document has 1 page.", useUnmergedTree = true).assertIsDisplayed()
+    }
 }

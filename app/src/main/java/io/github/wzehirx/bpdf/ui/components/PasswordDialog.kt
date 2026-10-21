@@ -10,6 +10,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +40,9 @@ fun PasswordDialog(
     var password by remember { mutableStateOf("") }
     var visible by remember { mutableStateOf(false) }
     val wrongMessage = stringResource(R.string.err_wrong_password)
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focus.requestFocus() }
+    val submit = { if (password.isNotEmpty()) onSubmit(password) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.password_title)) },
@@ -55,8 +61,8 @@ fun PasswordDialog(
                     },
                     visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = { onSubmit(password) }),
-                    modifier = Modifier.fillMaxWidth(),
+                    keyboardActions = KeyboardActions(onDone = { submit() }),
+                    modifier = Modifier.fillMaxWidth().focusRequester(focus),
                 )
                 val stateText = stringResource(
                     if (visible) R.string.password_state_visible else R.string.password_state_hidden,
@@ -65,12 +71,12 @@ fun PasswordDialog(
                     onClick = { visible = !visible },
                     modifier = Modifier.heightIn(min = 48.dp).semantics { stateDescription = stateText },
                 ) {
-                    Text(stringResource(if (visible) R.string.password_hide else R.string.password_show))
+                    Text(stringResource(R.string.password_toggle))
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSubmit(password) }, modifier = Modifier.heightIn(min = 48.dp)) {
+            TextButton(onClick = { submit() }, enabled = password.isNotEmpty(), modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.ok))
             }
         },

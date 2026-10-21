@@ -50,7 +50,8 @@ class OperationStatusPanelTest {
         rule.onNode(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo, ProgressBarRangeInfo(0.5f, 0f..1f)))
             .assertIsDisplayed()
         rule.onNodeWithText("Working… 50%").assertIsDisplayed()
-        rule.onNode(liveRegion(LiveRegionMode.Polite)).assertExists()
+        rule.onNode(liveRegion(LiveRegionMode.Polite)).assertDoesNotExist()
+        rule.onNode(liveRegion(LiveRegionMode.Assertive)).assertDoesNotExist()
     }
 
     @Test
@@ -65,9 +66,9 @@ class OperationStatusPanelTest {
     }
 
     @Test
-    fun failed_isAssertive_focusedAndOffersRetry() {
+    fun failed_isFocusedWithoutLiveRegion_andOffersRetry() {
         show(OperationState.Failed(PdfError.WrongPassword()))
-        rule.onNode(liveRegion(LiveRegionMode.Assertive)).assertExists()
+        rule.onNode(liveRegion(LiveRegionMode.Assertive)).assertDoesNotExist()
         rule.onNodeWithText("That password is incorrect. Try again.").assertIsFocused()
         rule.onNodeWithText("Retry").performClick()
         assertEquals(listOf("retry"), calls)
@@ -84,7 +85,7 @@ class OperationStatusPanelTest {
     fun success_showsText_focusesIt_andSaveShareWork() {
         show(OperationState.Success("out.pdf"))
         rule.onNodeWithText("Saved out.pdf").assertIsFocused()
-        rule.onNode(liveRegion(LiveRegionMode.Polite)).assertExists()
+        rule.onNode(liveRegion(LiveRegionMode.Polite)).assertDoesNotExist()
         rule.onNodeWithText("Save").performClick()
         rule.onNodeWithText("Share").performClick()
         assertEquals(listOf("save", "share"), calls)

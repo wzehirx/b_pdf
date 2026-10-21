@@ -15,19 +15,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.semantics
+import io.github.wzehirx.bpdf.core.a11y.rememberAnnouncer
 import androidx.compose.ui.unit.dp
 import io.github.wzehirx.bpdf.R
 import io.github.wzehirx.bpdf.core.work.OperationState
 
 /**
  * Shows progress / result / error for a long-running operation. Progress and success are
- * polite live regions, errors assertive; focus moves to the result text so screen-reader users
- * land on the outcome.
+ * announced once at start; focus (not a live region, to avoid double speech) moves to the
+ * result or error text so screen-reader users land on the outcome.
  */
 @Composable
 fun OperationStatusPanel(
@@ -39,12 +37,17 @@ fun OperationStatusPanel(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val resources = LocalContext.current.resources
+    val resources = LocalResources.current
     val focus = remember { FocusRequester() }
     val finished = state is OperationState.Success<*> || state is OperationState.Failed
     LaunchedEffect(if (finished) state else null) {
         if (finished) focus.requestFocus()
     }
+    // Announce the start once; progress itself is conveyed by the progress bar semantics.
+    val announce = rememberAnnouncer()
+    val workingText = stringResource(R.string.working)
+    val running = state is OperationState.Running
+    LaunchedEffect(running) { if (running) announce(workingText) }
     val resultModifier = Modifier.fillMaxWidth().focusRequester(focus).focusable()
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         when (state) {
@@ -57,7 +60,6 @@ fun OperationStatusPanel(
                     } else {
                         stringResource(R.string.working_percent, (p * 100).toInt())
                     },
-                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 )
                 if (p == null) {
                     LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -72,7 +74,7 @@ fun OperationStatusPanel(
                 Text(
                     text = successText(state.value),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = resultModifier.semantics { liveRegion = LiveRegionMode.Polite },
+                    modifier = resultModifier,
                 )
                 SaveResultActions(onSave = onSave, onShare = onShare)
             }
@@ -81,7 +83,7 @@ fun OperationStatusPanel(
                     text = state.error.toUserMessage(resources),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = resultModifier.semantics { liveRegion = LiveRegionMode.Assertive },
+                    modifier = resultModifier,
                 )
                 OutlinedButton(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp)) {
                     Text(stringResource(R.string.retry))

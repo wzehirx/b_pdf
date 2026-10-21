@@ -37,13 +37,12 @@
     <string name="file_remove_named">Remove %1$s</string>
     <string name="file_moved_announcement">%1$s moved to position %2$d of %3$d</string>
     <string name="page_range_label">Pages</string>
-    <string name="page_range_hint">For example 1-3, 5. The document has %1$d pages.</string>
+    <plurals name="page_range_hint">
+        <item quantity="one">For example 1-3, 5. The document has %1$d page.</item>
+        <item quantity="other">For example 1-3, 5. The document has %1$d pages.</item>
+    </plurals>
     <string name="password_title">Password required</string>
     <string name="password_label">Password</string>
-    <string name="password_show">Show password</string>
-    <string name="password_hide">Hide password</string>
-    <string name="password_state_hidden">Password hidden</string>
-    <string name="password_state_visible">Password visible</string>
     <string name="tool_merge_title">Merge PDFs</string>
     <string name="tool_merge_desc">Combine several PDF files into one.</string>
     <string name="tool_split_title">Split PDF</string>
@@ -82,4 +81,7 @@
     <string name="tool_repair_desc">Try to fix a damaged PDF.</string>
     <string name="tool_viewer_title">Accessible reader</string>
     <string name="tool_viewer_desc">Read a PDF page by page with text.</string>
+    <string name="password_toggle">Show password</string>
+    <string name="password_state_visible">Visible</string>
+    <string name="password_state_hidden">Hidden</string>
 </resources>

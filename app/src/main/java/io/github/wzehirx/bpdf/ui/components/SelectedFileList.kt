@@ -16,6 +16,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -48,39 +49,41 @@ fun SelectedFileList(
                 onMove(from, to)
                 announce(resources.getString(R.string.file_moved_announcement, file.displayName, to + 1, files.size))
             }
-            Card(Modifier.fillMaxWidth()) {
-                Row(
-                    Modifier
-                        .padding(start = 16.dp, end = 4.dp)
-                        .semantics(mergeDescendants = true) {}
-                        .reorderable(index, files.size, move) { onRemove(index) },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
-                        Text(file.displayName, style = MaterialTheme.typography.bodyLarge)
-                        Text(
-                            Formatter.formatShortFileSize(context, file.sizeBytes) + " · " +
-                                stringResource(R.string.file_position, index + 1, files.size),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                    IconButton(onClick = { move(index, index - 1) }, enabled = index > 0) {
-                        Icon(
-                            Icons.Default.KeyboardArrowUp,
-                            contentDescription = stringResource(R.string.file_move_up_named, file.displayName),
-                        )
-                    }
-                    IconButton(onClick = { move(index, index + 1) }, enabled = index < files.size - 1) {
-                        Icon(
-                            Icons.Default.KeyboardArrowDown,
-                            contentDescription = stringResource(R.string.file_move_down_named, file.displayName),
-                        )
-                    }
-                    IconButton(onClick = { onRemove(index) }) {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = stringResource(R.string.file_remove_named, file.displayName),
-                        )
+            key(file.file.path) {
+                Card(Modifier.fillMaxWidth()) {
+                    Row(
+                        Modifier
+                            .padding(start = 16.dp, end = 4.dp)
+                            .semantics(mergeDescendants = true) {}
+                            .reorderable(index, files.size, move) { onRemove(index) },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
+                            Text(file.displayName, style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                Formatter.formatShortFileSize(context, file.sizeBytes) + " · " +
+                                    stringResource(R.string.file_position, index + 1, files.size),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        IconButton(onClick = { move(index, index - 1) }, enabled = index > 0) {
+                            Icon(
+                                Icons.Default.KeyboardArrowUp,
+                                contentDescription = stringResource(R.string.file_move_up_named, file.displayName),
+                            )
+                        }
+                        IconButton(onClick = { move(index, index + 1) }, enabled = index < files.size - 1) {
+                            Icon(
+                                Icons.Default.KeyboardArrowDown,
+                                contentDescription = stringResource(R.string.file_move_down_named, file.displayName),
+                            )
+                        }
+                        IconButton(onClick = { onRemove(index) }) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = stringResource(R.string.file_remove_named, file.displayName),
+                            )
+                        }
                     }
                 }
             }
