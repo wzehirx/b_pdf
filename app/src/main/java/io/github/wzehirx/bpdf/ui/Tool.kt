@@ -62,5 +62,5 @@ enum class Tool(
     PAGE_NUMBERS("tool/page_numbers", R.string.tool_page_numbers_title, R.string.tool_page_numbers_desc, Icons.Default.DateRange, ToolCategory.EDIT, available = true),
     METADATA("tool/metadata", R.string.tool_metadata_title, R.string.tool_metadata_desc, Icons.Default.Info, ToolCategory.EDIT, available = true),
     REPAIR("tool/repair", R.string.tool_repair_title, R.string.tool_repair_desc, Icons.Default.Build, ToolCategory.EDIT, available = true),
-    VIEWER("tool/viewer", R.string.tool_viewer_title, R.string.tool_viewer_desc, Icons.Default.PlayArrow, ToolCategory.VIEW),
+    VIEWER("tool/viewer", R.string.tool_viewer_title, R.string.tool_viewer_desc, Icons.Default.PlayArrow, ToolCategory.VIEW, available = true),
 }

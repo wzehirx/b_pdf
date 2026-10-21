@@ -426,4 +426,35 @@
     <string name="text_copied">Metin kopyalandı</string>
     <string name="text_copy_failed">Metin kopyalanamadı. Bunun yerine dosya olarak kaydedin.</string>
     <string name="text_share_chooser_title">Metni paylaş</string>
+
+    <string name="err_source_unavailable">Bu belge açılamadı. Taşınmış ya da silinmiş olabilir veya uygulamanın erişimi kalkmış olabilir.</string>
+    <string name="viewer_instructions">Bir PDF\'yi sayfa sayfa okumak için seçin. Metin kipi, her sayfanın metnini kendi başlığı altında listeler.</string>
+    <string name="viewer_page_label">%1$d. sayfa, toplam %2$d</string>
+    <string name="viewer_previous">Önceki sayfa</string>
+    <string name="viewer_next">Sonraki sayfa</string>
+    <string name="viewer_go_to">Sayfaya git…</string>
+    <string name="viewer_text_mode">Metin kipine geç</string>
+    <string name="viewer_page_mode">Sayfa kipine geç</string>
+    <string name="viewer_zoom_in">Yakınlaştır</string>
+    <string name="viewer_zoom_out">Uzaklaştır</string>
+    <string name="viewer_zoom_value">Yakınlaştırma %%%1$d</string>
+    <string name="viewer_read_text">Sayfa metnini oku</string>
+    <string name="viewer_hide_text">Sayfa metnini gizle</string>
+    <string name="viewer_text_loading">Metin okunuyor…</string>
+    <string name="viewer_text_failed">Bu sayfanın metni okunamadı.</string>
+    <string name="viewer_page_failed">%1$d. sayfa çizilemedi.</string>
+    <string name="viewer_menu">Diğer seçenekler</string>
+    <string name="viewer_open_with">Araçla aç…</string>
+    <string name="viewer_removed_from_recents">Son kullanılanlar listesinden de kaldırıldı.</string>
+    <string name="viewer_goto_title">Sayfaya git</string>
+    <string name="viewer_goto_label">Sayfa numarası</string>
+    <string name="viewer_goto_hint">1 ile %1$d arasında bir sayı</string>
+    <string name="viewer_goto_empty">1 ile %1$d arasında bir sayfa numarası girin.</string>
+    <string name="viewer_goto_invalid">\"%1$s\" bu belgede bir sayfa değil. 1 ile %2$d arasında bir tam sayı girin.</string>
+    <string name="viewer_goto_confirm">Git</string>
+    <string name="home_recent_title">Son kullanılanlar</string>
+    <string name="home_recent_open">Okuyucuda aç</string>
+    <string name="home_recent_remove_action">Son kullanılanlardan kaldır</string>
+    <string name="home_recent_remove">%1$s dosyasını son kullanılanlardan kaldır</string>
+    <string name="home_recent_removed">%1$s son kullanılanlardan kaldırıldı</string>
 </resources>

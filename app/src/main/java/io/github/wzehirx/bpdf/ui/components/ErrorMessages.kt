@@ -3,6 +3,7 @@ package io.github.wzehirx.bpdf.ui.components
 import android.content.res.Resources
 import io.github.wzehirx.bpdf.R
 import io.github.wzehirx.bpdf.core.files.ExportFailed
+import io.github.wzehirx.bpdf.core.files.SourceUnavailable
 import io.github.wzehirx.bpdf.core.pdf.PdfError
 import io.github.wzehirx.bpdf.core.pdf.RangeErrorReason
 
@@ -26,5 +27,6 @@ fun PdfError.toMessage(res: Resources): String = when (this) {
 fun Throwable.toUserMessage(res: Resources): String = when (this) {
     is PdfError -> toMessage(res)
     is ExportFailed -> res.getString(R.string.err_export_failed)
+    is SourceUnavailable -> res.getString(R.string.err_source_unavailable)
     else -> res.getString(R.string.error_generic)
 }

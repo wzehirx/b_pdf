@@ -28,6 +28,7 @@ import io.github.wzehirx.bpdf.core.a11y.rememberAnnouncer
 import io.github.wzehirx.bpdf.core.pdf.NumberPosition
 import io.github.wzehirx.bpdf.core.pdf.PageScope
 import io.github.wzehirx.bpdf.core.work.OperationState
+import io.github.wzehirx.bpdf.ui.components.HandOffEffect
 import io.github.wzehirx.bpdf.ui.components.ChoiceRow
 import io.github.wzehirx.bpdf.ui.components.LabelledSlider
 import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
@@ -45,7 +46,12 @@ import kotlin.math.roundToInt
 
 /** Stateful entry point: wires the ViewModel to system pickers, saving and sharing. */
 @Composable
-fun PageNumbersScreen(onBack: () -> Unit, viewModel: PageNumbersViewModel = viewModel(factory = PageNumbersViewModel.Factory)) {
+fun PageNumbersScreen(
+    onBack: () -> Unit,
+    initialUri: Uri? = null,
+    viewModel: PageNumbersViewModel = viewModel(factory = PageNumbersViewModel.Factory),
+) {
+    HandOffEffect(initialUri) { viewModel.pickFile(listOf(it)) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val resources = LocalResources.current

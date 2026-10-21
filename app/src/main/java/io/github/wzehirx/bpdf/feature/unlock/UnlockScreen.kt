@@ -23,6 +23,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.wzehirx.bpdf.R
 import io.github.wzehirx.bpdf.core.a11y.rememberAnnouncer
 import io.github.wzehirx.bpdf.core.work.OperationState
+import io.github.wzehirx.bpdf.ui.components.HandOffEffect
 import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
@@ -34,7 +35,12 @@ import kotlinx.coroutines.launch
 
 /** Stateful entry point: wires the ViewModel to system pickers, saving and sharing. */
 @Composable
-fun UnlockScreen(onBack: () -> Unit, viewModel: UnlockViewModel = viewModel(factory = UnlockViewModel.Factory)) {
+fun UnlockScreen(
+    onBack: () -> Unit,
+    initialUri: Uri? = null,
+    viewModel: UnlockViewModel = viewModel(factory = UnlockViewModel.Factory),
+) {
+    HandOffEffect(initialUri) { viewModel.pickFile(listOf(it)) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val resources = LocalResources.current

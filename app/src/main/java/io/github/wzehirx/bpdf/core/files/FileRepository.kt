@@ -1,6 +1,7 @@
 package io.github.wzehirx.bpdf.core.files
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.core.content.FileProvider
@@ -17,6 +18,10 @@ class FileRepository(context: Context) {
     private val importsDir get() = File(context.cacheDir, "imports").apply { mkdirs() }
     private val sharedDir get() = File(context.cacheDir, "shared").apply { mkdirs() }
     private val cameraDir get() = File(context.cacheDir, "camera").apply { mkdirs() }
+
+    // Decrypted copies PdfRenderer reads from (thumbnails, viewer); normally deleted when closed,
+    // purged here when the app was killed first.
+    private val renderDirs get() = listOf("thumbnails", "viewer").map { File(context.cacheDir, it) }
 
     /** Copies the content behind [uri] into the app cache under a unique name. */
     suspend fun importToCache(uri: Uri, extension: String = "pdf"): ImportedFile =
@@ -35,6 +40,41 @@ class FileRepository(context: Context) {
             }
             ImportedFile(dest, name, dest.length())
         }
+
+    /**
+     * Asks the system to keep read access to [uri] across restarts, so it can be reopened from the
+     * recent files list. [intentFlags] are the flags of the intent that delivered the Uri (an
+     * "open with" request); the permission is only taken when they allow it. Pass null for a Uri
+     * from the document picker. Returns false, and never throws, when the Uri cannot be kept.
+     */
+    fun tryPersistReadPermission(uri: Uri, intentFlags: Int? = null): Boolean {
+        if (uri.scheme != "content") return false
+        if (intentFlags != null && intentFlags and Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION == 0) return false
+        return try {
+            context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            true
+        } catch (_: Exception) {
+            false // SecurityException, UnsupportedOperationException, IllegalArgumentException...
+        }
+    }
+
+    /** True when this app still holds a persisted read permission for [uri]. */
+    fun hasPersistedReadPermission(uri: Uri): Boolean =
+        try {
+            context.contentResolver.persistedUriPermissions.any { it.uri == uri && it.isReadPermission }
+        } catch (_: Exception) {
+            false
+        }
+
+    /** Gives back a permission taken with [tryPersistReadPermission]; the system caps how many an app may hold. */
+    fun releasePersistedPermission(uri: Uri) {
+        if (uri.scheme != "content") return
+        try {
+            context.contentResolver.releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        } catch (_: Exception) {
+            // Nothing was persisted for it.
+        }
+    }
 
     fun displayName(uri: Uri): String? {
         val fromProvider = runCatching {
@@ -85,7 +125,7 @@ class FileRepository(context: Context) {
 
     /** Deletes cache entries older than [maxAgeMillis]. */
     fun purgeStale(maxAgeMillis: Long, now: Long = System.currentTimeMillis()) {
-        for (dir in listOf(importsDir, sharedDir, cameraDir)) {
+        for (dir in listOf(importsDir, sharedDir, cameraDir) + renderDirs) {
             dir.listFiles().orEmpty()
                 .filter { now - it.lastModified() > maxAgeMillis }
                 .forEach { it.deleteRecursively() }
@@ -96,5 +136,6 @@ class FileRepository(context: Context) {
         importsDir.deleteRecursively()
         sharedDir.deleteRecursively()
         cameraDir.deleteRecursively()
+        renderDirs.forEach { it.deleteRecursively() }
     }
 }

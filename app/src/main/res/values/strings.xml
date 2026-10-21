@@ -426,4 +426,35 @@
     <string name="text_copied">Text copied</string>
     <string name="text_copy_failed">Could not copy the text. Save it as a file instead.</string>
     <string name="text_share_chooser_title">Share text</string>
+
+    <string name="err_source_unavailable">This document could not be opened. It may have been moved or deleted, or this app no longer has access to it.</string>
+    <string name="viewer_instructions">Choose a PDF to read it page by page. Text mode lists the text of every page under its own heading.</string>
+    <string name="viewer_page_label">Page %1$d of %2$d</string>
+    <string name="viewer_previous">Previous page</string>
+    <string name="viewer_next">Next page</string>
+    <string name="viewer_go_to">Go to page…</string>
+    <string name="viewer_text_mode">Switch to text mode</string>
+    <string name="viewer_page_mode">Switch to page mode</string>
+    <string name="viewer_zoom_in">Zoom in</string>
+    <string name="viewer_zoom_out">Zoom out</string>
+    <string name="viewer_zoom_value">Zoom %1$d%%</string>
+    <string name="viewer_read_text">Read page text</string>
+    <string name="viewer_hide_text">Hide page text</string>
+    <string name="viewer_text_loading">Reading the text…</string>
+    <string name="viewer_text_failed">The text of this page could not be read.</string>
+    <string name="viewer_page_failed">Page %1$d could not be drawn.</string>
+    <string name="viewer_menu">More options</string>
+    <string name="viewer_open_with">Open with tool…</string>
+    <string name="viewer_removed_from_recents">It was also removed from the recent files.</string>
+    <string name="viewer_goto_title">Go to page</string>
+    <string name="viewer_goto_label">Page number</string>
+    <string name="viewer_goto_hint">A number from 1 to %1$d</string>
+    <string name="viewer_goto_empty">Enter a page number from 1 to %1$d.</string>
+    <string name="viewer_goto_invalid">\"%1$s\" is not a page of this document. Enter a whole number from 1 to %2$d.</string>
+    <string name="viewer_goto_confirm">Go</string>
+    <string name="home_recent_title">Recent files</string>
+    <string name="home_recent_open">Open in reader</string>
+    <string name="home_recent_remove_action">Remove from recent files</string>
+    <string name="home_recent_remove">Remove %1$s from recent files</string>
+    <string name="home_recent_removed">%1$s removed from recent files</string>
 </resources>

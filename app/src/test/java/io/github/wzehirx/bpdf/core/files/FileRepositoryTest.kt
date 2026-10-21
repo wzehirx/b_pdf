@@ -166,4 +166,16 @@ class FileRepositoryTest {
         assertFalse(oldDir.exists())
         assertTrue(keep.exists())
     }
+
+    @Test
+    fun tryPersistReadPermission_neverThrows_andRefusesWhatCannotBeKept() {
+        // A file: Uri and an intent without the persistable flag are refused without touching the system.
+        assertFalse(repo.tryPersistReadPermission(Uri.fromFile(File("/tmp/x.pdf"))))
+        assertFalse(
+            repo.tryPersistReadPermission(Uri.parse("content://com.example/doc/1"), android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION),
+        )
+        // A picker Uri (no flags to check): whatever the system answers, it must not throw.
+        repo.tryPersistReadPermission(Uri.parse("content://com.example/doc/1"))
+        repo.releasePersistedPermission(Uri.parse("content://com.example/doc/1")) // also quiet
+    }
 }

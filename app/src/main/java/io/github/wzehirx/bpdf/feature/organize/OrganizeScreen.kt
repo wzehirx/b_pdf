@@ -39,6 +39,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.wzehirx.bpdf.R
 import io.github.wzehirx.bpdf.core.a11y.rememberAnnouncer
 import io.github.wzehirx.bpdf.core.work.OperationState
+import io.github.wzehirx.bpdf.ui.components.HandOffEffect
 import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PageGrid
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
@@ -63,7 +64,12 @@ internal fun OrganizeEvent.message(resources: Resources): String = when (this) {
 
 /** Stateful entry point: wires the ViewModel to system pickers, saving, sharing and announcements. */
 @Composable
-fun OrganizeScreen(onBack: () -> Unit, viewModel: OrganizeViewModel = viewModel(factory = OrganizeViewModel.Factory)) {
+fun OrganizeScreen(
+    onBack: () -> Unit,
+    initialUri: Uri? = null,
+    viewModel: OrganizeViewModel = viewModel(factory = OrganizeViewModel.Factory),
+) {
+    HandOffEffect(initialUri) { viewModel.pickFile(listOf(it)) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val resources = LocalResources.current

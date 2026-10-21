@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -16,12 +17,24 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.wzehirx.bpdf.core.a11y.rememberAnnouncer
+import io.github.wzehirx.bpdf.core.files.RecentFile
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
@@ -37,12 +50,36 @@ import io.github.wzehirx.bpdf.R
 import io.github.wzehirx.bpdf.ui.Tool
 import io.github.wzehirx.bpdf.ui.ToolCategory
 
+/** Stateful home: the tools plus the recent files from [HomeViewModel]. */
+@Composable
+fun HomeRoute(
+    onOpenTool: (Tool) -> Unit,
+    onOpenRecent: (RecentFile) -> Unit,
+    viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory),
+) {
+    val recents by viewModel.recents.collectAsStateWithLifecycle()
+    val resources = LocalResources.current
+    val announce = rememberAnnouncer()
+    HomeScreen(
+        onOpenTool = onOpenTool,
+        recents = recents,
+        onOpenRecent = onOpenRecent,
+        onRemoveRecent = {
+            viewModel.remove(it)
+            announce(resources.getString(R.string.home_recent_removed, it.name))
+        },
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onOpenTool: (Tool) -> Unit,
     modifier: Modifier = Modifier,
     isAvailable: (Tool) -> Boolean = { it.available },
+    recents: List<RecentFile> = emptyList(),
+    onOpenRecent: (RecentFile) -> Unit = {},
+    onRemoveRecent: (RecentFile) -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -64,6 +101,18 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            if (recents.isNotEmpty()) {
+                item(key = "recent_header", span = { GridItemSpan(maxLineSpan) }) {
+                    Text(
+                        text = stringResource(R.string.home_recent_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(top = 8.dp).semantics { heading() },
+                    )
+                }
+                items(recents, key = { "recent_${it.uri}" }, span = { GridItemSpan(maxLineSpan) }) { file ->
+                    RecentRow(file, onOpen = { onOpenRecent(file) }, onRemove = { onRemoveRecent(file) })
+                }
+            }
             ToolCategory.entries.forEach { category ->
                 item(key = "category_${category.name}", span = { GridItemSpan(maxLineSpan) }) {
                     Text(
@@ -75,6 +124,30 @@ fun HomeScreen(
                 items(Tool.entries.filter { it.category == category }, key = { "tool_${it.name}" }) { tool ->
                     ToolCard(tool, isAvailable(tool), onOpenTool)
                 }
+            }
+        }
+    }
+}
+
+/** One recent file: opens in the reader; can be removed with a screen-reader action or the visible button. */
+@Composable
+private fun RecentRow(file: RecentFile, onOpen: () -> Unit, onRemove: () -> Unit) {
+    val openLabel = stringResource(R.string.home_recent_open)
+    val removeAction = stringResource(R.string.home_recent_remove_action)
+    Card(Modifier.fillMaxWidth()) {
+        Row(Modifier.padding(start = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = file.name,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 48.dp)
+                    .clickable(onClickLabel = openLabel, role = Role.Button, onClick = onOpen)
+                    .semantics { customActions = listOf(CustomAccessibilityAction(removeAction) { onRemove(); true }) }
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
+            )
+            IconButton(onClick = onRemove) {
+                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.home_recent_remove, file.name))
             }
         }
     }

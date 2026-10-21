@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import android.graphics.Bitmap
+import io.github.wzehirx.bpdf.ui.components.HandOffEffect
 import io.github.wzehirx.bpdf.ui.components.PageChooser
 import io.github.wzehirx.bpdf.ui.components.rememberPageThumbnails
 import androidx.compose.ui.Modifier
@@ -43,8 +44,10 @@ import kotlinx.coroutines.launch
 fun PageSelectScreen(
     mode: PageSelectMode,
     onBack: () -> Unit,
+    initialUri: Uri? = null,
     viewModel: PageSelectViewModel = viewModel(key = mode.name, factory = PageSelectViewModel.factory(mode)),
 ) {
+    HandOffEffect(initialUri) { viewModel.pickFile(listOf(it)) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val resources = LocalResources.current
