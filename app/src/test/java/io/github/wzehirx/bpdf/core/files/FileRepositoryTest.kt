@@ -147,4 +147,23 @@ class FileRepositoryTest {
         assertFalse(imp.file.exists())
         assertFalse(out.exists())
     }
+
+    @Test
+    fun purgeStale_deletesOnlyOldEntriesInImportsAndShared() {
+        // Real timestamps: the Application's own background purge (24h) must not touch these.
+        val now = System.currentTimeMillis()
+        val hour = 3_600_000L
+        val imports = File(context.cacheDir, "imports").apply { mkdirs() }
+        val oldImport = File(imports, "old.pdf").apply { writeBytes(byteArrayOf(1)); setLastModified(now - 2 * hour) }
+        val newImport = File(imports, "new.pdf").apply { writeBytes(byteArrayOf(1)); setLastModified(now - hour / 2) }
+        val oldDir = File(File(context.cacheDir, "shared"), "uuid").apply { mkdirs() }
+        File(oldDir, "x.pdf").writeBytes(byteArrayOf(1))
+        oldDir.setLastModified(now - 2 * hour)
+        val keep = File(context.cacheDir, "other.txt").apply { writeBytes(byteArrayOf(1)); setLastModified(now - 2 * hour) }
+        repo.purgeStale(maxAgeMillis = hour, now = now)
+        assertFalse(oldImport.exists())
+        assertTrue(newImport.exists())
+        assertFalse(oldDir.exists())
+        assertTrue(keep.exists())
+    }
 }

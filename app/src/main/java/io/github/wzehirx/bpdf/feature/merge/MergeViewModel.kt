@@ -17,6 +17,8 @@ import io.github.wzehirx.bpdf.core.work.OperationState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,7 +72,12 @@ class MergeViewModel(
     /** Emits once each time [save] has written the result to its target. */
     val savedEvents: Flow<Unit> = saved.receiveAsFlow()
 
+    private val busy: Boolean
+        get() = local.value.pendingImports > 0 || runner.state.value is OperationState.Running
+
+    /** Ignored while importing or merging: the inputs must not change under a running operation. */
     fun addFiles(uris: List<Uri>) {
+        if (busy) return
         resetResult()
         local.update { it.copy(pendingImports = it.pendingImports + 1) }
         viewModelScope.launch {
@@ -91,26 +98,31 @@ class MergeViewModel(
 
     fun move(from: Int, to: Int) {
         val files = local.value.files
-        if (from !in files.indices || to !in files.indices || from == to) return
+        if (busy || from !in files.indices || to !in files.indices || from == to) return
         resetResult()
         local.update { it.copy(files = it.files.toMutableList().apply { add(to, removeAt(from)) }) }
     }
 
     fun remove(index: Int) {
-        if (index !in local.value.files.indices) return
+        val files = local.value.files
+        if (busy || index !in files.indices) return
         resetResult()
         local.update { it.copy(files = it.files.filterIndexed { i, _ -> i != index }) }
+        files[index].file.delete()
     }
 
     fun merge() {
         val files = local.value.files
-        if (files.size < 2) return
-        local.update { it.copy(error = null) }
+        if (busy || files.size < 2) return
+        resetResult()
         val out = fileRepository.newOutputFile("pdf")
         val name = suggestName(files.first().displayName, "merged", "pdf")
         runner.start { progress ->
+            val context = currentCoroutineContext()
             try {
-                val pages = MergeOperation.run(files.map { it.file }, out, progress = progress)
+                val pages = MergeOperation.run(
+                    files.map { it.file }, out, progress = progress, isCancelled = { !context.isActive },
+                )
                 MergeResult(out, pages, files.size, name)
             } catch (t: Throwable) {
                 out.delete()
@@ -149,8 +161,17 @@ class MergeViewModel(
     fun clearResult() = resetResult()
 
     private fun resetResult() {
+        // Drop the result (and its output file) the inputs no longer match.
+        (runner.state.value as? OperationState.Success)?.value?.file?.delete()
         runner.reset()
         local.update { it.copy(error = null) }
+    }
+
+    override fun onCleared() {
+        val output = (runner.state.value as? OperationState.Success)?.value?.file
+        runner.cancel()
+        output?.delete()
+        local.value.files.forEach { it.file.delete() }
     }
 
     companion object {

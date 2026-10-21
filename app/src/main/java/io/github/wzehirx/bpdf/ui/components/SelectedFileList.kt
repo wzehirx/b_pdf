@@ -39,6 +39,7 @@ fun SelectedFileList(
     onMove: (from: Int, to: Int) -> Unit,
     onRemove: (index: Int) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -55,7 +56,7 @@ fun SelectedFileList(
                         Modifier
                             .padding(start = 16.dp, end = 4.dp)
                             .semantics(mergeDescendants = true) {}
-                            .reorderable(index, files.size, move) { onRemove(index) },
+                            .then(if (enabled) Modifier.reorderable(index, files.size, move) { onRemove(index) } else Modifier),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
@@ -66,19 +67,19 @@ fun SelectedFileList(
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }
-                        IconButton(onClick = { move(index, index - 1) }, enabled = index > 0) {
+                        IconButton(onClick = { move(index, index - 1) }, enabled = enabled && index > 0) {
                             Icon(
                                 Icons.Default.KeyboardArrowUp,
                                 contentDescription = stringResource(R.string.file_move_up_named, file.displayName),
                             )
                         }
-                        IconButton(onClick = { move(index, index + 1) }, enabled = index < files.size - 1) {
+                        IconButton(onClick = { move(index, index + 1) }, enabled = enabled && index < files.size - 1) {
                             Icon(
                                 Icons.Default.KeyboardArrowDown,
                                 contentDescription = stringResource(R.string.file_move_down_named, file.displayName),
                             )
                         }
-                        IconButton(onClick = { onRemove(index) }) {
+                        IconButton(onClick = { onRemove(index) }, enabled = enabled) {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = stringResource(R.string.file_remove_named, file.displayName),

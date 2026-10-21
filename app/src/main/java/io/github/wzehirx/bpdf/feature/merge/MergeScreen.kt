@@ -91,6 +91,7 @@ fun MergeScreenContent(
             mimeTypes = arrayOf("application/pdf"),
             multiple = true,
             onPicked = onAddFiles,
+            enabled = !busy,
         )
         if (state.importing) {
             Text(
@@ -98,7 +99,7 @@ fun MergeScreenContent(
                 modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
             )
         }
-        SelectedFileList(files = state.files, onMove = onMove, onRemove = onRemove)
+        SelectedFileList(files = state.files, onMove = onMove, onRemove = onRemove, enabled = !busy)
         Button(
             onClick = onMerge,
             enabled = !tooFew && !busy,
@@ -110,8 +111,7 @@ fun MergeScreenContent(
         }
         OperationStatusPanel(
             state = state.operation,
-            successText = { value ->
-                val result = value as MergeResult
+            successText = { result ->
                 resources.getQuantityString(R.plurals.merge_success, result.pageCount, result.fileCount, result.pageCount)
             },
             onSave = onSave,

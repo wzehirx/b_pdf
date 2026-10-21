@@ -28,9 +28,9 @@ import io.github.wzehirx.bpdf.core.work.OperationState
  * result or error text so screen-reader users land on the outcome.
  */
 @Composable
-fun OperationStatusPanel(
-    state: OperationState<*>,
-    successText: (Any?) -> String,
+fun <T> OperationStatusPanel(
+    state: OperationState<T>,
+    successText: (T) -> String,
     onSave: () -> Unit,
     onShare: () -> Unit,
     onCancel: () -> Unit,
@@ -70,7 +70,7 @@ fun OperationStatusPanel(
                     Text(stringResource(R.string.cancel))
                 }
             }
-            is OperationState.Success<*> -> {
+            is OperationState.Success -> {
                 Text(
                     text = successText(state.value),
                     style = MaterialTheme.typography.titleMedium,

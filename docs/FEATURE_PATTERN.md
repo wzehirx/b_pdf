@@ -11,11 +11,15 @@ Merge (`feature/merge`, `core/pdf/MergeOperation.kt`) is the reference. Copy its
 - Constructor: `FileRepository` plus `ioDispatcher: CoroutineDispatcher = Dispatchers.IO`. Expose `companion object { val Factory = viewModelFactory { initializer { ... (this[APPLICATION_KEY] as BPdfApp).container.fileRepository } } }`.
 - One `StateFlow<<X>UiState>` (inputs, `importing`, `operation: OperationState<Result>`); intents are plain functions (`addFiles`, `move`, `remove`, `merge`, `cancel`, `save`, `clearResult`, `retry`).
 - Long work goes through `OperationRunner`; output file from `fileRepository.newOutputFile("pdf")`, deleted on failure. Import/save failures become a `Failed` state, never a crash. Changing inputs resets a stale result.
+- Cache hygiene: `remove()` deletes the input's cache copy; `resetResult()` deletes the discarded output (any input change, `clearResult`, or a new run); `onCleared()` deletes all imports and the output; a failed run deletes its own output. `BPdfApp` also purges cache entries older than 24h at start.
+- Busy guard: `move/remove/addFiles/merge` return early while importing or `Running`, and the UI disables the picker, row buttons and custom actions (`enabled = !busy`), so a late import error can never replace a running panel.
+- Cancellation: the engine takes `isCancelled: () -> Boolean` (the VM passes `{ !context.isActive }`, captured from `currentCoroutineContext()` inside `runner.start`), polls it between inputs and after saving, throws `CancellationException` and leaves no output. Only parsing maps to `PdfError.Corrupt`; disk/temp IO maps to `PdfError.Io`.
 - One-shot UI effects (e.g. "saved") are a `Flow` backed by a buffered `Channel`, collected in the screen.
 
 ## Screen
 - Stateful `<X>Screen(onBack, viewModel = viewModel(factory = ...Factory))` wires pickers (`rememberSaveDocumentLauncher`, `Context.shareFile`), the announcer and the ViewModel.
 - Stateless `<X>ScreenContent(state, callbacks...)` holds all layout: `ToolScaffold` -> instructions -> `PickFilesButton` -> `SelectedFileList` -> primary action (disabled with a `stateDescription` that says why) -> `OperationStatusPanel`.
+- `OperationStatusPanel<T>` is typed: `successText = { result -> ... }` receives the result. It moves focus to the result or error text; "Saved" is announced from `savedEvents`.
 - Result text and success announcements come from string resources; the success summary is a plurals resource.
 
 ## Wiring
@@ -28,3 +32,10 @@ Merge (`feature/merge`, `core/pdf/MergeOperation.kt`) is the reference. Copy its
 - Engine: real PDFs from `TestPdfs`; assert page counts and per-page text.
 - ViewModel: `Dispatchers.setMain(UnconfinedTestDispatcher())`, inject the same dispatcher, real `FileRepository` under Robolectric, `file://` Uris. Import/export hop to the real IO dispatcher, so wait on the state (`runBlocking { withTimeout { state.first { ... } } }`).
 - Screen: drive `<X>ScreenContent` with hand-built state; assert custom actions, disabled state + `stateDescription`, and callbacks. Use `performScrollTo()` before clicking below the fold.
+- Custom actions: read `SemanticsActions.CustomActions` from the row node, pick the action by label, call `rule.runOnUiThread { action.action() }`, and assert the callback (`onMove(1, 0)`, `onRemove(1)`). Also assert the first row has no "Move up" and the last no "Move down", and a busy state removes all actions.
+- Also test a `Failed` state: error text focused, Retry fires the callback.
+
+## Single-input variant (one PDF in, one PDF out, e.g. Rotate)
+- Engine: `run(input: File, out: File, <options>, password: String? = null, progress, isCancelled): Int` (page count). Load with `PdfLoader.load(input, password)`; same Io/Corrupt mapping and delete-on-failure.
+- State: `file: ImportedFile?` instead of a list, plus option fields; no reorder list, a single-file row with Remove/Replace. Picker is `multiple = false`; busy guard and cache cleanup are the same (replacing or removing the file deletes the old copy).
+- Page count comes from the engine result (or `PdfLoader.pageCount` right after import, to validate page ranges). Password: on `PdfError.PasswordRequired`/`WrongPassword` show `PasswordDialog`, keep the entered password in the ViewModel and rerun with it (Task 13 wires this for all tools).

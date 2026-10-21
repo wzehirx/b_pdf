@@ -67,4 +67,55 @@ class MergeOperationTest {
             // expected
         }
     }
+
+    @Test
+    fun merge_cancelledBetweenInputs_stopsAndLeavesNoOutput() {
+        val files = List(3) { TestPdfs.create(tmp.root, 1) }
+        val out = File(tmp.root, "out.pdf")
+        var checks = 0
+        try {
+            MergeOperation.run(files, out, isCancelled = { ++checks > 1 })
+            org.junit.Assert.fail("expected cancellation")
+        } catch (e: java.util.concurrent.CancellationException) {
+            // expected
+        }
+        assertEquals(2, checks)
+        assertTrue(!out.exists())
+    }
+
+    @Test
+    fun merge_cancelledAfterSave_deletesWrittenOutput() {
+        val files = List(2) { TestPdfs.create(tmp.root, 1) }
+        val out = File(tmp.root, "out.pdf")
+        var checks = 0
+        try {
+            MergeOperation.run(files, out, isCancelled = { ++checks > files.size })
+            org.junit.Assert.fail("expected cancellation")
+        } catch (e: java.util.concurrent.CancellationException) {
+            // expected
+        }
+        assertTrue(!out.exists())
+    }
+
+    @Test
+    fun merge_unwritableOutput_throwsIoNotCorrupt() {
+        val files = List(2) { TestPdfs.create(tmp.root, 1) }
+        try {
+            MergeOperation.run(files, File(tmp.root, "no-such-dir/out.pdf"))
+            org.junit.Assert.fail("expected Io")
+        } catch (e: PdfError.Io) {
+            // expected
+        }
+    }
+
+    @Test
+    fun merge_corruptSource_throwsCorrupt() {
+        val bad = File(tmp.root, "bad.pdf").apply { writeText("nope") }
+        try {
+            MergeOperation.run(listOf(TestPdfs.create(tmp.root, 1), bad), File(tmp.root, "out.pdf"))
+            org.junit.Assert.fail("expected Corrupt")
+        } catch (e: PdfError.Corrupt) {
+            // expected
+        }
+    }
 }

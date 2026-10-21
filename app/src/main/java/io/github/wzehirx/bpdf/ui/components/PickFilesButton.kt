@@ -20,6 +20,7 @@ fun PickFilesButton(
     multiple: Boolean,
     onPicked: (List<Uri>) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     val current by rememberUpdatedState(onPicked)
     val single = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
@@ -29,6 +30,7 @@ fun PickFilesButton(
         if (it.isNotEmpty()) current(it)
     }
     Button(
+        enabled = enabled,
         onClick = { if (multiple) many.launch(mimeTypes) else single.launch(mimeTypes) },
         modifier = modifier.heightIn(min = 48.dp),
     ) {

@@ -72,6 +72,15 @@ class FileRepository(context: Context) {
     /** A fresh, unique output file in the shareable `shared/` directory. */
     fun newOutputFile(ext: String): File = File(sharedDir, "${UUID.randomUUID()}.$ext")
 
+    /** Deletes cache entries older than [maxAgeMillis]. */
+    fun purgeStale(maxAgeMillis: Long, now: Long = System.currentTimeMillis()) {
+        for (dir in listOf(importsDir, sharedDir)) {
+            dir.listFiles().orEmpty()
+                .filter { now - it.lastModified() > maxAgeMillis }
+                .forEach { it.deleteRecursively() }
+        }
+    }
+
     fun clearCache() {
         importsDir.deleteRecursively()
         sharedDir.deleteRecursively()
