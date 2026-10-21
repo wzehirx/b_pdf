@@ -50,6 +50,12 @@ class PasswordDialogTest {
     }
 
     @Test
+    fun title_isAHeading() {
+        show()
+        rule.onNode(androidx.compose.ui.test.hasText("Password required") and androidx.compose.ui.test.isHeading()).assertExists()
+    }
+
+    @Test
     fun toggle_hasFixedLabelAndStateDescription() {
         show()
         fun state() = rule.onNodeWithText("Show password").fetchSemanticsNode().config

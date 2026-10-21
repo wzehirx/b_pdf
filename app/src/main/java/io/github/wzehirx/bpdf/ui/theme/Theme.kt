@@ -10,7 +10,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val LightColors = lightColorScheme(
+internal val LightColors = lightColorScheme(
     primary = BrandRed,
     onPrimary = BrandOnRed,
     primaryContainer = BrandRedContainer,
@@ -21,7 +21,7 @@ private val LightColors = lightColorScheme(
     onSurface = OnSurfaceLight,
 )
 
-private val DarkColors = darkColorScheme(
+internal val DarkColors = darkColorScheme(
     primary = BrandRedDark,
     onPrimary = BrandOnRedDark,
     primaryContainer = BrandRedContainerDark,

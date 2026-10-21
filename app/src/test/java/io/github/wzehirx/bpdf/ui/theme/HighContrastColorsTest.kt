@@ -34,11 +34,28 @@ class HighContrastColorsTest {
         "outline/background" to (c.outline to c.background),
     )
 
-    private fun assertAtLeast7(name: String, c: ColorScheme) =
-        pairs(c).forEach { (pair, colors) ->
+    private fun assertAtLeast(min: Double, name: String, c: ColorScheme, skip: Set<String> = emptySet()) =
+        pairs(c).filterKeys { it !in skip }.forEach { (pair, colors) ->
             val r = ratio(colors.first, colors.second)
-            assertTrue("$name $pair is ${"%.2f".format(r)}:1, needs 7:1", r >= 7.0)
+            assertTrue("$name $pair is ${"%.2f".format(r)}:1, needs $min:1", r >= min)
         }
+
+    private fun assertAtLeast7(name: String, c: ColorScheme) = assertAtLeast(7.0, name, c)
+
+    // Pairs that only exist for text drawn on a surface; outline is a border (3:1 for non-text, checked separately).
+    private val borderOnly = setOf("outline/background")
+
+    @Test
+    fun brandLight_meetsAA() = assertAtLeast(4.5, "brand light", LightColors, borderOnly)
+
+    @Test
+    fun brandDark_meetsAA() = assertAtLeast(4.5, "brand dark", DarkColors, borderOnly)
+
+    @Test
+    fun brandBorders_meetNonTextContrast() {
+        assertTrue(ratio(LightColors.outline, LightColors.background) >= 3.0)
+        assertTrue(ratio(DarkColors.outline, DarkColors.background) >= 3.0)
+    }
 
     @Test
     fun highContrastLight_meetsAAA() = assertAtLeast7("light", HighContrastLightColors)

@@ -715,7 +715,7 @@ private fun GoToPageDialog(count: Int, current: Int, onConfirm: (page: Int) -> U
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.viewer_goto_title)) },
+        title = { Text(stringResource(R.string.viewer_goto_title), Modifier.semantics { heading() }) },
         text = {
             OutlinedTextField(
                 value = text,

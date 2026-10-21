@@ -11,6 +11,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.semantics.heading
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -60,7 +61,7 @@ fun PasswordDialog(
     val submit = { if (password.isNotEmpty() && !checking) onSubmit(password) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.password_title)) },
+        title = { Text(stringResource(R.string.password_title), Modifier.semantics { heading() }) },
         text = {
             // Inside the dialog's own composition so the requester is attached before use.
             LaunchedEffect(Unit) {

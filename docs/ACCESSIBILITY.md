@@ -16,6 +16,27 @@ b PDF is designed so that a blind or low-vision user can complete every task wit
 
 All strings must exist in English and Turkish.
 
+## Audit for 1.0.0
+
+Every screen was checked against the nine items above (screen by screen, by reading the code and with Robolectric tests). Three suites now guard the audit: `AccessibilityAuditTest` and `ToolScreensAuditTest` check that on every screen each interactive element has an accessible name and a touch target of at least 48dp and that the screen has a heading, and `FontScale200Test` renders Home, Merge, Organize, Viewer and Settings at 200% font scale on a 360x640dp phone and checks that the content scrolls and that the key buttons can be scrolled into view and are displayed. `HighContrastColorsTest` computes contrast ratios for the colour schemes, and `TurkishSlashStringsTest` fails when a Turkish string that can be spoken contains a "/".
+
+| Screen | Result | Fixes |
+| --- | --- | --- |
+| Home | Pass. One heading per category, every tool card reads "title. description", recent files have a remove custom action plus a visible button, the new Settings action is labelled and 48dp. | None. |
+| Viewer | Pass. Page label "Page N of M" on each page, next, previous, go to page and text mode as custom actions and as buttons, zoom buttons next to pinch, controls scroll at large font sizes. | The "Go to page" dialog title is now a heading (see below). |
+| Settings | Pass. Section headings, radio groups with selected state, high contrast switch with an On or Off state text, Clear cache result spoken once. | New screen, built to the checklist. |
+| About | Pass. Headings, each license row is one button that names the project and license and opens its page. | New screen, built to the checklist. |
+| Merge, Images to PDF | Pass. Move up, Move down, Move to top, Move to bottom and Remove as custom actions and visible buttons; position announced after a move. | None. |
+| Organize pages | Pass. Each page cell says "Page N of M" with rotation and selection; Move up, Move down, Move to position, Rotate left, Rotate right, Duplicate and Delete as custom actions and in a menu. | The "Move page" dialog title is now a heading. The Turkish page label read "Sayfa 2 / 7", which a screen reader says as "slash"; it is now "2. sayfa, toplam 7" (also in the page grids of the other page tools). |
+| Split, Remove pages, Extract pages, Rotate, PDF to images, PDF to text, Text recognition (OCR), Watermark, Page numbers | Pass. Page range field with a specific, localized error, optional page grid, progress, result and error take focus. | Turkish page labels in the page grid no longer contain "/" (see Organize pages). |
+| Protect, Unlock, Sign, Compress, Metadata, Repair | Pass. Labelled fields and switches with state text; Sign has a typed signature (the default) so drawing is never required, and the drawing box says whether it is empty. | None. |
+| Password dialog (all tools) | Pass after fix. | The dialog title is now a heading; Material 3 does not mark it. |
+
+Decisions recorded by the audit:
+
+- Errors take focus and are read from there, and are not also an assertive live region, because a live region on a focused node makes TalkBack read the message twice. `OperationStatusPanel` pins this in a test.
+- Colour: the default and high-contrast schemes are checked in tests (4.5 to 1 for the default brand colors, 7 to 1 for high contrast). With dynamic color on Android 12 and later the wallpaper colors come from the system, so high contrast is the setting to use when more contrast is needed.
+
 ## Manual TalkBack test procedure
 
 Run this for every new or changed screen, in English and in Turkish.

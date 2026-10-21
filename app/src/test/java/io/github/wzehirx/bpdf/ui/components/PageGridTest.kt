@@ -181,9 +181,9 @@ class PageGridTest {
     @Config(qualifiers = "tr")
     fun turkishLabels() {
         show(selected = setOf(0), rotations = mapOf(1 to 90))
-        assertEquals("Seçili", cell("Sayfa 1 / 3").state())
-        assertEquals("Seçili değil", cell("Sayfa 3 / 3").state())
-        cell("Sayfa 2 / 3, 90° döndürülmüş").assertExists()
+        assertEquals("Seçili", cell("1. sayfa, toplam 3").state())
+        assertEquals("Seçili değil", cell("3. sayfa, toplam 3").state())
+        cell("2. sayfa, toplam 3, 90° döndürülmüş").assertExists()
         rule.onNodeWithText("Tümünü seç").assertExists()
         rule.onNodeWithText("Seçimi temizle").assertExists()
         rule.onNodeWithText("1 sayfa seçili").assertExists()

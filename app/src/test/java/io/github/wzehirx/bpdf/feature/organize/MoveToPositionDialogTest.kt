@@ -41,6 +41,7 @@ class MoveToPositionDialogTest {
     fun opensWithTheCurrentPosition() {
         show()
         rule.onNodeWithText("Move page 2").assertExists()
+        rule.onNode(androidx.compose.ui.test.hasText("Move page 2") and androidx.compose.ui.test.isHeading()).assertExists()
         rule.onNodeWithText("Enter a number from 1 to 5.").assertExists()
     }
 

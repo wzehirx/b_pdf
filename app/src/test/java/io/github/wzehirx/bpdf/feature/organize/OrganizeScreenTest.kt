@@ -271,7 +271,7 @@ class OrganizeScreenTest {
         show(threePages)
         assertEquals(
             listOf("Yukarı taşı", "Aşağı taşı", "Konuma taşı…", "Sola döndür", "Sağa döndür", "Çoğalt", "Sil"),
-            cell("Sayfa 2 / 3").actions().map { it.label },
+            cell("2. sayfa, toplam 3").actions().map { it.label },
         )
         rule.onNodeWithText("Geri al").assertExists()
         val resources = ApplicationProvider.getApplicationContext<android.content.Context>().resources

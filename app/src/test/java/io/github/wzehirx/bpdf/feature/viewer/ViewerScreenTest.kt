@@ -153,6 +153,7 @@ class ViewerScreenTest {
         show(loaded(page = 0))
         actionsOf("Page 1 of 5").run("Go to page…")
         rule.onNodeWithText("Go to page").assertExists()
+        rule.onNode(hasText("Go to page") and isHeading()).assertExists()
         rule.onNode(hasSetTextAction()).performTextReplacement("4")
         rule.onNodeWithText("Go").performClick()
         assertEquals(listOf(3), gotos)
