@@ -44,6 +44,7 @@
     </plurals>
     <string name="password_title">Parola gerekli</string>
     <string name="password_label">Parola</string>
+    <string name="password_prompt_for">\"%1$s\" için parolayı girin.</string>
     <string name="tool_merge_title">PDF birleştir</string>
     <string name="tool_merge_desc">Birden çok PDF dosyasını tek dosyada birleştirir.</string>
     <string name="tool_split_title">PDF böl</string>
@@ -82,7 +83,7 @@
     <string name="tool_repair_desc">Hasarlı bir PDF dosyasını onarmayı dener.</string>
     <string name="tool_viewer_title">Erişilebilir okuyucu</string>
     <string name="tool_viewer_desc">Bir PDF dosyasını metin olarak sayfa sayfa okur.</string>
-    <string name="password_toggle">Şifreyi göster</string>
+    <string name="password_toggle">Parolayı göster</string>
     <string name="password_state_visible">Görünür</string>
     <string name="password_state_hidden">Gizli</string>
     <string name="merge_instructions">İki veya daha fazla PDF dosyası ekleyin, istediğiniz sıraya koyun ve tek bir belgede birleştirin.</string>
@@ -268,5 +269,33 @@
     <plurals name="images_added_announcement">
         <item quantity="one">%1$d resim eklendi</item>
         <item quantity="other">%1$d resim eklendi</item>
+    </plurals>
+    <string name="protect_instructions">Bir PDF seçin, parola belirleyin ve dosyayı açanların neler yapabileceğine karar verin. Dosyayı açan herkes parolayı girmek zorundadır.</string>
+    <string name="protect_password_label">Parola</string>
+    <string name="protect_confirm_label">Parolayı doğrulayın</string>
+    <string name="protect_owner_label">Sahip parolası (isteğe bağlı)</string>
+    <string name="protect_owner_hint">Bu izinleri daha sonra değiştirmenizi sağlar. İzinlerin sabit kalması için boş bırakın.</string>
+    <string name="protect_show_passwords">Parolaları göster</string>
+    <string name="protect_permissions_label">İzin verilen işlemler</string>
+    <string name="protect_perm_print">Yazdırma</string>
+    <string name="protect_perm_copy">Metin ve resimleri kopyalama</string>
+    <string name="protect_perm_modify">Belgeyi değiştirme</string>
+    <string name="protect_perm_allowed">İzinli</string>
+    <string name="protect_perm_blocked">İzinli değil</string>
+    <string name="protect_error_empty">Bir parola girin.</string>
+    <string name="protect_error_mismatch">İki parola eşleşmiyor. İki alana da aynı parolayı yazın.</string>
+    <string name="protect_button">Koru</string>
+    <string name="protect_need_file">Önce bir PDF seçin</string>
+    <plurals name="protect_success">
+        <item quantity="one">%1$d sayfalık PDF korundu. Parolayı güvende tutun, geri getirilemez.</item>
+        <item quantity="other">%1$d sayfalık PDF korundu. Parolayı güvende tutun, geri getirilemez.</item>
+    </plurals>
+    <string name="unlock_instructions">Parola korumalı bir PDF seçin ve parolasını girin. Parolasız açılan bir kopya elde edersiniz.</string>
+    <string name="unlock_button">Parolayı kaldır</string>
+    <string name="unlock_need_file">Önce bir PDF seçin</string>
+    <string name="unlock_not_protected">Bu PDF\'nin parolası ve kısıtlaması yok, kaldırılacak bir şey yok.</string>
+    <plurals name="unlock_success">
+        <item quantity="one">%1$d sayfalık PDF\'nin parolası kaldırıldı</item>
+        <item quantity="other">%1$d sayfalık PDF\'nin parolası kaldırıldı</item>
     </plurals>
 </resources>

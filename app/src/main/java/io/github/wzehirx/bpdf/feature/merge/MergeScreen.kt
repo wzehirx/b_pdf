@@ -23,6 +23,7 @@ import io.github.wzehirx.bpdf.R
 import io.github.wzehirx.bpdf.core.a11y.rememberAnnouncer
 import io.github.wzehirx.bpdf.core.work.OperationState
 import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
+import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SelectedFileList
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
@@ -63,6 +64,8 @@ fun MergeScreen(onBack: () -> Unit, viewModel: MergeViewModel = viewModel(factor
             }
         },
         onRetry = viewModel::retry,
+        onSubmitPassword = viewModel::submitPassword,
+        onDismissPassword = viewModel::dismissPassword,
     )
 }
 
@@ -79,11 +82,14 @@ fun MergeScreenContent(
     onSave: () -> Unit,
     onShare: () -> Unit,
     onRetry: () -> Unit,
+    onSubmitPassword: (String) -> Unit = {},
+    onDismissPassword: () -> Unit = {},
 ) {
     val resources = LocalResources.current
     val needTwo = stringResource(R.string.merge_need_two_files)
     val tooFew = state.files.size < 2
     val busy = state.importing || state.saving || state.operation is OperationState.Running
+    PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_merge_title), onBack = onBack) {
         Text(stringResource(R.string.merge_instructions))
         PickFilesButton(

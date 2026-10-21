@@ -44,6 +44,7 @@
     </plurals>
     <string name="password_title">Password required</string>
     <string name="password_label">Password</string>
+    <string name="password_prompt_for">Enter the password for \"%1$s\".</string>
     <string name="tool_merge_title">Merge PDFs</string>
     <string name="tool_merge_desc">Combine several PDF files into one.</string>
     <string name="tool_split_title">Split PDF</string>
@@ -268,5 +269,33 @@
     <plurals name="images_added_announcement">
         <item quantity="one">%1$d picture added</item>
         <item quantity="other">%1$d pictures added</item>
+    </plurals>
+    <string name="protect_instructions">Choose a PDF, set a password and decide what people who open it may do. Everyone who opens the file must enter the password.</string>
+    <string name="protect_password_label">Password</string>
+    <string name="protect_confirm_label">Confirm password</string>
+    <string name="protect_owner_label">Owner password (optional)</string>
+    <string name="protect_owner_hint">Lets you change these permissions later. Leave empty to keep them fixed.</string>
+    <string name="protect_show_passwords">Show passwords</string>
+    <string name="protect_permissions_label">Allowed actions</string>
+    <string name="protect_perm_print">Printing</string>
+    <string name="protect_perm_copy">Copying text and pictures</string>
+    <string name="protect_perm_modify">Changing the document</string>
+    <string name="protect_perm_allowed">Allowed</string>
+    <string name="protect_perm_blocked">Not allowed</string>
+    <string name="protect_error_empty">Enter a password.</string>
+    <string name="protect_error_mismatch">The two passwords do not match. Type the same password in both fields.</string>
+    <string name="protect_button">Protect</string>
+    <string name="protect_need_file">Choose a PDF first</string>
+    <plurals name="protect_success">
+        <item quantity="one">Protected a PDF with %1$d page. Keep the password safe, it cannot be recovered.</item>
+        <item quantity="other">Protected a PDF with %1$d pages. Keep the password safe, it cannot be recovered.</item>
+    </plurals>
+    <string name="unlock_instructions">Choose a password-protected PDF and enter its password. You get a copy that opens without one.</string>
+    <string name="unlock_button">Remove password</string>
+    <string name="unlock_need_file">Choose a PDF first</string>
+    <string name="unlock_not_protected">This PDF has no password and no restrictions, so there is nothing to remove.</string>
+    <plurals name="unlock_success">
+        <item quantity="one">Password removed from a PDF with %1$d page</item>
+        <item quantity="other">Password removed from a PDF with %1$d pages</item>
     </plurals>
 </resources>

@@ -36,6 +36,7 @@ import io.github.wzehirx.bpdf.core.work.OperationState
 import io.github.wzehirx.bpdf.ui.components.ChoiceRow
 import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PageRangeField
+import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SaveFolderZipActions
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
@@ -96,6 +97,8 @@ fun SplitScreen(onBack: () -> Unit, viewModel: SplitViewModel = viewModel(factor
             }
         },
         onRetry = viewModel::retry,
+        onSubmitPassword = viewModel::submitPassword,
+        onDismissPassword = viewModel::dismissPassword,
     )
 }
 
@@ -115,11 +118,14 @@ fun SplitScreenContent(
     onSaveZip: () -> Unit,
     onShare: () -> Unit,
     onRetry: () -> Unit,
+    onSubmitPassword: (String) -> Unit = {},
+    onDismissPassword: () -> Unit = {},
 ) {
     val resources = LocalResources.current
     val needFile = stringResource(R.string.split_need_file)
     val busy = state.importing || state.saving || state.operation is OperationState.Running
     val file = state.file
+    PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_split_title), onBack = onBack) {
         Text(stringResource(R.string.split_instructions))
         PickFilesButton(

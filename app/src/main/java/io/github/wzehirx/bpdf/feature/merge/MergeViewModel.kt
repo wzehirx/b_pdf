@@ -14,6 +14,8 @@ import io.github.wzehirx.bpdf.core.files.suggestName
 import io.github.wzehirx.bpdf.core.pdf.MergeOperation
 import io.github.wzehirx.bpdf.core.work.OperationRunner
 import io.github.wzehirx.bpdf.core.work.OperationState
+import io.github.wzehirx.bpdf.core.work.PasswordGate
+import io.github.wzehirx.bpdf.core.work.PasswordPrompt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +47,8 @@ data class MergeUiState(
     val importing: Boolean = false,
     /** True while the result is being written to its target; edits and further saves are ignored. */
     val saving: Boolean = false,
+    /** Set while the user is asked for the password of the file being added. */
+    val passwordPrompt: PasswordPrompt? = null,
     val operation: OperationState<MergeResult> = OperationState.Idle,
 )
 
@@ -62,13 +66,15 @@ class MergeViewModel(
 
     private val local = MutableStateFlow(Local())
     private val runner = OperationRunner<MergeResult>(viewModelScope, ioDispatcher)
+    private val passwordGate = PasswordGate(ioDispatcher)
     private val saved = Channel<Unit>(Channel.BUFFERED)
 
-    val state: StateFlow<MergeUiState> = combine(local, runner.state) { l, op ->
+    val state: StateFlow<MergeUiState> = combine(local, runner.state, passwordGate.prompt) { l, op, prompt ->
         MergeUiState(
             files = l.files,
             importing = l.pendingImports > 0,
             saving = l.saving,
+            passwordPrompt = prompt,
             operation = l.error?.let { OperationState.Failed(it) } ?: op,
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, MergeUiState())
@@ -88,6 +94,16 @@ class MergeViewModel(
             try {
                 for (uri in uris) {
                     val imported = fileRepository.importToCache(uri)
+                    try {
+                        // Asks for the password of a protected file; null means the user skipped it.
+                        if (passwordGate.open(imported) == null) {
+                            imported.file.delete()
+                            continue
+                        }
+                    } catch (t: Throwable) {
+                        imported.file.delete()
+                        throw t
+                    }
                     local.update { it.copy(files = it.files + imported) }
                 }
             } catch (e: CancellationException) {
@@ -112,6 +128,7 @@ class MergeViewModel(
         if (busy || index !in files.indices) return
         resetResult()
         local.update { it.copy(files = it.files.filterIndexed { i, _ -> i != index }) }
+        passwordGate.forget(files[index].file)
         files[index].file.delete()
     }
 
@@ -121,11 +138,12 @@ class MergeViewModel(
         resetResult()
         val out = fileRepository.newOutputFile("pdf")
         val name = suggestName(files.first().displayName, "merged", "pdf")
+        val passwords = files.mapNotNull { f -> passwordGate.passwordOf(f.file)?.let { f.file to it } }.toMap()
         runner.start { progress ->
             val context = currentCoroutineContext()
             try {
                 val pages = MergeOperation.run(
-                    files.map { it.file }, out, progress = progress, isCancelled = { !context.isActive },
+                    files.map { it.file }, out, passwords, progress = progress, isCancelled = { !context.isActive },
                 )
                 MergeResult(out, pages, files.size, name)
             } catch (t: Throwable) {
@@ -139,6 +157,12 @@ class MergeViewModel(
     fun retry() {
         if (local.value.error != null) local.update { it.copy(error = null) } else merge()
     }
+
+    /** Answers the password prompt; a wrong password keeps the prompt open with `wrong` set. */
+    fun submitPassword(password: String) = passwordGate.submit(password)
+
+    /** The user skips the protected file being added; it is not added. */
+    fun dismissPassword() = passwordGate.dismiss()
 
     fun cancel() = runner.cancel()
 
@@ -178,6 +202,7 @@ class MergeViewModel(
     }
 
     override fun onCleared() {
+        passwordGate.clear()
         val output = (runner.state.value as? OperationState.Success)?.value?.file
         runner.cancel()
         output?.delete()

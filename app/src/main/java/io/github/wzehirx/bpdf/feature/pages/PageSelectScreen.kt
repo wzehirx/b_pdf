@@ -29,6 +29,7 @@ import io.github.wzehirx.bpdf.core.a11y.rememberAnnouncer
 import io.github.wzehirx.bpdf.core.work.OperationState
 import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PageRangeField
+import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
@@ -80,7 +81,9 @@ fun PageSelectScreen(
             }
         },
         onRetry = viewModel::retry,
-        thumbnail = rememberPageThumbnails(state.file?.file),
+        onSubmitPassword = viewModel::submitPassword,
+        onDismissPassword = viewModel::dismissPassword,
+        thumbnail = rememberPageThumbnails(state.file?.file, state.file?.let { viewModel.passwordOf(it.file) }),
     )
 }
 
@@ -97,6 +100,8 @@ fun PageSelectScreenContent(
     onSave: () -> Unit,
     onShare: () -> Unit,
     onRetry: () -> Unit,
+    onSubmitPassword: (String) -> Unit = {},
+    onDismissPassword: () -> Unit = {},
     thumbnail: suspend (Int) -> Bitmap? = { null },
 ) {
     val resources = LocalResources.current
@@ -105,6 +110,7 @@ fun PageSelectScreenContent(
     val removeAllError = stringResource(R.string.pages_remove_all_error)
     val busy = state.importing || state.saving || state.operation is OperationState.Running
     val file = state.file
+    PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(
         title = stringResource(if (removing) R.string.tool_remove_pages_title else R.string.tool_extract_pages_title),
         onBack = onBack,

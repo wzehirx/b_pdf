@@ -41,6 +41,7 @@ import io.github.wzehirx.bpdf.core.a11y.rememberAnnouncer
 import io.github.wzehirx.bpdf.core.work.OperationState
 import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PageGrid
+import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
@@ -120,8 +121,10 @@ fun OrganizeScreen(onBack: () -> Unit, viewModel: OrganizeViewModel = viewModel(
             }
         },
         onRetry = viewModel::retry,
+        onSubmitPassword = viewModel::submitPassword,
+        onDismissPassword = viewModel::dismissPassword,
         snackbarHostState = snackbarHostState,
-        thumbnail = rememberPageThumbnails(state.file?.file),
+        thumbnail = rememberPageThumbnails(state.file?.file, state.file?.let { viewModel.passwordOf(it.file) }),
     )
 }
 
@@ -145,6 +148,8 @@ fun OrganizeScreenContent(
     onSave: () -> Unit,
     onShare: () -> Unit,
     onRetry: () -> Unit,
+    onSubmitPassword: (String) -> Unit = {},
+    onDismissPassword: () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     thumbnail: suspend (Int) -> Bitmap? = { null },
 ) {
@@ -187,6 +192,7 @@ fun OrganizeScreenContent(
         )
     }
 
+    PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(
         title = stringResource(R.string.tool_organize_title),
         onBack = onBack,

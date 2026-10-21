@@ -2,6 +2,8 @@ package io.github.wzehirx.bpdf.ui.components
 
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -59,5 +61,17 @@ class PasswordDialogTest {
     fun wrongPassword_showsErrorOnField() {
         show(wrong = true)
         rule.onNodeWithText("That password is incorrect. Try again.").assertExists()
+    }
+
+    @Test
+    fun field_isAPasswordField() {
+        show()
+        rule.onNode(hasSetTextAction()).assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Password))
+    }
+
+    @Test
+    fun fileName_isShownWhenGiven() {
+        rule.setContent { PasswordDialog({}, {}, false, "locked.pdf") }
+        rule.onNodeWithText("Enter the password for \"locked.pdf\".").assertExists()
     }
 }

@@ -270,7 +270,13 @@ class SplitViewModelTest {
         val gate = StandardTestDispatcher()
         val slow = SplitViewModel(repo, gate)
         slow.pickFile(listOf(pdf(3, "a.pdf")))
-        await { slow.state.first { !it.importing && it.file != null } }
+        // The password check runs on the gated dispatcher, so keep releasing it while waiting.
+        await {
+            while (!(slow.state.value.file != null && !slow.state.value.importing)) {
+                gate.scheduler.advanceUntilIdle()
+                kotlinx.coroutines.delay(10)
+            }
+        }
         slow.setMode(SplitModeChoice.EACH_PAGE)
         slow.split()
         await { slow.state.first { it.operation is OperationState.Running } }

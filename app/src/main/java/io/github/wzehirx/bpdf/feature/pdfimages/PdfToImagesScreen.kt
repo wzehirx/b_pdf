@@ -33,6 +33,7 @@ import io.github.wzehirx.bpdf.ui.components.ChoiceRow
 import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PageChooser
 import io.github.wzehirx.bpdf.ui.components.PageRangeField
+import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SaveFolderZipActions
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
@@ -93,7 +94,9 @@ fun PdfToImagesScreen(
             }
         },
         onRetry = viewModel::retry,
-        thumbnail = rememberPageThumbnails(state.file?.file),
+        onSubmitPassword = viewModel::submitPassword,
+        onDismissPassword = viewModel::dismissPassword,
+        thumbnail = rememberPageThumbnails(state.file?.file, state.file?.let { viewModel.passwordOf(it.file) }),
     )
 }
 
@@ -114,12 +117,15 @@ fun PdfToImagesScreenContent(
     onSaveZip: () -> Unit,
     onShare: () -> Unit,
     onRetry: () -> Unit,
+    onSubmitPassword: (String) -> Unit = {},
+    onDismissPassword: () -> Unit = {},
     thumbnail: suspend (Int) -> Bitmap? = { null },
 ) {
     val resources = LocalResources.current
     val needFile = stringResource(R.string.images_out_need_file)
     val busy = state.importing || state.saving || state.operation is OperationState.Running
     val file = state.file
+    PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_pdf_to_images_title), onBack = onBack) {
         Text(stringResource(R.string.images_out_instructions))
         PickFilesButton(

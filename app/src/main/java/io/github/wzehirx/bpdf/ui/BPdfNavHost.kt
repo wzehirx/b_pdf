@@ -11,8 +11,10 @@ import io.github.wzehirx.bpdf.feature.organize.OrganizeScreen
 import io.github.wzehirx.bpdf.feature.pages.PageSelectMode
 import io.github.wzehirx.bpdf.feature.pages.PageSelectScreen
 import io.github.wzehirx.bpdf.feature.pdfimages.PdfToImagesScreen
+import io.github.wzehirx.bpdf.feature.protect.ProtectScreen
 import io.github.wzehirx.bpdf.feature.rotate.RotateScreen
 import io.github.wzehirx.bpdf.feature.split.SplitScreen
+import io.github.wzehirx.bpdf.feature.unlock.UnlockScreen
 import io.github.wzehirx.bpdf.ui.home.HomeScreen
 
 const val HOME_ROUTE = "home"
@@ -50,6 +52,12 @@ fun BPdfNavHost(navController: NavHostController = rememberNavController()) {
         }
         composable(Tool.PDF_TO_IMAGES.route) {
             PdfToImagesScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Tool.PROTECT.route) {
+            ProtectScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Tool.UNLOCK.route) {
+            UnlockScreen(onBack = { navController.popBackStack() })
         }
     }
 }

@@ -14,9 +14,10 @@ import io.github.wzehirx.bpdf.core.files.suggestName
 import io.github.wzehirx.bpdf.core.pdf.PageRanges
 import io.github.wzehirx.bpdf.core.pdf.PageSelectOperation
 import io.github.wzehirx.bpdf.core.pdf.PdfError
-import io.github.wzehirx.bpdf.core.pdf.PdfLoader
 import io.github.wzehirx.bpdf.core.work.OperationRunner
 import io.github.wzehirx.bpdf.core.work.OperationState
+import io.github.wzehirx.bpdf.core.work.PasswordGate
+import io.github.wzehirx.bpdf.core.work.PasswordPrompt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -63,6 +64,8 @@ data class PageSelectUiState(
     val importing: Boolean = false,
     /** True while the result is being written to its target; edits and further saves are ignored. */
     val saving: Boolean = false,
+    /** Set while the user is asked for the file's password. */
+    val passwordPrompt: PasswordPrompt? = null,
     val operation: OperationState<PageSelectResult> = OperationState.Idle,
 )
 
@@ -85,9 +88,10 @@ class PageSelectViewModel(
 
     private val local = MutableStateFlow(Local())
     private val runner = OperationRunner<PageSelectResult>(viewModelScope, ioDispatcher)
+    private val passwordGate = PasswordGate(ioDispatcher)
     private val saved = Channel<Unit>(Channel.BUFFERED)
 
-    val state: StateFlow<PageSelectUiState> = combine(local, runner.state) { l, op ->
+    val state: StateFlow<PageSelectUiState> = combine(local, runner.state, passwordGate.prompt) { l, op, prompt ->
         val selection = if (l.file != null) selectionOf(l.rangeText, l.pageCount, l.attempted) else null
         PageSelectUiState(
             mode = mode,
@@ -99,6 +103,7 @@ class PageSelectViewModel(
             failedAttempts = l.failedAttempts,
             importing = l.pendingImports > 0,
             saving = l.saving,
+            passwordPrompt = prompt,
             operation = l.error?.let { OperationState.Failed(it) } ?: op,
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, PageSelectUiState(mode = mode))
@@ -136,14 +141,18 @@ class PageSelectViewModel(
             try {
                 val imported = fileRepository.importToCache(uri)
                 val pages = try {
-                    withContext(ioDispatcher) { PdfLoader.pageCount(imported.file) }
+                    passwordGate.open(imported)
                 } catch (t: Throwable) {
                     imported.file.delete()
                     throw t
+                } ?: run {
+                    // The user gave up on the password prompt: keep whatever was open before.
+                    imported.file.delete()
+                    return@launch
                 }
                 val old = local.value.file
                 local.update { it.copy(file = imported, pageCount = pages, attempted = false) }
-                old?.file?.delete()
+                old?.let { passwordGate.forget(it.file); it.file.delete() }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Throwable) {
@@ -159,6 +168,7 @@ class PageSelectViewModel(
         if (busy) return
         resetResult()
         local.update { it.copy(file = null, pageCount = 0, attempted = false) }
+        passwordGate.forget(file.file)
         file.file.delete()
     }
 
@@ -177,14 +187,15 @@ class PageSelectViewModel(
             ?: return rejectInput()
         val out = fileRepository.newOutputFile("pdf")
         val name = suggestName(file.displayName, if (mode == PageSelectMode.REMOVE) "removed" else "extracted", "pdf")
+        val password = passwordGate.passwordOf(file.file)
         runner.start { progress ->
             val context = currentCoroutineContext()
             try {
                 val resultPages = when (mode) {
                     PageSelectMode.REMOVE ->
-                        PageSelectOperation.remove(file.file, pages, out, progress = progress, isCancelled = { !context.isActive })
+                        PageSelectOperation.remove(file.file, pages, out, password, progress = progress, isCancelled = { !context.isActive })
                     PageSelectMode.EXTRACT ->
-                        PageSelectOperation.extract(file.file, pages, out, progress = progress, isCancelled = { !context.isActive })
+                        PageSelectOperation.extract(file.file, pages, out, password, progress = progress, isCancelled = { !context.isActive })
                 }
                 PageSelectResult(out, pages.size, resultPages, name)
             } catch (t: Throwable) {
@@ -200,6 +211,15 @@ class PageSelectViewModel(
     fun retry() {
         if (local.value.error != null) local.update { it.copy(error = null) } else run()
     }
+
+    /** Answers the password prompt; a wrong password keeps the prompt open with `wrong` set. */
+    fun submitPassword(password: String) = passwordGate.submit(password)
+
+    /** The user gave up on the password prompt; the picked file is discarded. */
+    fun dismissPassword() = passwordGate.dismiss()
+
+    /** The password that opened [file] (for thumbnails), or null when it needs none. */
+    fun passwordOf(file: File): String? = passwordGate.passwordOf(file)
 
     fun cancel() = runner.cancel()
 
@@ -241,6 +261,7 @@ class PageSelectViewModel(
     }
 
     override fun onCleared() {
+        passwordGate.clear()
         val output = successValue()?.file
         runner.cancel()
         output?.delete()

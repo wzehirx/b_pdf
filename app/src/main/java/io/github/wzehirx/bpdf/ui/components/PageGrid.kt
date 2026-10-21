@@ -80,14 +80,14 @@ fun rememberThumbnailWidthPx(): Int {
  * a page cannot be drawn.
  */
 @Composable
-fun rememberPageThumbnails(file: File?): suspend (Int) -> Bitmap? {
+fun rememberPageThumbnails(file: File?, password: String? = null): suspend (Int) -> Bitmap? {
     val context = LocalContext.current
     val widthPx = rememberThumbnailWidthPx()
     val loader = remember(context) { ThumbnailLoader(File(context.cacheDir, "thumbnails")) }
     DisposableEffect(loader) { onDispose { loader.close() } }
     DisposableEffect(loader, file) { onDispose { file?.let(loader::release) } }
-    return remember(loader, file, widthPx) {
-        { index: Int -> file?.let { loader.renderOrNull(it, index, widthPx) } }
+    return remember(loader, file, password, widthPx) {
+        { index: Int -> file?.let { loader.renderOrNull(it, index, widthPx, password) } }
     }
 }
 

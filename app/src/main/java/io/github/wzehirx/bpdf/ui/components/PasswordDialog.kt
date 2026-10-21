@@ -30,12 +30,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.android.awaitFrame
 import io.github.wzehirx.bpdf.R
+import io.github.wzehirx.bpdf.core.work.PasswordPrompt
 
 @Composable
 fun PasswordDialog(
     onSubmit: (String) -> Unit,
     onDismiss: () -> Unit,
     wrongPassword: Boolean,
+    /** Which file is asking, spoken before the field; omitted when null. */
+    fileName: String? = null,
 ) {
     // Deliberately not rememberSaveable: never write the password into saved instance state.
     var password by remember { mutableStateOf("") }
@@ -53,6 +56,9 @@ fun PasswordDialog(
                 runCatching { focus.requestFocus() }
             }
             Column {
+                if (fileName != null) {
+                    Text(stringResource(R.string.password_prompt_for, fileName))
+                }
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -91,4 +97,10 @@ fun PasswordDialog(
             }
         },
     )
+}
+
+/** Shows [PasswordDialog] for [prompt] while there is one; a wrong attempt keeps the dialog and flags the field. */
+@Composable
+fun PasswordPromptDialog(prompt: PasswordPrompt?, onSubmit: (String) -> Unit, onDismiss: () -> Unit) {
+    if (prompt != null) PasswordDialog(onSubmit, onDismiss, prompt.wrong, prompt.fileName)
 }

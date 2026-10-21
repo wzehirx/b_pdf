@@ -130,11 +130,14 @@ class MergeViewModelTest {
     }
 
     @Test
-    fun corruptFile_failsMergeWithPdfError_notCrash() {
+    fun corruptFile_isRejectedAtImportWithPdfError_notCrash() {
         val bad = File(dir, "bad.pdf").apply { writeText("not a pdf") }
-        add(pdf(1, "A", "a.pdf"), Uri.fromFile(bad))
-        val op = mergeAndAwait()
-        assertTrue(op.toString(), op is OperationState.Failed && op.error is PdfError.Corrupt)
+        vm.addFiles(listOf(pdf(1, "A", "a.pdf"), Uri.fromFile(bad)))
+        val state = awaitState { it.operation is OperationState.Failed && !it.importing }
+        assertTrue(state.operation.toString(), (state.operation as OperationState.Failed).error is PdfError.Corrupt)
+        assertNames("a.pdf")
+        // The rejected copy is not left behind in the cache.
+        assertEquals(1, File(context.cacheDir, "imports").listFiles().orEmpty().size)
     }
 
     @Test
@@ -194,9 +197,9 @@ class MergeViewModelTest {
 
     @Test
     fun failedMerge_leavesNoOutputFile() {
-        val bad = File(dir, "bad.pdf").apply { writeText("not a pdf") }
-        add(pdf(1, "A", "a.pdf"), Uri.fromFile(bad))
-        mergeAndAwait()
+        add(pdf(1, "A", "a.pdf"), pdf(1, "B", "b.pdf"))
+        vm.state.value.files.last().file.delete() // an input vanishes after import
+        assertTrue(mergeAndAwait() is OperationState.Failed)
         assertTrue(File(context.cacheDir, "shared").listFiles().orEmpty().isEmpty())
     }
 
@@ -215,7 +218,13 @@ class MergeViewModelTest {
         val gate = kotlinx.coroutines.test.StandardTestDispatcher()
         val slow = MergeViewModel(repo, gate)
         slow.addFiles(listOf(pdf(1, "A", "a.pdf"), pdf(1, "B", "b.pdf")))
-        await { slow.state.first { !it.importing && it.files.size == 2 } }
+        // The password check runs on the gated dispatcher, so keep releasing it while waiting.
+        await {
+            while (!(slow.state.value.files.size == 2 && !slow.state.value.importing)) {
+                gate.scheduler.advanceUntilIdle()
+                kotlinx.coroutines.delay(10)
+            }
+        }
         slow.merge()
         awaitState(slow) { it.operation is OperationState.Running }
         slow.move(0, 1)
@@ -233,8 +242,10 @@ class MergeViewModelTest {
     fun whileImporting_addMergeMoveAreIgnored() {
         val latch = java.util.concurrent.CountDownLatch(1)
         val uri = Uri.parse("content://test.slow/slow.pdf")
+        val content = TestPdfs.create(dir, 1, "S").readBytes().inputStream()
         val stream = object : java.io.InputStream() {
-            override fun read(): Int { latch.await(); return -1 }
+            override fun read(): Int { latch.await(); return content.read() }
+            override fun read(b: ByteArray, off: Int, len: Int): Int { latch.await(); return content.read(b, off, len) }
         }
         org.robolectric.Shadows.shadowOf(context.contentResolver).registerInputStream(uri, stream)
         vm.addFiles(listOf(uri))

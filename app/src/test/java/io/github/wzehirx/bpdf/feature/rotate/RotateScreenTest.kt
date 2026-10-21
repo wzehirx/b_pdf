@@ -203,4 +203,31 @@ class RotateScreenTest {
         show(loaded)
         rule.onNodeWithText("Choose pages").assertDoesNotExist()
     }
+
+    @Test
+    fun passwordPrompt_showsDialog_submitsAndFlagsWrongPassword() {
+        val submitted = mutableListOf<String>()
+        var prompt by mutableStateOf<io.github.wzehirx.bpdf.core.work.PasswordPrompt?>(
+            io.github.wzehirx.bpdf.core.work.PasswordPrompt("locked.pdf"),
+        )
+        rule.setContent {
+            RotateScreenContent(
+                state = RotateUiState(importing = true, passwordPrompt = prompt),
+                onBack = {}, onPickFile = {}, onRemoveFile = {}, onAngleChange = {}, onScopeChange = {},
+                onRangeChange = {}, onRotate = {}, onCancel = {}, onSave = {}, onShare = {}, onRetry = {},
+                onSubmitPassword = { submitted += it },
+                onDismissPassword = { calls += "dismissPassword" },
+            )
+        }
+        rule.onNodeWithText("Enter the password for \"locked.pdf\".").assertExists()
+        rule.onNode(androidx.compose.ui.test.hasSetTextAction()).performTextReplacement("hunter2")
+        rule.onNodeWithText("OK").performClick()
+        assertEquals(listOf("hunter2"), submitted)
+        rule.onNodeWithText("Cancel").performClick()
+        assertEquals(listOf("dismissPassword"), calls)
+        rule.runOnUiThread { prompt = io.github.wzehirx.bpdf.core.work.PasswordPrompt("locked.pdf", wrong = true) }
+        rule.onNodeWithText("That password is incorrect. Try again.").assertExists()
+        rule.runOnUiThread { prompt = null }
+        rule.onNodeWithText("Enter the password for \"locked.pdf\".").assertDoesNotExist()
+    }
 }
