@@ -4,14 +4,11 @@ import android.content.res.Resources
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +37,7 @@ import io.github.wzehirx.bpdf.ui.components.ChoiceRow
 import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PageRangeField
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
+import io.github.wzehirx.bpdf.ui.components.SaveFolderZipActions
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
@@ -185,7 +183,7 @@ fun SplitScreenContent(
             onCancel = onCancel,
             onRetry = onRetry,
             successActions = {
-                SplitResultActions(
+                SaveFolderZipActions(
                     onSaveToFolder = onSaveToFolder,
                     onSaveZip = onSaveZip,
                     onShare = onShare,
@@ -228,19 +226,4 @@ private fun EveryNField(state: SplitUiState, onChange: (String) -> Unit, enabled
             .fillMaxWidth()
             .semantics { if (message != null) error(message) },
     )
-}
-
-@Composable
-private fun SplitResultActions(onSaveToFolder: () -> Unit, onSaveZip: () -> Unit, onShare: () -> Unit, enabled: Boolean) {
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Button(onClick = onSaveToFolder, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-            Text(stringResource(R.string.split_save_folder))
-        }
-        Button(onClick = onSaveZip, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-            Text(stringResource(R.string.split_save_zip))
-        }
-        OutlinedButton(onClick = onShare, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-            Text(stringResource(R.string.share))
-        }
-    }
 }

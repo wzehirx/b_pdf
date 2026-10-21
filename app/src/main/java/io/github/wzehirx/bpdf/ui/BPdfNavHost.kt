@@ -10,6 +10,7 @@ import io.github.wzehirx.bpdf.feature.merge.MergeScreen
 import io.github.wzehirx.bpdf.feature.organize.OrganizeScreen
 import io.github.wzehirx.bpdf.feature.pages.PageSelectMode
 import io.github.wzehirx.bpdf.feature.pages.PageSelectScreen
+import io.github.wzehirx.bpdf.feature.pdfimages.PdfToImagesScreen
 import io.github.wzehirx.bpdf.feature.rotate.RotateScreen
 import io.github.wzehirx.bpdf.feature.split.SplitScreen
 import io.github.wzehirx.bpdf.ui.home.HomeScreen
@@ -46,6 +47,9 @@ fun BPdfNavHost(navController: NavHostController = rememberNavController()) {
         }
         composable(Tool.IMAGES_TO_PDF.route) {
             ImagesToPdfScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Tool.PDF_TO_IMAGES.route) {
+            PdfToImagesScreen(onBack = { navController.popBackStack() })
         }
     }
 }

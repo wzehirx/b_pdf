@@ -124,8 +124,8 @@
         <item quantity="one">Created %1$d file</item>
         <item quantity="other">Created %1$d files</item>
     </plurals>
-    <string name="split_save_folder">Save to folder</string>
-    <string name="split_save_zip">Save as ZIP</string>
+    <string name="save_folder">Save to folder</string>
+    <string name="save_zip">Save as ZIP</string>
     <string name="split_share_chooser_title">Share split PDFs</string>
     <plurals name="split_saved_announcement">
         <item quantity="one">Saved %1$d file</item>
@@ -241,4 +241,28 @@
         <item quantity="one">Created a PDF with %1$d page</item>
         <item quantity="other">Created a PDF with %1$d pages</item>
     </plurals>
+    <string name="images_out_instructions">Choose a PDF, decide which pages to turn into pictures, then convert. Each page becomes one picture.</string>
+    <string name="images_out_need_file">Choose a PDF first</string>
+    <string name="images_out_pages_label">Pages to convert</string>
+    <string name="images_out_pages_all">All pages</string>
+    <string name="images_out_pages_selected">Selected pages</string>
+    <string name="images_out_range_hint">Type the pages you want, or choose them from the page grid.</string>
+    <string name="images_out_dpi_label">Resolution</string>
+    <string name="images_out_dpi_option">%1$d dpi, %2$s</string>
+    <string name="images_out_dpi_low">smallest files</string>
+    <string name="images_out_dpi_medium">balanced</string>
+    <string name="images_out_dpi_high">sharpest</string>
+    <string name="images_out_format_label">Image format</string>
+    <string name="images_out_format_jpeg">JPG, smaller files</string>
+    <string name="images_out_format_png">PNG, lossless, larger files</string>
+    <string name="images_out_button">Convert to pictures</string>
+    <plurals name="images_out_success">
+        <item quantity="one">Created %1$d picture</item>
+        <item quantity="other">Created %1$d pictures</item>
+    </plurals>
+    <plurals name="images_saved_announcement">
+        <item quantity="one">Saved %1$d picture</item>
+        <item quantity="other">Saved %1$d pictures</item>
+    </plurals>
+    <string name="images_share_chooser_title">Share pictures</string>
 </resources>

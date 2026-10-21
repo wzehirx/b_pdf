@@ -6,6 +6,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
+- PDF to images tool: turn all or selected pages into JPG or PNG pictures at 72, 150 or 300 dpi; save them to a folder or as one ZIP, or share them.
 - Images to PDF tool: pick pictures from the gallery or take photos, reorder or remove them with buttons or screen-reader actions, choose page size (A4, US Letter or fit to picture), orientation and margin, then save or share a PDF with one page per picture.
 - Organize pages tool: see every page as a thumbnail, then move (up, down, to a position), rotate left or right, duplicate or delete pages with screen-reader actions or a per-page menu, undo changes, and save or share the new PDF.
 - Page thumbnails: Remove pages, Extract pages and Rotate pages can pick pages from an accessible grid (each page is one labelled, checkable item with "Select all", "Clear selection" and a selected count) instead of typing a range; both stay in sync.
