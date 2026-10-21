@@ -509,6 +509,7 @@
     <string name="ocr_save_text">Save as text file</string>
     <string name="ocr_share_text">Share text</string>
     <string name="ocr_save_pdf">Save searchable PDF</string>
-    <string name="ocr_pdf_note">A searchable PDF keeps your original pages and adds the recognized text invisibly, so search, selection and screen readers can use it.</string>
+    <string name="ocr_pdf_note">A searchable PDF keeps your original pages and adds the recognized text invisibly, so search, selection and screen readers can use it. Search highlights may not line up with the words on the page.</string>
     <string name="err_ocr_failed">Text recognition could not start. Check the available storage and try again.</string>
+    <string name="ocr_building_pdf">Building searchable PDF…</string>
 </resources>

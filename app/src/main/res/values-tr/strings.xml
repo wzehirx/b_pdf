@@ -509,6 +509,7 @@
     <string name="ocr_save_text">Metin dosyası olarak kaydet</string>
     <string name="ocr_share_text">Metni paylaş</string>
     <string name="ocr_save_pdf">Aranabilir PDF kaydet</string>
-    <string name="ocr_pdf_note">Aranabilir PDF özgün sayfalarınızı korur ve tanınan metni görünmez biçimde ekler; böylece arama, seçme ve ekran okuyucular onu kullanabilir.</string>
+    <string name="ocr_pdf_note">Aranabilir PDF özgün sayfalarınızı korur ve tanınan metni görünmez biçimde ekler; böylece arama, seçme ve ekran okuyucular onu kullanabilir. Arama vurguları sayfadaki sözcüklerle hizalı olmayabilir.</string>
     <string name="err_ocr_failed">Metin tanıma başlatılamadı. Boş depolama alanını kontrol edip yeniden deneyin.</string>
+    <string name="ocr_building_pdf">Aranabilir PDF hazırlanıyor…</string>
 </resources>

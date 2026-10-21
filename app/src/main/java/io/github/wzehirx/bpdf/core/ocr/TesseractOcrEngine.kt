@@ -44,16 +44,21 @@ class TesseractOcrEngine(private val dataPath: File) : OcrEngine {
         return tess
     }
 
+    // stop() comes from another thread: share a lock with release() so the engine is never recycled during stop().
+    private val lifecycle = Any()
+
     override fun stop() {
-        runCatching { api?.stop() }
+        synchronized(lifecycle) { runCatching { api?.stop() } }
     }
 
     override fun close() = release()
 
     private fun release() {
-        val tess = api
-        api = null
-        startedWith = null
-        runCatching { tess?.recycle() }
+        synchronized(lifecycle) {
+            val tess = api
+            api = null
+            startedWith = null
+            runCatching { tess?.recycle() }
+        }
     }
 }

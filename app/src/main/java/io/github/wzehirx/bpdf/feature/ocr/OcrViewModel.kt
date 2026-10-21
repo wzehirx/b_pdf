@@ -34,7 +34,9 @@ import io.github.wzehirx.bpdf.core.work.PasswordPrompt
 import io.github.wzehirx.bpdf.feature.pdftext.TextResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
@@ -69,6 +71,10 @@ data class OcrUiState(
     /** True while a result is being written to its target; edits and further saves are ignored. */
     val saving: Boolean = false,
     val passwordPrompt: PasswordPrompt? = null,
+    /** True while the searchable PDF is being built (before it is written to its target); it can be cancelled. */
+    val buildingPdf: Boolean = false,
+    /** 0..1 progress of the searchable PDF build while [buildingPdf]. */
+    val buildProgress: Float = 0f,
     /** True when the input needed a password: the searchable PDF has none. */
     val copyUnprotected: Boolean = false,
     /** The page being read while [operation] is running; null before the first page and when idle. */
@@ -105,11 +111,14 @@ class OcrViewModel(
 
     private val local = MutableStateFlow(Local())
     private val progress = MutableStateFlow<OcrPageProgress?>(null)
+    /** Progress of the searchable PDF build, or null when none is being built. */
+    private val build = MutableStateFlow<Float?>(null)
+    private var buildJob: Job? = null
     private val runner = OperationRunner<TextResult>(viewModelScope, ioDispatcher)
     private val passwordGate = PasswordGate(ioDispatcher)
     private val saved = Channel<Unit>(Channel.BUFFERED)
 
-    val state: StateFlow<OcrUiState> = combine(local, runner.state, passwordGate.prompt, progress) { l, op, prompt, page ->
+    val state: StateFlow<OcrUiState> = combine(local, runner.state, passwordGate.prompt, progress, build) { l, op, prompt, page, building ->
         OcrUiState(
             file = l.file,
             pageCount = l.pageCount,
@@ -126,6 +135,8 @@ class OcrViewModel(
             failedAttempts = l.failedAttempts,
             importing = l.pendingImports > 0,
             saving = l.saving,
+            buildingPdf = building != null,
+            buildProgress = building ?: 0f,
             passwordPrompt = prompt,
             copyUnprotected = l.protectedInput,
             progress = if (op is OperationState.Running) page else null,
@@ -296,13 +307,20 @@ class OcrViewModel(
         if (busy || result.allBlank) return
         local.update { it.copy(saving = true) }
         val password = passwordGate.passwordOf(file.file)
-        viewModelScope.launch {
+        build.value = 0f
+        // Lazy so the job is stored before its body can run (it may start inline on an immediate dispatcher).
+        val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
             var built: File? = null
             try {
                 val temp = fileRepository.newOutputFile("pdf").also { built = it }
                 withContext(ioDispatcher) {
-                    SearchablePdfOperation.run(file.file, result.pages, temp, fontLoader, password)
+                    val context = currentCoroutineContext()
+                    SearchablePdfOperation.run(
+                        file.file, result.pages, temp, fontLoader, password,
+                        progress = { build.value = it }, isCancelled = { !context.isActive },
+                    )
                 }
+                build.value = null
                 fileRepository.export(temp, target)
                 saved.send(Unit)
             } catch (e: CancellationException) {
@@ -310,10 +328,18 @@ class OcrViewModel(
             } catch (e: Throwable) {
                 local.update { it.copy(error = e) }
             } finally {
+                build.value = null
                 built?.delete()
                 local.update { it.copy(saving = false) }
             }
         }
+        buildJob = job
+        job.start()
+    }
+
+    /** Stops building the searchable PDF; nothing is written and the recognized text stays. */
+    fun cancelBuild() {
+        buildJob?.cancel()
     }
 
     /** A content Uri for sharing the `.txt`, or null when there is no text to share. */
@@ -339,6 +365,7 @@ class OcrViewModel(
     override fun onCleared() {
         passwordGate.clear()
         val output = successValue()?.file
+        buildJob?.cancel()
         runner.cancel()
         output?.delete()
         local.value.file?.file?.delete()

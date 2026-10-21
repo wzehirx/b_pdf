@@ -57,6 +57,7 @@ class OcrViewModelTest {
     private var rasterizer = FakeRasterizer()
     private val engineRequests = mutableListOf<String>()
     private var engineFailure: Throwable? = null
+    private var fontHook: (() -> Unit)? = null
 
     @Before
     fun setUp() {
@@ -78,7 +79,7 @@ class OcrViewModelTest {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T = OcrViewModel(
                 repo,
-                fontLoader = { context.assets.open(Fonts.ASSET_PATH) },
+                fontLoader = { fontHook?.invoke(); context.assets.open(Fonts.ASSET_PATH) },
                 engineFactory = { languages ->
                     engineRequests += languages
                     engineFailure?.let { throw it }
@@ -316,6 +317,29 @@ class OcrViewModelTest {
         await { vm.savedEvents.first() }
         assertFalse(PdfLoader.isEncrypted(target))
         assertTrue(TestPdfs.text(target).single().contains("text of page 1"))
+    }
+
+    @Test
+    fun saveSearchablePdf_cancelledWhileBuilding_writesNothing_andKeepsTheResult() {
+        val vm = newVm()
+        vm.pick(2)
+        val result = vm.success()
+        // The build runs inline on the test dispatcher; cancel it from inside, at the font load.
+        var buildingWhenCancelled: Boolean? = null
+        fontHook = { buildingWhenCancelled = vm.state.value.buildingPdf; vm.cancelBuild() }
+        val target = File(dir, "cancelled.pdf")
+        vm.saveSearchablePdf(Uri.fromFile(target))
+        vm.settled { !it.saving && !it.buildingPdf }
+        assertEquals("the build state was on while building", true, buildingWhenCancelled)
+        assertFalse(target.exists())
+        assertTrue("temporary build is cleaned up", sharedFiles().none { it.extension == "pdf" })
+        assertTrue(vm.state.value.operation is OperationState.Success)
+        assertTrue(result.file!!.exists())
+        // and it can be saved afterwards
+        fontHook = null
+        vm.saveSearchablePdf(Uri.fromFile(File(dir, "later.pdf")))
+        await { vm.savedEvents.first() }
+        assertFalse(vm.settled { !it.saving }.buildingPdf)
     }
 
     @Test

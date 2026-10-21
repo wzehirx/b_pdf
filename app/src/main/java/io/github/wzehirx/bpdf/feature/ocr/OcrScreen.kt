@@ -7,7 +7,11 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -66,6 +70,9 @@ fun OcrScreen(
     LaunchedEffect(viewModel) {
         viewModel.savedEvents.collect { announce(resources.getString(R.string.saved_announcement)) }
     }
+    // The searchable PDF is built after the save dialog closes: say so once, since nothing else changes audibly.
+    val buildingMessage = stringResource(R.string.ocr_building_pdf)
+    LaunchedEffect(state.buildingPdf) { if (state.buildingPdf) announce(buildingMessage) }
     // Pressing the button with an invalid range starts nothing, so say what is wrong.
     LaunchedEffect(state.failedAttempts) {
         if (state.failedAttempts > 0) state.rangeError?.let { announce(it.toMessage(resources)) }
@@ -99,6 +106,7 @@ fun OcrScreen(
             announce(resources.getString(if (copied) R.string.text_copied else R.string.text_copy_failed))
         },
         onSaveSearchablePdf = { launchSavePdf(viewModel.searchablePdfName()) },
+        onCancelBuild = viewModel::cancelBuild,
         onRetry = viewModel::retry,
         onSubmitPassword = viewModel::submitPassword,
         onDismissPassword = viewModel::dismissPassword,
@@ -122,6 +130,7 @@ fun OcrScreenContent(
     onShareText: () -> Unit,
     onCopyAll: () -> Unit,
     onSaveSearchablePdf: () -> Unit,
+    onCancelBuild: () -> Unit,
     onRetry: () -> Unit,
     onSubmitPassword: (String) -> Unit = {},
     onDismissPassword: () -> Unit = {},
@@ -199,6 +208,16 @@ fun OcrScreenContent(
             successActions = {
                 if (result != null && !result.allBlank) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        if (state.buildingPdf) {
+                            Text(
+                                stringResource(R.string.ocr_building_pdf),
+                                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                            )
+                            LinearProgressIndicator(progress = { state.buildProgress.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
+                            OutlinedButton(onClick = onCancelBuild, modifier = Modifier.heightIn(min = 48.dp)) {
+                                Text(stringResource(R.string.cancel))
+                            }
+                        }
                         Button(onClick = onSaveText, enabled = !state.saving, modifier = Modifier.heightIn(min = 48.dp)) {
                             Text(stringResource(R.string.ocr_save_text))
                         }

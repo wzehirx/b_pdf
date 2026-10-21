@@ -68,7 +68,7 @@ fun BPdfNavHost(navController: NavHostController = rememberNavController()) {
         toolScreen(Tool.PDF_TO_TEXT) {
             PdfToTextScreen(
                 onBack = back,
-                onOpenOcr = { navController.navigate(Tool.OCR.route) },
+                onOpenOcr = { uri -> navController.navigate(IncomingIntents.toolRoute(Tool.OCR, uri)) },
                 initialUri = it,
             )
         }

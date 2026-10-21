@@ -68,6 +68,8 @@ data class PdfToTextUiState(
     val saving: Boolean = false,
     /** Set while the user is asked for the file's password. */
     val passwordPrompt: PasswordPrompt? = null,
+    /** Where the current [file] came from, so "Try OCR" can hand the same document to the OCR tool. */
+    val sourceUri: Uri? = null,
     val operation: OperationState<TextResult> = OperationState.Idle,
 )
 
@@ -79,6 +81,7 @@ class PdfToTextViewModel(
 ) : ViewModel() {
     private data class Local(
         val file: ImportedFile? = null,
+        val sourceUri: Uri? = null,
         val pageCount: Int = 0,
         val scope: TextScope = TextScope.ALL,
         val rangeText: String = "",
@@ -98,6 +101,7 @@ class PdfToTextViewModel(
     val state: StateFlow<PdfToTextUiState> = combine(local, runner.state, passwordGate.prompt) { l, op, prompt ->
         PdfToTextUiState(
             file = l.file,
+            sourceUri = l.sourceUri,
             pageCount = l.pageCount,
             scope = l.scope,
             rangeText = l.rangeText,
@@ -142,7 +146,7 @@ class PdfToTextViewModel(
                     return@launch
                 }
                 val old = local.value.file
-                local.update { it.copy(file = imported, pageCount = pages, attempted = false) }
+                local.update { it.copy(file = imported, sourceUri = uri, pageCount = pages, attempted = false) }
                 old?.let { passwordGate.forget(it.file); it.file.delete() }
             } catch (e: CancellationException) {
                 throw e
@@ -158,7 +162,7 @@ class PdfToTextViewModel(
         val file = local.value.file ?: return
         if (busy) return
         resetResult()
-        local.update { it.copy(file = null, pageCount = 0, attempted = false) }
+        local.update { it.copy(file = null, sourceUri = null, pageCount = 0, attempted = false) }
         passwordGate.forget(file.file)
         file.file.delete()
     }

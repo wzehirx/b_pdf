@@ -66,6 +66,7 @@ class OcrScreenTest {
             onShareText = { calls += "shareText" },
             onCopyAll = { calls += "copy" },
             onSaveSearchablePdf = { calls += "savePdf" },
+            onCancelBuild = { calls += "cancelBuild" },
             onRetry = { calls += "retry" },
         )
     }
@@ -172,6 +173,27 @@ class OcrScreenTest {
         show(loaded.copy(saving = true, operation = OperationState.Success(result("alpha"))))
         button("Save as text file").performScrollTo().assertIsNotEnabled()
         button("Save searchable PDF").performScrollTo().assertIsNotEnabled()
+    }
+
+    @Test
+    fun buildingSearchablePdf_showsPoliteStatusProgressAndCancel_andDisablesTheActions() {
+        show(loaded.copy(saving = true, buildingPdf = true, buildProgress = 0.4f, operation = OperationState.Success(result("alpha"))))
+        val status = rule.onNodeWithText("Building searchable PDF…").performScrollTo()
+        assertEquals(LiveRegionMode.Polite, status.fetchSemanticsNode().config.getOrNull(SemanticsProperties.LiveRegion))
+        rule.onNode(
+            androidx.compose.ui.test.SemanticsMatcher.expectValue(
+                SemanticsProperties.ProgressBarRangeInfo, androidx.compose.ui.semantics.ProgressBarRangeInfo(0.4f, 0f..1f),
+            ),
+        ).assertExists()
+        button("Save searchable PDF").performScrollTo().assertIsNotEnabled()
+        button("Cancel").performScrollTo().assertHeightIsAtLeast(48.dp).performClick()
+        assertEquals(listOf("cancelBuild"), calls)
+    }
+
+    @Test
+    fun nothingBuilding_hidesTheBuildStatus() {
+        show(loaded.copy(operation = OperationState.Success(result("alpha"))))
+        rule.onNodeWithText("Building searchable PDF…").assertDoesNotExist()
     }
 
     @Test

@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
@@ -78,6 +80,22 @@ class ToolHandOffTest {
     fun ocr_receivesTheFile() {
         navigate(IncomingIntents.toolRoute(Tool.OCR, pdf("scan.pdf", 2)))
         waitForText("scan.pdf, 2 pages")
+    }
+
+    @Test
+    fun tryOcr_fromPdfToText_carriesTheFileToOcr() {
+        val blank = File(context.cacheDir, "scanned.pdf")
+        com.tom_roush.pdfbox.pdmodel.PDDocument().use { doc ->
+            repeat(2) { doc.addPage(com.tom_roush.pdfbox.pdmodel.PDPage()) }
+            doc.save(blank)
+        }
+        navigate(IncomingIntents.toolRoute(Tool.PDF_TO_TEXT, Uri.fromFile(blank)))
+        waitForText("scanned.pdf, 2 pages")
+        rule.onNode(hasText("Extract text") and androidx.compose.ui.test.hasClickAction()).performScrollTo().performClick()
+        waitForText("Try text recognition (OCR)")
+        rule.onNode(hasText("Try text recognition (OCR)") and androidx.compose.ui.test.hasClickAction()).performScrollTo().performClick()
+        waitForText("Recognize text")
+        waitForText("scanned.pdf, 2 pages")
     }
 
     @Test

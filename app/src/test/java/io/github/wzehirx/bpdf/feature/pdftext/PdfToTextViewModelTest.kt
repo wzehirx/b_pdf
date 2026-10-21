@@ -97,6 +97,16 @@ class PdfToTextViewModelTest {
     }
 
     @Test
+    fun sourceUri_isKeptForHandingTheFileToOcr_andForgottenOnRemove() {
+        val vm = newVm()
+        val uri = uriOf(TestPdfs.create(dir, 2), "scan.pdf")
+        vm.pickFile(listOf(uri))
+        assertEquals(uri, vm.settled { it.file?.displayName == "scan.pdf" && it.sourceUri != null }.sourceUri)
+        vm.remove()
+        assertNull(vm.settled { it.file == null }.sourceUri)
+    }
+
+    @Test
     fun selectedPages_extractOnlyThose() {
         val vm = newVm()
         vm.pick(TestPdfs.create(dir, 4, "S"))

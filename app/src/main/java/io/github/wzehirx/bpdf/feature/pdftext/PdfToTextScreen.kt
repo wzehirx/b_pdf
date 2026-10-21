@@ -58,7 +58,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun PdfToTextScreen(
     onBack: () -> Unit,
-    onOpenOcr: () -> Unit = {},
+    onOpenOcr: (Uri?) -> Unit = {},
     initialUri: Uri? = null,
     viewModel: PdfToTextViewModel = viewModel(factory = PdfToTextViewModel.Factory),
 ) {
@@ -107,7 +107,7 @@ fun PdfToTextScreen(
         },
         onRetry = viewModel::retry,
         ocrAvailable = Tool.OCR.available,
-        onOpenOcr = onOpenOcr,
+        onOpenOcr = { onOpenOcr(state.sourceUri) },
         onSubmitPassword = viewModel::submitPassword,
         onDismissPassword = viewModel::dismissPassword,
         thumbnail = rememberPageThumbnails(state.file?.file, state.file?.let { viewModel.passwordOf(it.file) }),
