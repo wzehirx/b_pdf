@@ -175,4 +175,16 @@
         <item quantity="one">%1$d sayfa döndürüldü</item>
         <item quantity="other">%1$d sayfa döndürüldü</item>
     </plurals>
+    <string name="page_grid_cell">Sayfa %1$d / %2$d</string>
+    <string name="page_grid_cell_rotated">Sayfa %1$d / %2$d, %3$d° döndürülmüş</string>
+    <string name="page_grid_selected">Seçili</string>
+    <string name="page_grid_not_selected">Seçili değil</string>
+    <string name="page_grid_select_all">Tümünü seç</string>
+    <string name="page_grid_clear_selection">Seçimi temizle</string>
+    <plurals name="page_grid_selected_count">
+        <item quantity="one">%1$d sayfa seçili</item>
+        <item quantity="other">%1$d sayfa seçili</item>
+    </plurals>
+    <string name="page_grid_actions_for_page">%1$d. sayfa işlemleri</string>
+    <string name="page_grid_choose_pages">Sayfaları seç</string>
 </resources>

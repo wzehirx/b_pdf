@@ -8,6 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import android.graphics.Bitmap
+import io.github.wzehirx.bpdf.ui.components.PageChooser
+import io.github.wzehirx.bpdf.ui.components.rememberPageThumbnails
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -73,6 +76,7 @@ fun RotateScreen(onBack: () -> Unit, viewModel: RotateViewModel = viewModel(fact
             }
         },
         onRetry = viewModel::retry,
+        thumbnail = rememberPageThumbnails(state.file?.file),
     )
 }
 
@@ -91,6 +95,7 @@ fun RotateScreenContent(
     onSave: () -> Unit,
     onShare: () -> Unit,
     onRetry: () -> Unit,
+    thumbnail: suspend (Int) -> Bitmap? = { null },
 ) {
     val resources = LocalResources.current
     val needFile = stringResource(R.string.rotate_need_file)
@@ -141,6 +146,13 @@ fun RotateScreenContent(
                     onValueChange = onRangeChange,
                     pageCount = state.pageCount,
                     error = state.rangeError,
+                    enabled = !busy,
+                )
+                PageChooser(
+                    rangeText = state.rangeText,
+                    pageCount = state.pageCount,
+                    onRangeChange = onRangeChange,
+                    thumbnail = thumbnail,
                     enabled = !busy,
                 )
             }

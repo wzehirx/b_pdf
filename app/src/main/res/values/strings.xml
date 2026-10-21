@@ -175,4 +175,16 @@
         <item quantity="one">Rotated %1$d page</item>
         <item quantity="other">Rotated %1$d pages</item>
     </plurals>
+    <string name="page_grid_cell">Page %1$d of %2$d</string>
+    <string name="page_grid_cell_rotated">Page %1$d of %2$d, rotated %3$d°</string>
+    <string name="page_grid_selected">Selected</string>
+    <string name="page_grid_not_selected">Not selected</string>
+    <string name="page_grid_select_all">Select all</string>
+    <string name="page_grid_clear_selection">Clear selection</string>
+    <plurals name="page_grid_selected_count">
+        <item quantity="one">%1$d page selected</item>
+        <item quantity="other">%1$d pages selected</item>
+    </plurals>
+    <string name="page_grid_actions_for_page">Actions for page %1$d</string>
+    <string name="page_grid_choose_pages">Choose pages</string>
 </resources>

@@ -1,5 +1,10 @@
 package io.github.wzehirx.bpdf.feature.rotate
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.onNodeWithContentDescription
+import org.robolectric.annotation.Config
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -168,5 +173,34 @@ class RotateScreenTest {
         show(loaded.copy(saving = true, operation = OperationState.Success(RotateResult(File("o.pdf"), 1, 5, "n.pdf"))))
         rule.onNodeWithText("Save").performScrollTo().assertIsNotEnabled()
         rule.onNodeWithText("Share").performScrollTo().assertIsNotEnabled()
+    }
+    @Test
+    @Config(qualifiers = "w400dp-h2000dp")
+    fun chooseFromGrid_updatesRangeText_andTextUpdatesGrid() {
+        var text by mutableStateOf("")
+        rule.setContent {
+            RotateScreenContent(
+                state = loaded.copy(scope = RotateScope.SELECTED, rangeText = text),
+                onBack = {}, onPickFile = {}, onRemoveFile = {}, onAngleChange = {}, onScopeChange = {},
+                onRangeChange = { text = it },
+                onRotate = {}, onCancel = {}, onSave = {}, onShare = {}, onRetry = {},
+            )
+        }
+        rule.onNodeWithText("Choose pages").performClick()
+        rule.onNodeWithContentDescription("Page 2 of 5").performClick()
+        rule.onNodeWithContentDescription("Page 3 of 5").performClick()
+        assertEquals("2-3", text)
+        rule.runOnUiThread { text = "5" }
+        rule.waitForIdle()
+        assertEquals(
+            "Selected",
+            rule.onNodeWithContentDescription("Page 5 of 5").fetchSemanticsNode().config.getOrNull(SemanticsProperties.StateDescription),
+        )
+    }
+
+    @Test
+    fun allPagesScope_hidesTheGridChooser() {
+        show(loaded)
+        rule.onNodeWithText("Choose pages").assertDoesNotExist()
     }
 }

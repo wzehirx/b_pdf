@@ -3,7 +3,12 @@ package io.github.wzehirx.bpdf.feature.pages
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onNodeWithContentDescription
+import org.robolectric.annotation.Config
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.assertIsFocused
@@ -172,5 +177,60 @@ class PageSelectScreenTest {
         ))
         rule.onNodeWithText("Save").performScrollTo().assertIsNotEnabled()
         rule.onNodeWithText("Share").performScrollTo().assertIsNotEnabled()
+    }
+    private fun pageState(label: String) = rule.onNodeWithContentDescription(label).fetchSemanticsNode()
+        .config.getOrNull(SemanticsProperties.StateDescription)
+
+    @Test
+    @Config(qualifiers = "w400dp-h2000dp")
+    fun chooseFromGrid_andRangeText_stayInSync() {
+        var text by mutableStateOf("2")
+        rule.setContent {
+            PageSelectScreenContent(
+                state = loaded(PageSelectMode.EXTRACT).copy(rangeText = text),
+                onBack = {}, onPickFile = {}, onRemoveFile = {},
+                onRangeChange = { text = it },
+                onRun = {}, onCancel = {}, onSave = {}, onShare = {}, onRetry = {},
+            )
+        }
+        // The grid is an opt-in alternative to typing.
+        rule.onNodeWithContentDescription("Page 1 of 5").assertDoesNotExist()
+        rule.onNodeWithText("Choose pages").performClick()
+
+        // Text to grid.
+        assertEquals("Selected", pageState("Page 2 of 5"))
+        assertEquals("Not selected", pageState("Page 1 of 5"))
+        rule.onNodeWithText("1 page selected").assertExists()
+
+        // Grid to text: toggles append in the order chosen (extraction keeps it).
+        rule.onNodeWithContentDescription("Page 1 of 5").performClick()
+        assertEquals("2,1", text)
+        rule.onNodeWithContentDescription("Page 2 of 5").performClick()
+        assertEquals("1", text)
+        rule.onNodeWithText("Select all").performClick()
+        assertEquals("1-5", text)
+        rule.onNodeWithText("5 pages selected").assertExists()
+        rule.onNodeWithText("Clear selection").performClick()
+        assertEquals("", text)
+
+        // Typing a valid range updates the grid; an invalid one selects nothing.
+        rule.runOnUiThread { text = "3-4" }
+        rule.waitForIdle()
+        assertEquals("Selected", pageState("Page 3 of 5"))
+        assertEquals("Selected", pageState("Page 4 of 5"))
+        assertEquals("Not selected", pageState("Page 5 of 5"))
+        rule.runOnUiThread { text = "9" }
+        rule.waitForIdle()
+        rule.onNodeWithText("0 pages selected").assertExists()
+    }
+
+    @Test
+    @Config(qualifiers = "w400dp-h2000dp")
+    fun gridIsDisabledWhileBusy() {
+        show(loaded(PageSelectMode.REMOVE).copy(rangeText = "1", operation = OperationState.Running(0.2f)))
+        rule.onNodeWithText("Choose pages").performClick()
+        rule.onNodeWithContentDescription("Page 2 of 5").performClick()
+        assertTrue(ranges.isEmpty())
+        rule.onNodeWithText("Select all").assertIsNotEnabled()
     }
 }
