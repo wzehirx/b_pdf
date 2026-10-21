@@ -95,4 +95,39 @@
     </plurals>
     <string name="saved_announcement">Kaydedildi</string>
     <string name="share_chooser_title">PDF paylaş</string>
+    <string name="split_instructions">Bir PDF seçin, nasıl keseceğinizi belirleyin ve birkaç dosyaya bölün.</string>
+    <string name="split_choose_file">PDF seç</string>
+    <string name="split_replace_file">Başka PDF seç</string>
+    <string name="split_importing">Dosya açılıyor…</string>
+    <string name="split_remove_file">%1$s dosyasını kaldır</string>
+    <string name="split_remove_action">Dosyayı kaldır</string>
+    <plurals name="split_file_summary">
+        <item quantity="one">%1$s, %2$d sayfa</item>
+        <item quantity="other">%1$s, %2$d sayfa</item>
+    </plurals>
+    <string name="split_mode_label">Nasıl bölünsün</string>
+    <string name="split_mode_ranges">Sayfa aralıklarına göre</string>
+    <string name="split_mode_every_n">Her N sayfada bir</string>
+    <string name="split_mode_each_page">Her sayfa ayrı dosya</string>
+    <string name="split_ranges_hint">Virgülle ayrılan her aralık ayrı bir dosya olur, örneğin 1-2, 4.</string>
+    <string name="split_every_n_label">Dosya başına sayfa</string>
+    <plurals name="split_every_n_hint">
+        <item quantity="one">1 ile %1$d arasında bir tam sayı girin.</item>
+        <item quantity="other">1 ile %1$d arasında bir tam sayı girin.</item>
+    </plurals>
+    <string name="split_every_n_empty">Her dosyada kaç sayfa olacağını girin.</string>
+    <string name="split_every_n_invalid">\"%1$s\" geçerli değil. 1 ile %2$d arasında bir tam sayı girin.</string>
+    <string name="split_button">Böl</string>
+    <string name="split_need_file">Önce bir PDF seçin</string>
+    <plurals name="split_success">
+        <item quantity="one">%1$d dosya oluşturuldu</item>
+        <item quantity="other">%1$d dosya oluşturuldu</item>
+    </plurals>
+    <string name="split_save_folder">Klasöre kaydet</string>
+    <string name="split_save_zip">ZIP olarak kaydet</string>
+    <string name="split_share_chooser_title">Bölünen PDF\'leri paylaş</string>
+    <plurals name="split_saved_announcement">
+        <item quantity="one">%1$d dosya kaydedildi</item>
+        <item quantity="other">%1$d dosya kaydedildi</item>
+    </plurals>
 </resources>

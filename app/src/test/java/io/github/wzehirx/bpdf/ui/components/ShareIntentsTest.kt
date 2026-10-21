@@ -26,4 +26,24 @@ class ShareIntentsTest {
         assertEquals(uri, send.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java))
         assertTrue(send.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0)
     }
+
+    @Test
+    fun shareFiles_sendsAllUrisWithReadGrant() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val uris = listOf(Uri.parse("content://x.fileprovider/shared/a_1.pdf"), Uri.parse("content://x.fileprovider/shared/a_2.pdf"))
+        assertTrue(app.shareFiles(uris, "application/pdf", "Share"))
+        val chooser = shadowOf(app).nextStartedActivity
+        val send = chooser.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)!!
+        assertEquals(Intent.ACTION_SEND_MULTIPLE, send.action)
+        assertEquals("application/pdf", send.type)
+        assertEquals(uris, send.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java))
+        assertEquals(2, send.clipData!!.itemCount)
+        assertTrue(send.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0)
+    }
+
+    @Test
+    fun shareFiles_emptyList_returnsFalse() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        assertEquals(false, app.shareFiles(emptyList(), "application/pdf", "Share"))
+    }
 }

@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ### Added
 - Merge PDF tool: combine several PDFs in a chosen order (reorder and remove with buttons or screen-reader actions), then save or share the result.
+- Split PDF tool: split by page ranges, every N pages, or one file per page; save all parts to a folder or as one ZIP, or share them.
 
 ## [0.1.0] - 2026-10-21
 

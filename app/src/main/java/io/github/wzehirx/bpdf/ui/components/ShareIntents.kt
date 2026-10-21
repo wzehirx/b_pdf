@@ -42,3 +42,26 @@ fun Context.shareFile(uri: Uri, mimeType: String, chooserTitle: String): Boolean
         false
     }
 }
+
+/** Opens the share sheet for several FileProvider [uris] at once (ACTION_SEND_MULTIPLE). */
+fun Context.shareFiles(uris: List<Uri>, mimeType: String, chooserTitle: String): Boolean {
+    if (uris.isEmpty()) return false
+    val list = ArrayList(uris)
+    val send = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+        type = mimeType
+        putParcelableArrayListExtra(Intent.EXTRA_STREAM, list)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        clipData = android.content.ClipData.newRawUri(null, list.first()).also { clip ->
+            list.drop(1).forEach { clip.addItem(android.content.ClipData.Item(it)) }
+        }
+    }
+    val chooser = Intent.createChooser(send, chooserTitle).apply {
+        if (this@shareFiles !is Activity) addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    return try {
+        startActivity(chooser)
+        true
+    } catch (_: ActivityNotFoundException) {
+        false
+    }
+}

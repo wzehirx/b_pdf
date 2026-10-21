@@ -20,6 +20,7 @@ fun PageRangeField(
     pageCount: Int,
     error: PdfError.InvalidRange?,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     val resources = LocalResources.current
     val errorMessage = error?.toMessage(resources)
@@ -36,6 +37,7 @@ fun PageRangeField(
             }
         },
         singleLine = true,
+        enabled = enabled,
         modifier = modifier
             .fillMaxWidth()
             .semantics { if (errorMessage != null) error(errorMessage) },

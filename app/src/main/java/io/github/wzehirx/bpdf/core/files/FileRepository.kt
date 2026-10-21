@@ -13,6 +13,7 @@ data class ImportedFile(val file: File, val displayName: String, val sizeBytes: 
 
 class FileRepository(context: Context) {
     private val context = context.applicationContext
+    internal val appContext: Context get() = context
     private val importsDir get() = File(context.cacheDir, "imports").apply { mkdirs() }
     private val sharedDir get() = File(context.cacheDir, "shared").apply { mkdirs() }
 
@@ -71,6 +72,9 @@ class FileRepository(context: Context) {
 
     /** A fresh, unique output file in the shareable `shared/` directory. */
     fun newOutputFile(ext: String): File = File(sharedDir, "${UUID.randomUUID()}.$ext")
+
+    /** A fresh, empty directory under `shared/` for tools that produce several files. */
+    fun newOutputDir(): File = File(sharedDir, UUID.randomUUID().toString()).apply { mkdirs() }
 
     /** Deletes cache entries older than [maxAgeMillis]. */
     fun purgeStale(maxAgeMillis: Long, now: Long = System.currentTimeMillis()) {

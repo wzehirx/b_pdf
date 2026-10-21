@@ -31,11 +31,12 @@ import io.github.wzehirx.bpdf.core.work.OperationState
 fun <T> OperationStatusPanel(
     state: OperationState<T>,
     successText: (T) -> String,
-    onSave: () -> Unit,
-    onShare: () -> Unit,
     onCancel: () -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
+    onSave: () -> Unit = {},
+    onShare: () -> Unit = {},
+    successActions: @Composable () -> Unit = { SaveResultActions(onSave = onSave, onShare = onShare) },
 ) {
     val resources = LocalResources.current
     val focus = remember { FocusRequester() }
@@ -76,7 +77,7 @@ fun <T> OperationStatusPanel(
                     style = MaterialTheme.typography.titleMedium,
                     modifier = resultModifier,
                 )
-                SaveResultActions(onSave = onSave, onShare = onShare)
+                successActions()
             }
             is OperationState.Failed -> {
                 Text(

@@ -95,4 +95,39 @@
     </plurals>
     <string name="saved_announcement">Saved</string>
     <string name="share_chooser_title">Share PDF</string>
+    <string name="split_instructions">Choose a PDF, decide how to cut it, then split it into several files.</string>
+    <string name="split_choose_file">Choose PDF</string>
+    <string name="split_replace_file">Choose another PDF</string>
+    <string name="split_importing">Opening file…</string>
+    <string name="split_remove_file">Remove %1$s</string>
+    <string name="split_remove_action">Remove file</string>
+    <plurals name="split_file_summary">
+        <item quantity="one">%1$s, %2$d page</item>
+        <item quantity="other">%1$s, %2$d pages</item>
+    </plurals>
+    <string name="split_mode_label">How to split</string>
+    <string name="split_mode_ranges">By page ranges</string>
+    <string name="split_mode_every_n">Every N pages</string>
+    <string name="split_mode_each_page">One file per page</string>
+    <string name="split_ranges_hint">Each comma-separated range becomes its own file, for example 1-2, 4.</string>
+    <string name="split_every_n_label">Pages per file</string>
+    <plurals name="split_every_n_hint">
+        <item quantity="one">Enter a whole number from 1 to %1$d.</item>
+        <item quantity="other">Enter a whole number from 1 to %1$d.</item>
+    </plurals>
+    <string name="split_every_n_empty">Enter how many pages each file should have.</string>
+    <string name="split_every_n_invalid">\"%1$s\" is not valid. Enter a whole number from 1 to %2$d.</string>
+    <string name="split_button">Split</string>
+    <string name="split_need_file">Choose a PDF first</string>
+    <plurals name="split_success">
+        <item quantity="one">Created %1$d file</item>
+        <item quantity="other">Created %1$d files</item>
+    </plurals>
+    <string name="split_save_folder">Save to folder</string>
+    <string name="split_save_zip">Save as ZIP</string>
+    <string name="split_share_chooser_title">Share split PDFs</string>
+    <plurals name="split_saved_announcement">
+        <item quantity="one">Saved %1$d file</item>
+        <item quantity="other">Saved %1$d files</item>
+    </plurals>
 </resources>
