@@ -27,6 +27,13 @@ object PageSelectOperation {
      * pointed at a removed page lose that target (and with it the page's content).
      * Throws [IllegalArgumentException] when [pages] is empty, contains an index outside the
      * document, or covers every page (a PDF needs at least one page).
+     *
+     * Fidelity trade-off: the saved file is checked for any leftover page that is not in the page
+     * tree. If one is found (a reference the cleanup does not know about), the output is rebuilt
+     * from the kept pages only, like [extract] plus the outline. Only in that fallback are the
+     * structure tree (tags) and interactive form fields dropped, and links and bookmarks that
+     * point at removed pages are lost as before. Removed content never survives; some structure
+     * of unusual files may.
      */
     fun remove(
         input: File,
@@ -134,11 +141,28 @@ object PageSelectOperation {
 
     private fun <T> identitySet(): MutableSet<T> = Collections.newSetFromMap(IdentityHashMap<T, Boolean>())
 
-    /** True when [file] holds a `/Type /Page` object that is not part of its page tree. */
+    /**
+     * True when [file] holds a page that is not part of its page tree. That is a `/Type /Page`
+     * object, or any other dictionary that hangs off the page tree like a page (its `/Parent` is a
+     * page-tree node, it has a `/MediaBox` or `/Contents`, and it is not a node itself): a page
+     * whose `/Type` is missing or wrong still carries its content into the file.
+     */
     private fun hasOrphanPages(file: File): Boolean = PdfLoader.load(file).use { doc ->
         val inTree = identitySet<COSDictionary>()
         for (i in 0 until doc.numberOfPages) inTree += doc.getPage(i).cosObject
-        doc.document.getObjectsByType(COSName.PAGE).any { (it.getObject() as? COSDictionary) !in inTree }
+        doc.document.getObjectsByType(COSName.PAGE).any { (it.getObject() as? COSDictionary) !in inTree } ||
+            doc.document.objects.any { entry ->
+                val dict = entry.getObject() as? COSDictionary
+                dict != null && dict !in inTree && dict.looksLikePage()
+            }
+    }
+
+    private fun COSDictionary.looksLikePage(): Boolean {
+        if (containsKey(COSName.KIDS)) return false // a page-tree node, not a page
+        val parent = getDictionaryObject(COSName.PARENT) as? COSDictionary ?: return false
+        val parentIsPageTreeNode = parent.getNameAsString(COSName.TYPE) == "Pages" ||
+            (parent.containsKey(COSName.KIDS) && parent.containsKey(COSName.COUNT))
+        return parentIsPageTreeNode && (containsKey(COSName.MEDIA_BOX) || containsKey(COSName.CONTENTS))
     }
 
     /**

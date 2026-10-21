@@ -3,6 +3,7 @@ package io.github.wzehirx.bpdf.core.pdf
 import androidx.test.core.app.ApplicationProvider
 import com.tom_roush.pdfbox.cos.COSArray
 import com.tom_roush.pdfbox.cos.COSDictionary
+import com.tom_roush.pdfbox.cos.COSInteger
 import com.tom_roush.pdfbox.cos.COSName
 import com.tom_roush.pdfbox.cos.COSStream
 import com.tom_roush.pdfbox.cos.COSString
@@ -205,6 +206,37 @@ class RemovedPageLeakTest {
         }
         removeAndAssertGone(input, expectFallback = true)
         assertEquals(listOf("KEEPONE", "KEEPTHREE"), TestPdfs.text(out()))
+    }
+
+    @Test
+    fun unknownReferenceToPageWithoutType_isStillDetectedAndRebuilt() {
+        // PDFBox puts /Type /Page back on every page it walks, so the stray copy has to be a
+        // separate dictionary: no /Type, not in the page tree, but with a page-tree parent, a media
+        // box and the removed page's contents (a page-like object that a type search cannot see).
+        val input = fixture { removed, _ ->
+            val stray = COSDictionary(removed.cosObject).apply { removeItem(COSName.TYPE) }
+            documentCatalog.cosObject.setItem(COSName.getPDFName("BpdfUnknownKey"), stray)
+        }
+        removeAndAssertGone(input, expectFallback = true)
+    }
+
+    @Test
+    fun nestedPageTreeWithInheritedBoxes_isNotMistakenForOrphanPages() {
+        // Intermediate page-tree nodes carry /MediaBox and have a page-tree parent too; they are
+        // not pages and must not make the safety net rebuild a perfectly clean output.
+        val input = fixture { _, _ ->
+            val root = documentCatalog.pages.cosObject
+            val node = COSDictionary()
+            node.setItem(COSName.TYPE, COSName.PAGES)
+            node.setItem(COSName.KIDS, COSArray().apply { addAll(root.getDictionaryObject(COSName.KIDS) as COSArray) })
+            node.setItem(COSName.COUNT, COSInteger.get(3))
+            node.setItem(COSName.PARENT, root)
+            node.setItem(COSName.MEDIA_BOX, PDRectangle.LETTER.cosArray)
+            val kids = node.getDictionaryObject(COSName.KIDS) as COSArray
+            for (i in 0 until kids.size()) (kids.getObject(i) as COSDictionary).setItem(COSName.PARENT, node)
+            root.setItem(COSName.KIDS, COSArray().apply { add(node) })
+        }
+        removeAndAssertGone(input, expectFallback = false)
     }
 
     @Test
