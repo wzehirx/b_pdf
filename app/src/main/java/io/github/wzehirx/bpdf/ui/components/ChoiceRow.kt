@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -35,18 +36,22 @@ fun <T> ChoiceRow(
     Column(modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(label, style = MaterialTheme.typography.titleSmall)
         options.forEach { option ->
+            val label = optionLabel(option)
+            // A spoken replacement only matters when it differs; then the visible label is hidden from screen readers.
+            val spoken = optionDescription?.invoke(option)?.takeIf { it != label }
             Row(
                 Modifier
                     .fillMaxWidth()
                     .heightIn(min = 48.dp)
                     .selectable(selected = option == selected, enabled = enabled, role = Role.RadioButton) { onSelect(option) }
                     .padding(horizontal = 4.dp)
-                    .semantics { optionDescription?.invoke(option)?.let { contentDescription = it } },
+                    .semantics { spoken?.let { contentDescription = it } },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 RadioButton(selected = option == selected, onClick = null, enabled = enabled)
-                Text(optionLabel(option))
+                // With a spoken replacement the visible label is hidden from screen readers, or both would be read.
+                Text(label, modifier = if (spoken != null) Modifier.clearAndSetSemantics { } else Modifier)
             }
         }
     }

@@ -6,6 +6,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
@@ -19,6 +20,8 @@ import io.github.wzehirx.bpdf.core.files.RecentFile
 import io.github.wzehirx.bpdf.ui.Tool
 import io.github.wzehirx.bpdf.ui.ToolCategory
 import io.github.wzehirx.bpdf.ui.theme.BPdfTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -60,8 +63,9 @@ class HomeScreenTest {
         RecentFile("content://a/2", "ders notları.pdf", 1),
     )
 
-    private fun label(tool: Tool) =
-        "${context.getString(tool.title)}. ${context.getString(tool.description)}"
+    /** The tool's row: one merged, clickable node whose spoken text is the visible title and description (no extra label). */
+    private fun row(tool: Tool) =
+        rule.onNode(hasText(context.getString(tool.title)) and hasText(context.getString(tool.description)))
 
     @Test
     fun oneHeadingPerCategory() {
@@ -74,15 +78,23 @@ class HomeScreenTest {
     }
 
     @Test
-    fun everyToolShowsTitleAndDescriptionInMergedLabel() {
+    fun everyToolIsOneMergedRow_withTitleAndDescriptionAsText_andNoContentDescription() {
         show()
-        Tool.entries.forEach { rule.onNodeWithContentDescription(label(it)).assertExists() }
+        Tool.entries.forEach { tool ->
+            val config = row(tool).assertExists().fetchSemanticsNode().config
+            assertEquals(
+                listOf(context.getString(tool.title), context.getString(tool.description)),
+                config.getOrNull(SemanticsProperties.Text)?.map { it.text },
+            )
+            // A contentDescription over the same visible text is what made TalkBack read every tool twice.
+            assertEquals(null, config.getOrNull(SemanticsProperties.ContentDescription))
+        }
     }
 
     @Test
     fun unavailableTool_isDisabledWithComingSoonState_andDoesNotNavigate() {
         show()
-        val node = rule.onNodeWithContentDescription(label(Tool.MERGE))
+        val node = row(Tool.MERGE)
         node.assertIsNotEnabled()
         val state = node.fetchSemanticsNode().config.getOrNull(SemanticsProperties.StateDescription)
         assertEquals("Coming soon", state)
@@ -93,9 +105,9 @@ class HomeScreenTest {
     @Test
     fun availableTool_isClickableAndNavigates() {
         show(available = setOf(Tool.MERGE))
-        rule.onNodeWithContentDescription(label(Tool.MERGE)).performClick()
+        row(Tool.MERGE).performClick()
         assertEquals(listOf(Tool.MERGE), opened)
-        val state = rule.onNodeWithContentDescription(label(Tool.MERGE))
+        val state = row(Tool.MERGE)
             .fetchSemanticsNode().config.getOrNull(SemanticsProperties.StateDescription)
         assertEquals(null, state)
     }

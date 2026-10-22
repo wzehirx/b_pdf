@@ -14,6 +14,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -95,7 +96,7 @@ class PageNumbersScreenTest {
     fun formatPresets_showExamplesWithTheRealPageCount_andCallBack() {
         show(loaded)
         rule.onNodeWithText("Number only (1)").assertIsSelected()
-        rule.onNodeWithText("Number and total (1 / 5)").assertExists()
+        rule.onNodeWithContentDescription("Number and total (1 of 5)").assertExists()
         rule.onNodeWithText("Page 1 of 5").performScrollTo().performClick()
         rule.onNodeWithText("Custom format").performScrollTo().performClick()
         assertEquals(listOf(NumberFormat.LOCALIZED, NumberFormat.CUSTOM), formats)
@@ -104,16 +105,19 @@ class PageNumbersScreenTest {
     @Test
     fun slashPreset_isSpokenWithoutTheSlash() {
         show(loaded)
-        val config = rule.onNodeWithText("Number and total (1 / 5)").fetchSemanticsNode().config
+        val config = rule.onNodeWithContentDescription("Number and total (1 of 5)").fetchSemanticsNode().config
         assertEquals(listOf("Number and total (1 of 5)"), config.getOrNull(SemanticsProperties.ContentDescription))
+        // The label with the slash is only drawn: it is hidden from the screen reader, so nothing is spoken twice.
+        assertEquals(null, config.getOrNull(SemanticsProperties.Text))
     }
 
     @Test
     @Config(qualifiers = "tr")
     fun turkishPreset_isSpokenAsBolu() {
         show(loaded)
-        val spoken = rule.onNodeWithText("Sayfa 1 / 5").fetchSemanticsNode().config.getOrNull(SemanticsProperties.ContentDescription)
-        assertEquals(listOf("Sayfa 1 bölü 5"), spoken)
+        val config = rule.onNodeWithContentDescription("Sayfa 1 bölü 5").fetchSemanticsNode().config
+        assertEquals(listOf("Sayfa 1 bölü 5"), config.getOrNull(SemanticsProperties.ContentDescription))
+        assertEquals(null, config.getOrNull(SemanticsProperties.Text))
     }
 
     @Test

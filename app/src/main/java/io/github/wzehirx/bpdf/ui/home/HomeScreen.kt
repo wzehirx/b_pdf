@@ -167,15 +167,13 @@ private fun ToolCard(tool: Tool, available: Boolean, onOpen: (Tool) -> Unit) {
     val title = stringResource(tool.title)
     val description = stringResource(tool.description)
     val comingSoon = stringResource(R.string.tool_coming_soon)
-    val label = "$title. $description"
     val base = Modifier.fillMaxWidth().heightIn(min = 48.dp)
     val interaction = if (available) {
         base.clickable(role = Role.Button) { onOpen(tool) }
-            .semantics(mergeDescendants = true) { contentDescription = label }
+            .semantics(mergeDescendants = true) {}
     } else {
         // Still focusable so screen-reader and keyboard users can discover it, but inert.
         base.focusable().semantics(mergeDescendants = true) {
-            contentDescription = label
             role = Role.Button
             stateDescription = comingSoon
             disabled()

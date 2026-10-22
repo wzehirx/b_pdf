@@ -82,8 +82,8 @@ class FontScale200Test {
         rule.onNodeWithContentDescription("Settings").assertIsDisplayed().assertTarget48dp()
         val last = Tool.entries.last { it.category == ToolCategory.entries.last() }
         val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
-        // The tools are lazily composed: scroll the grid until the last card exists, then it must be on screen.
-        val lastCard = androidx.compose.ui.test.hasContentDescription("${context.getString(last.title)}. ${context.getString(last.description)}")
+        // The tool groups are lazily composed: scroll the list until the last tool row exists, then it must be on screen.
+        val lastCard = androidx.compose.ui.test.hasText(context.getString(last.title))
         rule.onNode(hasScrollAction()).performScrollToNode(lastCard)
         rule.onNode(lastCard).assertIsDisplayed()
     }
