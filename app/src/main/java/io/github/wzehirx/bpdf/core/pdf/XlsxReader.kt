@@ -34,7 +34,7 @@ internal class XlsxReader(file: File, private val displayName: String) : Closeab
         val e = zip.getEntry(entry) ?: return null
         val p = Xml.newPullParser()
         p.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true)
-        p.setInput(zip.getInputStream(e), "UTF-8")
+        p.setInput(OoxmlLimits.open(zip, e, displayName, OoxmlLimits.MAX_PART_BYTES, xml = true), "UTF-8")
         return p
     }
 
@@ -49,6 +49,7 @@ internal class XlsxReader(file: File, private val displayName: String) : Closeab
         var current: StringBuilder? = null
         var inT = false
         var phonetic = 0
+        var total = 0L
         while (p.next() != XmlPullParser.END_DOCUMENT) {
             when (p.eventType) {
                 XmlPullParser.START_TAG -> when (p.name) {
@@ -56,7 +57,11 @@ internal class XlsxReader(file: File, private val displayName: String) : Closeab
                     "rPh" -> phonetic++
                     "t" -> inT = phonetic == 0
                 }
-                XmlPullParser.TEXT -> if (inT) current?.append(p.text)
+                XmlPullParser.TEXT -> if (inT && total < OoxmlLimits.MAX_TEXT_CHARS) {
+                    val chunk = p.text
+                    total += chunk.length
+                    current?.append(chunk)
+                }
                 XmlPullParser.END_TAG -> when (p.name) {
                     "t" -> inT = false
                     "rPh" -> phonetic--

@@ -175,7 +175,10 @@ internal class PdfContentReader(file: File, password: String? = null) : Closeabl
     /** Encodes [picture], or null when it is tiny or cannot be decoded. The bitmap is recycled here. */
     fun encode(picture: Picture): EncodedImage? {
         val image = picture.image
-        val bitmap = try { image.image } catch (e: IOException) { null } catch (e: RuntimeException) { null } ?: return null
+        // Decode large pictures at reduced size: ImageEncoder shrinks them to MAX_SIDE anyway, and a
+        // full-size 10000 x 14000 scan alone would need over 500 MB.
+        val sub = maxOf(1, Math.ceil(maxOf(image.width, image.height).toDouble() / ImageEncoder.MAX_SIDE).toInt())
+        val bitmap = try { if (sub > 1) image.getImage(null, sub) else image.image } catch (e: IOException) { null } catch (e: RuntimeException) { null } ?: return null
         return try {
             val transparent = try { image.softMask != null || image.mask != null || image.isStencil } catch (e: Exception) { false }
             ImageEncoder.encode(bitmap, forcePng = transparent)

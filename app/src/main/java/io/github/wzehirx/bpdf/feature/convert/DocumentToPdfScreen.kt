@@ -37,7 +37,8 @@ import kotlinx.coroutines.launch
 internal val DOCUMENT_MIME_TYPES = arrayOf(
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "text/plain",
+    "text/*", // .csv, .md, .log and other text files come with their own types
+    "application/octet-stream", // providers that cannot tell the type; the file content is sniffed on import
 )
 
 /** Word, Excel or text to PDF. */

@@ -96,7 +96,7 @@ class DocumentToPdfViewModel(
         local.update { it.copy(pendingImports = it.pendingImports + 1) }
         viewModelScope.launch {
             try {
-                val name = fileRepository.displayName(uri)
+                val name = withContext(ioDispatcher) { fileRepository.displayName(uri) }
                 val extension = name?.substringAfterLast('.', "")?.lowercase()?.takeIf { it.length in 1..5 && it.all(Char::isLetterOrDigit) } ?: "bin"
                 val imported = fileRepository.importToCache(uri, extension)
                 val kind = try {
@@ -168,6 +168,8 @@ class DocumentToPdfViewModel(
                 local.update { it.copy(error = e) }
             } finally {
                 local.update { it.copy(saving = false) }
+                // The screen was left mid-save: the result could not be deleted then, so do it now.
+                if (cleared) out.delete()
             }
         }
     }
@@ -189,10 +191,14 @@ class DocumentToPdfViewModel(
         local.update { it.copy(error = null) }
     }
 
+    /** Set in [onCleared]; a save still running then deletes its own source when it ends. */
+    @Volatile private var cleared = false
+
     override fun onCleared() {
+        cleared = true
         val output = successValue()?.file
         runner.cancel()
-        output?.delete()
+        if (!local.value.saving) output?.delete()
         local.value.file?.file?.delete()
     }
 

@@ -28,13 +28,16 @@ internal class DocxReader(file: File, private val displayName: String) : Closeab
 
     /** Bytes of the zip entry [name] (a picture), or null when missing. */
     fun entryBytes(name: String): ByteArray? =
-        zip.getEntry(name)?.let { e -> zip.getInputStream(e).use { it.readBytes() } }
+        zip.getEntry(name)?.let { e ->
+            if (e.size > OoxmlLimits.MAX_PICTURE_BYTES) return null
+            OoxmlLimits.open(zip, e, displayName, OoxmlLimits.MAX_PICTURE_BYTES, xml = false).use { it.readBytes() }
+        }
 
     private fun parser(entry: String): XmlPullParser? {
         val e = zip.getEntry(entry) ?: return null
         val p = Xml.newPullParser()
         p.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true)
-        p.setInput(zip.getInputStream(e), "UTF-8")
+        p.setInput(OoxmlLimits.open(zip, e, displayName, OoxmlLimits.MAX_PART_BYTES, xml = true), "UTF-8")
         return p
     }
 
@@ -200,7 +203,7 @@ internal class DocxReader(file: File, private val displayName: String) : Closeab
                     XmlPullParser.TEXT -> if (fallbackDepth == 0 && inText && para != null) {
                         val pp = para!!
                         val chunk = p.text
-                        pp.text.append(chunk)
+                        if (pp.text.length < OoxmlLimits.MAX_TEXT_CHARS) pp.text.append(chunk)
                         val n = chunk.count { !it.isWhitespace() }
                         if (runBold) pp.boldChars += n else pp.plainChars += n
                     }

@@ -163,6 +163,33 @@ class DocumentToPdfOperationTest {
     }
 
     @Test
+    fun docx_withDoctype_isUnreadable_soEntitiesCannotExpand() {
+        val bomb = File(tmp.root, "bomb.docx")
+        ZipOutputStream(bomb.outputStream()).use { z ->
+            z.putNextEntry(ZipEntry("word/document.xml"))
+            z.write(
+                """<?xml version="1.0"?><!DOCTYPE d [<!ENTITY a "aaaaaaaaaa"><!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;">]><w:document $W><w:body><w:p><w:r><w:t>&b;</w:t></w:r></w:p></w:body></w:document>""".toByteArray(),
+            )
+            z.closeEntry()
+        }
+        try { convert(bomb); fail() } catch (_: DocumentUnreadable) { }
+    }
+
+    @Test
+    fun docx_partThatInflatesPastTheLimit_isUnreadable() {
+        val big = File(tmp.root, "big.docx")
+        ZipOutputStream(big.outputStream()).use { z ->
+            z.putNextEntry(ZipEntry("word/document.xml"))
+            z.write("""<?xml version="1.0"?><w:document $W><w:body><!--""".toByteArray())
+            val chunk = ByteArray(1 shl 20) { 'a'.code.toByte() }
+            repeat(65) { z.write(chunk) }
+            z.write("--></w:body></w:document>".toByteArray())
+            z.closeEntry()
+        }
+        try { convert(big); fail() } catch (_: DocumentUnreadable) { }
+    }
+
+    @Test
     fun docx_notAZipOrWithoutDocument_isUnreadable() {
         val garbage = File(tmp.root, "bad.docx").apply { writeText("not a zip") }
         try { convert(garbage); fail() } catch (_: DocumentUnreadable) { }
