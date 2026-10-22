@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tool_pdf_to_document_title">PDF to Word, Excel, HTML</string>
+    <string name="tool_pdf_to_document_desc">Turn a PDF into an editable Word, Excel or web page file.</string>
+    <string name="tool_document_to_pdf_title">Word, Excel, Text to PDF</string>
+    <string name="tool_document_to_pdf_desc">Turn a Word, Excel or text file into a PDF.</string>
+
+    <string name="convert_page_header">Page %1$d</string>
+    <string name="convert_picture_alt">Picture %1$d on page %2$d</string>
+    <string name="convert_page_image_alt">Page %1$d as a picture</string>
+
+    <string name="convert_from_pdf_instructions">Choose a PDF, then the type of file to make. Each page becomes a heading, so you can jump from page to page. Everything stays on your device.</string>
+    <string name="convert_need_file">Choose a PDF first</string>
+    <string name="convert_format_label">File type</string>
+    <string name="convert_format_word">Word document (docx)</string>
+    <string name="convert_format_excel">Excel spreadsheet (xlsx), basic and experimental</string>
+    <string name="convert_format_html">Web page (html)</string>
+    <string name="convert_layout_label">What to keep</string>
+    <string name="convert_layout_text_pictures">Text and pictures (editable)</string>
+    <string name="convert_layout_exact">Exact look (each page as a picture, followed by its text)</string>
+    <string name="convert_excel_note">Excel conversion is basic and experimental. Only text is converted, with one sheet per page. Each line of text becomes a row, and columns are guessed from wide gaps. Please check the result.</string>
+    <string name="convert_pdf_button">Convert</string>
+    <string name="convert_share_chooser_title">Share converted file</string>
+    <plurals name="convert_success_word">
+        <item quantity="one">Converted %1$d page to a Word document.</item>
+        <item quantity="other">Converted %1$d pages to a Word document.</item>
+    </plurals>
+    <plurals name="convert_success_excel">
+        <item quantity="one">Converted %1$d page to an Excel spreadsheet.</item>
+        <item quantity="other">Converted %1$d pages to an Excel spreadsheet.</item>
+    </plurals>
+    <plurals name="convert_success_html">
+        <item quantity="one">Converted %1$d page to a web page.</item>
+        <item quantity="other">Converted %1$d pages to a web page.</item>
+    </plurals>
+    <plurals name="convert_pictures_kept">
+        <item quantity="one">%1$d picture included.</item>
+        <item quantity="other">%1$d pictures included.</item>
+    </plurals>
+    <plurals name="convert_blank_pages">
+        <item quantity="one">%1$d page has no text. It may be a scanned picture.</item>
+        <item quantity="other">%1$d pages have no text. They may be scanned pictures.</item>
+    </plurals>
+
+    <string name="convert_to_pdf_instructions">Choose a Word (docx), Excel (xlsx) or text (txt) file to turn into a PDF. Everything stays on your device.</string>
+    <string name="convert_to_pdf_limits">Word files keep headings, bold paragraphs, lists, tables (one row per line) and inline pictures. Colours, fonts, headers, footers and floating shapes are not kept; a shape with a description appears as that description. Excel sheets become simple tables, without pictures. Old doc and xls files are not supported.</string>
+    <string name="convert_choose_document">Choose Word, Excel or text file</string>
+    <string name="convert_replace_document">Choose another file</string>
+    <string name="convert_need_document">Choose a file first</string>
+    <string name="convert_document_summary">%1$s, %2$s</string>
+    <string name="convert_kind_word">Word document</string>
+    <string name="convert_kind_excel">Excel spreadsheet</string>
+    <string name="convert_kind_text">Text file</string>
+    <string name="convert_to_pdf_button">Convert to PDF</string>
+    <string name="convert_to_pdf_share_chooser_title">Share PDF</string>
+    <plurals name="convert_to_pdf_success">
+        <item quantity="one">Created a PDF with %1$d page.</item>
+        <item quantity="other">Created a PDF with %1$d pages.</item>
+    </plurals>
+    <plurals name="convert_to_pdf_pictures">
+        <item quantity="one">%1$d picture included.</item>
+        <item quantity="other">%1$d pictures included.</item>
+    </plurals>
+    <plurals name="convert_to_pdf_sheets">
+        <item quantity="one">%1$d sheet converted.</item>
+        <item quantity="other">%1$d sheets converted.</item>
+    </plurals>
+    <string name="convert_to_pdf_truncated">Large sheets were cut: only the first %1$d rows and %2$d columns of a sheet are included.</string>
+    <string name="err_document_unreadable">\"%1$s\" could not be read. It may be damaged, protected with a password, or in an old format such as doc or xls. Save it as docx, xlsx or txt and try again.</string>
+</resources>

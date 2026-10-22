@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tool_pdf_to_document_title">PDF\'den Word, Excel, HTML\'ye</string>
+    <string name="tool_pdf_to_document_desc">PDF\'yi düzenlenebilir bir Word, Excel veya web sayfası dosyasına dönüştürür.</string>
+    <string name="tool_document_to_pdf_title">Word, Excel, Metinden PDF\'ye</string>
+    <string name="tool_document_to_pdf_desc">Word, Excel veya metin dosyasını PDF\'ye dönüştürür.</string>
+
+    <string name="convert_page_header">Sayfa %1$d</string>
+    <string name="convert_picture_alt">Sayfa %2$d, resim %1$d</string>
+    <string name="convert_page_image_alt">Sayfa %1$d, resim olarak</string>
+
+    <string name="convert_from_pdf_instructions">Bir PDF seçin, sonra oluşturulacak dosya türünü seçin. Her sayfa bir başlık olur; böylece sayfalar arasında başlıkla gezinebilirsiniz. Her şey cihazınızda kalır.</string>
+    <string name="convert_need_file">Önce bir PDF seçin</string>
+    <string name="convert_format_label">Dosya türü</string>
+    <string name="convert_format_word">Word belgesi (docx)</string>
+    <string name="convert_format_excel">Excel çalışma sayfası (xlsx), basit ve deneysel</string>
+    <string name="convert_format_html">Web sayfası (html)</string>
+    <string name="convert_layout_label">Nelerin korunacağı</string>
+    <string name="convert_layout_text_pictures">Metin ve resimler (düzenlenebilir)</string>
+    <string name="convert_layout_exact">Birebir görünüm (her sayfa bir resim olarak, ardından metni)</string>
+    <string name="convert_excel_note">Excel dönüştürme basit ve deneyseldir. Yalnızca metin dönüştürülür ve her sayfa ayrı bir çalışma sayfası olur. Her metin satırı bir satır olur, sütunlar geniş boşluklardan tahmin edilir. Lütfen sonucu kontrol edin.</string>
+    <string name="convert_pdf_button">Dönüştür</string>
+    <string name="convert_share_chooser_title">Dönüştürülen dosyayı paylaş</string>
+    <plurals name="convert_success_word">
+        <item quantity="one">%1$d sayfa Word belgesine dönüştürüldü.</item>
+        <item quantity="other">%1$d sayfa Word belgesine dönüştürüldü.</item>
+    </plurals>
+    <plurals name="convert_success_excel">
+        <item quantity="one">%1$d sayfa Excel çalışma sayfasına dönüştürüldü.</item>
+        <item quantity="other">%1$d sayfa Excel çalışma sayfasına dönüştürüldü.</item>
+    </plurals>
+    <plurals name="convert_success_html">
+        <item quantity="one">%1$d sayfa web sayfasına dönüştürüldü.</item>
+        <item quantity="other">%1$d sayfa web sayfasına dönüştürüldü.</item>
+    </plurals>
+    <plurals name="convert_pictures_kept">
+        <item quantity="one">%1$d resim eklendi.</item>
+        <item quantity="other">%1$d resim eklendi.</item>
+    </plurals>
+    <plurals name="convert_blank_pages">
+        <item quantity="one">%1$d sayfada metin yok. Taranmış bir resim olabilir.</item>
+        <item quantity="other">%1$d sayfada metin yok. Taranmış resimler olabilir.</item>
+    </plurals>
+
+    <string name="convert_to_pdf_instructions">PDF\'ye dönüştürmek için bir Word (docx), Excel (xlsx) veya metin (txt) dosyası seçin. Her şey cihazınızda kalır.</string>
+    <string name="convert_to_pdf_limits">Word dosyalarında başlıklar, kalın paragraflar, listeler, tablolar (her satır ayrı satır) ve metin içindeki resimler korunur. Renkler, yazı tipleri, üst ve alt bilgiler ile yüzen şekiller korunmaz; açıklaması olan bir şekil yalnızca açıklaması olarak görünür. Excel sayfaları resimsiz basit tablolara dönüşür. Eski doc ve xls dosyaları desteklenmez.</string>
+    <string name="convert_choose_document">Word, Excel veya metin dosyası seç</string>
+    <string name="convert_replace_document">Başka dosya seç</string>
+    <string name="convert_need_document">Önce bir dosya seçin</string>
+    <string name="convert_document_summary">%1$s, %2$s</string>
+    <string name="convert_kind_word">Word belgesi</string>
+    <string name="convert_kind_excel">Excel çalışma sayfası</string>
+    <string name="convert_kind_text">Metin dosyası</string>
+    <string name="convert_to_pdf_button">PDF\'ye dönüştür</string>
+    <string name="convert_to_pdf_share_chooser_title">PDF\'yi paylaş</string>
+    <plurals name="convert_to_pdf_success">
+        <item quantity="one">%1$d sayfalık PDF oluşturuldu.</item>
+        <item quantity="other">%1$d sayfalık PDF oluşturuldu.</item>
+    </plurals>
+    <plurals name="convert_to_pdf_pictures">
+        <item quantity="one">%1$d resim eklendi.</item>
+        <item quantity="other">%1$d resim eklendi.</item>
+    </plurals>
+    <plurals name="convert_to_pdf_sheets">
+        <item quantity="one">%1$d sayfa dönüştürüldü.</item>
+        <item quantity="other">%1$d sayfa dönüştürüldü.</item>
+    </plurals>
+    <string name="convert_to_pdf_truncated">Büyük sayfalar kısaltıldı: her sayfanın yalnızca ilk %1$d satırı ve %2$d sütunu alındı.</string>
+    <string name="err_document_unreadable">\"%1$s\" okunamadı. Dosya hasarlı, parola korumalı veya doc ya da xls gibi eski bir biçimde olabilir. Dosyayı docx, xlsx veya txt olarak kaydedip yeniden deneyin.</string>
+</resources>
