@@ -58,6 +58,9 @@ fun PasswordDialog(
     LaunchedEffect(attempt, wrongPassword) {
         if (wrongPassword) announce(wrongMessage)
     }
+    // After a wrong password the field starts empty: a screen reader user would otherwise have to
+    // delete the wrong text one character ("dot") at a time.
+    LaunchedEffect(attempt) { if (attempt > 0) password = "" }
     val submit = { if (password.isNotEmpty() && !checking) onSubmit(password) }
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -88,7 +91,12 @@ fun PasswordDialog(
                         null
                     },
                     visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                    // A shown password is plain text for the keyboard too, so what was typed can be checked by ear.
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = if (visible) KeyboardType.Text else KeyboardType.Password,
+                        autoCorrectEnabled = if (visible) false else null,
+                        imeAction = ImeAction.Done,
+                    ),
                     keyboardActions = KeyboardActions(onDone = { submit() }),
                     modifier = Modifier.fillMaxWidth().focusRequester(focus),
                 )

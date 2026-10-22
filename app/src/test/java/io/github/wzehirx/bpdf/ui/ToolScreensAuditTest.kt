@@ -417,4 +417,30 @@ class ToolScreensAuditTest {
         }
         audit("Repair")
     }
+
+    @Test
+    fun documentToPdf() {
+        show {
+            io.github.wzehirx.bpdf.feature.convert.DocumentToPdfScreenContent(
+                state = io.github.wzehirx.bpdf.feature.convert.DocumentToPdfUiState(
+                    file = file("rapor.docx"), kind = io.github.wzehirx.bpdf.core.pdf.DocumentKind.DOCX,
+                ),
+                onBack = {}, onPickFile = {}, onRemoveFile = {}, onConvert = {}, onCancel = {},
+                onSave = {}, onShare = {}, onRetry = {},
+            )
+        }
+        audit("Word, Excel and text to PDF")
+    }
+
+    @Test
+    fun pdfToDocument() {
+        show {
+            io.github.wzehirx.bpdf.feature.convert.PdfToDocumentScreenContent(
+                state = io.github.wzehirx.bpdf.feature.convert.PdfToDocumentUiState(file = file("a.pdf"), pageCount = 5),
+                onBack = {}, onPickFile = {}, onRemoveFile = {}, onFormatChange = {}, onLayoutChange = {},
+                onConvert = {}, onCancel = {}, onSave = {}, onShare = {}, onRetry = {},
+            )
+        }
+        audit("PDF to Word, Excel and HTML")
+    }
 }

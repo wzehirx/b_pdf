@@ -129,7 +129,7 @@ class MetadataViewModel(
                 val old = local.value.file
                 local.update { it.copy(
                         file = imported,
-                        protectedInput = info.encrypted || passwordGate.passwordOf(imported.file) != null,
+                        protectedInput = info.encrypted || passwordGate.wasEncrypted(imported.file),
                         info = info,
                         title = info.title.orEmpty(),
                         author = info.author.orEmpty(),

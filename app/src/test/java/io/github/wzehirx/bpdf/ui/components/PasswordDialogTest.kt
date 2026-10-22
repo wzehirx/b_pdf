@@ -108,6 +108,18 @@ class PasswordDialogTest {
     }
 
     @Test
+    fun wrongAttempt_clearsTheField_soTheUserStartsOver() {
+        var attempt by androidx.compose.runtime.mutableIntStateOf(0)
+        rule.setContent { PasswordDialog({}, {}, attempt > 0, null, attempt) }
+        rule.onNode(hasSetTextAction()).performTextInput("typo")
+        rule.runOnUiThread { attempt = 1 }
+        rule.waitForIdle()
+        assertEquals("", rule.onNode(hasSetTextAction()).fetchSemanticsNode().config
+            .getOrNull(SemanticsProperties.EditableText)?.text.orEmpty())
+        rule.onNodeWithText("OK").assertIsNotEnabled()
+    }
+
+    @Test
     fun checking_disablesOk_andShowsProgressText() {
         rule.setContent { PasswordDialog({ submitted += it }, {}, false, null, 0, checking = true) }
         rule.onNode(hasSetTextAction()).performTextInput("pw")

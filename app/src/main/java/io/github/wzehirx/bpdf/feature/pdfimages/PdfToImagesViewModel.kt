@@ -207,7 +207,7 @@ class PdfToImagesViewModel(
             // PdfRenderer cannot open encrypted files: render a decrypted cache copy instead.
             var decrypted: File? = null
             try {
-                val source = if (password != null || PdfLoader.isEncrypted(file.file)) {
+                val source = if (password != null || passwordGate.wasEncrypted(file.file)) {
                     fileRepository.newScratchFile("pdf").also { decrypted = it }
                         .also { UnlockOperation.run(file.file, password.orEmpty(), it, isCancelled = { !context.isActive }) }
                 } else {

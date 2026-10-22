@@ -17,6 +17,7 @@ import io.github.wzehirx.bpdf.core.pdf.RepairOperation
 import io.github.wzehirx.bpdf.core.work.OperationRunner
 import io.github.wzehirx.bpdf.core.work.OperationState
 import io.github.wzehirx.bpdf.core.work.PasswordGate
+import io.github.wzehirx.bpdf.core.work.PdfProbe
 import io.github.wzehirx.bpdf.core.work.PasswordPrompt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -73,9 +74,9 @@ class RepairViewModel(
     private val passwordGate = PasswordGate(ioDispatcher) { file, password ->
         // A damaged file is exactly what this tool is for, so it is not turned away here.
         try {
-            PdfLoader.pageCount(file, password)
+            PdfLoader.load(file, password).use { PdfProbe(it.numberOfPages, it.isEncrypted) }
         } catch (_: PdfError.Corrupt) {
-            UNREADABLE
+            PdfProbe(UNREADABLE, encrypted = false)
         }
     }
     private val saved = Channel<Unit>(Channel.BUFFERED)
@@ -118,7 +119,7 @@ class RepairViewModel(
                     return@launch
                 }
                 val old = local.value.file
-                local.update { it.copy(file = imported, protectedInput = passwordGate.passwordOf(imported.file) != null, pageCount = pages.takeIf { it != UNREADABLE }) }
+                local.update { it.copy(file = imported, protectedInput = passwordGate.wasEncrypted(imported.file), pageCount = pages.takeIf { it != UNREADABLE }) }
                 old?.let { passwordGate.forget(it.file); it.file.delete() }
             } catch (e: CancellationException) {
                 throw e

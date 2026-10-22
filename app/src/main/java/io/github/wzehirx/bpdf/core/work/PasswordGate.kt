@@ -21,6 +21,9 @@ data class PasswordPrompt(
     val attempt: Int = 0,
 )
 
+/** What opening a PDF showed: its page count and whether it is encrypted at all (also with an empty user password). */
+data class PdfProbe(val pages: Int, val encrypted: Boolean)
+
 /**
  * Shared password flow of every tool that opens a PDF. A ViewModel calls [open] for each imported file:
  * an unprotected file opens at once; a protected one raises [prompt] and suspends until the user
@@ -33,8 +36,10 @@ data class PasswordPrompt(
  */
 class PasswordGate(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-    /** Opens [File] with the password (null = none) and returns its page count; throws [PdfError] when it cannot. */
-    private val probe: (File, String?) -> Int = { file, password -> PdfLoader.pageCount(file, password) },
+    /** Opens [File] with the password (null = none) and reports pages and encryption; throws [PdfError] when it cannot. */
+    private val probe: (File, String?) -> PdfProbe = { file, password ->
+        PdfLoader.load(file, password).use { PdfProbe(it.numberOfPages, it.isEncrypted) }
+    },
 ) {
     private val _prompt = MutableStateFlow<PasswordPrompt?>(null)
 
@@ -42,6 +47,7 @@ class PasswordGate(
     val prompt: StateFlow<PasswordPrompt?> = _prompt
 
     private val passwords = ConcurrentHashMap<File, String>()
+    private val encrypted: MutableSet<File> = ConcurrentHashMap.newKeySet()
     private val answers = Channel<String?>(Channel.UNLIMITED)
 
     /**
@@ -51,7 +57,10 @@ class PasswordGate(
      */
     suspend fun open(file: ImportedFile): Int? {
         try {
-            return withContext(ioDispatcher) { probe(file.file, null) }
+            val opened = withContext(ioDispatcher) { probe(file.file, null) }
+            // Opens with no password but is encrypted: owner restrictions (print, copy...) that every tool removes.
+            if (opened.encrypted) encrypted += file.file
+            return opened.pages
         } catch (_: PdfError.PasswordRequired) {
             // fall through to ask
         }
@@ -64,9 +73,10 @@ class PasswordGate(
             while (true) {
                 val password = answers.receive() ?: return null
                 try {
-                    val pages = withContext(ioDispatcher) { probe(file.file, password) }
+                    val opened = withContext(ioDispatcher) { probe(file.file, password) }
                     passwords[file.file] = password
-                    return pages
+                    encrypted += file.file
+                    return opened.pages
                 } catch (_: PdfError.WrongPassword) {
                     _prompt.value = PasswordPrompt(file.displayName, wrong = true, attempt = ++wrongAttempts)
                 }
@@ -92,13 +102,21 @@ class PasswordGate(
     /** The password that opened [file], or null when it needs none. */
     fun passwordOf(file: File): String? = passwords[file]
 
+    /**
+     * True when [file] is encrypted, whether it asked for a password or only carried restrictions.
+     * Tools write their result without that protection and say so.
+     */
+    fun wasEncrypted(file: File): Boolean = file in encrypted
+
     /** Forgets the password of a file that was removed or replaced. */
     fun forget(file: File) {
         passwords.remove(file)
+        encrypted.remove(file)
     }
 
     /** Forgets every password. */
     fun clear() {
         passwords.clear()
+        encrypted.clear()
     }
 }

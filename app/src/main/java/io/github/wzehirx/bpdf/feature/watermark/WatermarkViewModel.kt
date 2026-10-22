@@ -179,7 +179,7 @@ class WatermarkViewModel(
                     return@launch
                 }
                 val old = local.value.file
-                local.update { it.copy(file = imported, protectedInput = passwordGate.passwordOf(imported.file) != null, pageCount = pages, attempted = false) }
+                local.update { it.copy(file = imported, protectedInput = passwordGate.wasEncrypted(imported.file), pageCount = pages, attempted = false) }
                 old?.let { passwordGate.forget(it.file); it.file.delete() }
             } catch (e: CancellationException) {
                 throw e

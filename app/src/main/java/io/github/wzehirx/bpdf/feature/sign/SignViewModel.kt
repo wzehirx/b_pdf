@@ -156,7 +156,7 @@ class SignViewModel(
                 local.update {
                     it.copy(
                         file = imported,
-                        protectedInput = passwordGate.passwordOf(imported.file) != null,
+                        protectedInput = passwordGate.wasEncrypted(imported.file),
                         pageCount = pages,
                         pageText = pages.toString(),
                         attempted = false,

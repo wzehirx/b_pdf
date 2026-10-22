@@ -137,7 +137,7 @@ class PdfToDocumentViewModel(
                     return@launch
                 }
                 val old = local.value.file
-                val unprotected = passwordGate.passwordOf(imported.file) != null
+                val unprotected = passwordGate.wasEncrypted(imported.file)
                 local.update { it.copy(file = imported, pageCount = pages, protectedInput = unprotected) }
                 old?.let { passwordGate.forget(it.file); it.file.delete() }
             } catch (e: CancellationException) {

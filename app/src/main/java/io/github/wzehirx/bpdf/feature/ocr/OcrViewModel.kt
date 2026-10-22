@@ -171,7 +171,7 @@ class OcrViewModel(
                 }
                 val old = local.value.file
                 local.update {
-                    it.copy(file = imported, protectedInput = passwordGate.passwordOf(imported.file) != null, pageCount = pages, attempted = false)
+                    it.copy(file = imported, protectedInput = passwordGate.wasEncrypted(imported.file), pageCount = pages, attempted = false)
                 }
                 old?.let { passwordGate.forget(it.file); it.file.delete() }
             } catch (e: CancellationException) {
@@ -228,7 +228,7 @@ class OcrViewModel(
             var decrypted: File? = null
             var out: File? = null
             try {
-                val source = if (password != null || PdfLoader.isEncrypted(file.file)) {
+                val source = if (password != null || passwordGate.wasEncrypted(file.file)) {
                     fileRepository.newScratchFile("pdf").also { decrypted = it }
                         .also { UnlockOperation.run(file.file, password.orEmpty(), it, isCancelled = { !context.isActive }) }
                 } else {

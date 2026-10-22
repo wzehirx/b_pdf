@@ -20,9 +20,10 @@ class PasswordGateTest {
 
     private fun gate(dispatcher: kotlinx.coroutines.CoroutineDispatcher) = PasswordGate(dispatcher) { file, password ->
         when {
-            file.name != "locked.pdf" -> 4
+            file.name == "restricted.pdf" -> PdfProbe(5, encrypted = true)
+            file.name != "locked.pdf" -> PdfProbe(4, encrypted = false)
             password == null -> throw PdfError.PasswordRequired()
-            password == "right" -> 7
+            password == "right" -> PdfProbe(7, encrypted = true)
             else -> throw PdfError.WrongPassword()
         }
     }
@@ -44,6 +45,30 @@ class PasswordGateTest {
         assertEquals(7, result.await())
         assertNull(gate.prompt.value)
         assertEquals("right", gate.passwordOf(locked.file))
+    }
+
+    @Test
+    fun ownerRestrictedFile_opensWithoutPrompt_butIsRememberedAsEncrypted() = runTest(UnconfinedTestDispatcher()) {
+        val gate = gate(UnconfinedTestDispatcher(testScheduler))
+        val restricted = ImportedFile(File("restricted.pdf"), "restricted.pdf", 1)
+        assertEquals(5, gate.open(restricted))
+        assertNull(gate.prompt.value)
+        assertNull(gate.passwordOf(restricted.file))
+        assertTrue(gate.wasEncrypted(restricted.file))
+        assertFalse(gate.wasEncrypted(open.file).also { gate.open(open) })
+        gate.forget(restricted.file)
+        assertFalse(gate.wasEncrypted(restricted.file))
+    }
+
+    @Test
+    fun passwordProtectedFile_isEncrypted_untilClear() = runTest(UnconfinedTestDispatcher()) {
+        val gate = gate(UnconfinedTestDispatcher(testScheduler))
+        val result = async { gate.open(locked) }
+        gate.submit("right")
+        result.await()
+        assertTrue(gate.wasEncrypted(locked.file))
+        gate.clear()
+        assertFalse(gate.wasEncrypted(locked.file))
     }
 
     @Test

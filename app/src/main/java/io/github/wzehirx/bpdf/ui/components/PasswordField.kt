@@ -38,7 +38,11 @@ fun PasswordField(
         singleLine = true,
         enabled = enabled,
         visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = imeAction),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = if (visible) KeyboardType.Text else KeyboardType.Password,
+            autoCorrectEnabled = if (visible) false else null,
+            imeAction = imeAction,
+        ),
         modifier = modifier
             .fillMaxWidth()
             .semantics { if (errorMessage != null) error(errorMessage) },

@@ -110,7 +110,7 @@ class MergeViewModel(
                         throw t
                     }
                     local.update {
-                        it.copy(files = it.files + imported, protectedInput = it.protectedInput || passwordGate.passwordOf(imported.file) != null)
+                        it.copy(files = it.files + imported, protectedInput = it.protectedInput || passwordGate.wasEncrypted(imported.file))
                     }
                 }
             } catch (e: CancellationException) {
@@ -137,7 +137,7 @@ class MergeViewModel(
         passwordGate.forget(files[index].file)
         local.update {
             val rest = it.files.filterIndexed { i, _ -> i != index }
-            it.copy(files = rest, protectedInput = rest.any { f -> passwordGate.passwordOf(f.file) != null })
+            it.copy(files = rest, protectedInput = rest.any { f -> passwordGate.wasEncrypted(f.file) })
         }
         files[index].file.delete()
     }
