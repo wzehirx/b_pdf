@@ -129,6 +129,8 @@ fun MetadataScreenContent(
         }
         if (file != null && info != null) {
             SelectedPdfCard(
+                file = file,
+                pageCount = info.pageCount,
                 summary = pluralStringResource(R.plurals.single_file_summary, info.pageCount, file.displayName, info.pageCount),
                 removeActionLabel = stringResource(R.string.single_file_remove_action),
                 removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),

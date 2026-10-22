@@ -139,6 +139,24 @@
     <string name="single_file_importing">Opening file…</string>
     <string name="single_file_remove">Remove %1$s</string>
     <string name="single_file_remove_action">Remove file</string>
+    <plurals name="single_file_loaded">
+        <item quantity="one">%1$s loaded, %2$d page</item>
+        <item quantity="other">%1$s loaded, %2$d pages</item>
+    </plurals>
+    <string name="single_file_loaded_no_count">%1$s loaded</string>
+    <string name="single_file_removed">%1$s removed</string>
+    <plurals name="file_list_added">
+        <item quantity="one">%1$s added, %2$d file in the list</item>
+        <item quantity="other">%1$s added, %2$d files in the list</item>
+    </plurals>
+    <plurals name="file_list_added_many">
+        <item quantity="one">%1$d file added</item>
+        <item quantity="other">%1$d files added</item>
+    </plurals>
+    <plurals name="file_list_removed">
+        <item quantity="one">%1$s removed, %2$d file left</item>
+        <item quantity="other">%1$s removed, %2$d files left</item>
+    </plurals>
     <plurals name="single_file_summary">
         <item quantity="one">%1$s, %2$d page</item>
         <item quantity="other">%1$s, %2$d pages</item>
@@ -179,6 +197,7 @@
         <item quantity="other">Rotated %1$d pages</item>
     </plurals>
     <string name="page_grid_cell">Page %1$d of %2$d</string>
+    <string name="page_grid_label_rotated">%1$s, rotated %2$d°</string>
     <string name="page_grid_cell_rotated">Page %1$d of %2$d, rotated %3$d°</string>
     <string name="page_grid_selected">Selected</string>
     <string name="page_grid_not_selected">Not selected</string>
@@ -207,6 +226,8 @@
         <item quantity="one">Created a PDF with %1$d page</item>
         <item quantity="other">Created a PDF with %1$d pages</item>
     </plurals>
+    <string name="organize_cell">Position %1$d of %2$d, original page %3$d</string>
+    <string name="organize_cell_copy">Position %1$d of %2$d, copy of original page %3$d</string>
     <string name="organize_moved">Page %1$d moved to position %2$d</string>
     <string name="organize_rotated_right">Page %1$d rotated right</string>
     <string name="organize_rotated_left">Page %1$d rotated left</string>

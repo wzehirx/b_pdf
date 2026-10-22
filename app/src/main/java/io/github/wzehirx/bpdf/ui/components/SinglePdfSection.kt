@@ -37,6 +37,8 @@ fun SinglePdfSection(
     }
     if (file != null) {
         SelectedPdfCard(
+            file = file,
+            pageCount = pageCount,
             summary = pluralStringResource(R.plurals.single_file_summary, pageCount, file.displayName, pageCount),
             removeActionLabel = stringResource(R.string.single_file_remove_action),
             removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),

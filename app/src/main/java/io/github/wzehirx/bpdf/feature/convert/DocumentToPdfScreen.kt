@@ -116,6 +116,8 @@ fun DocumentToPdfScreenContent(
         }
         if (file != null) {
             SelectedPdfCard(
+                file = file,
+                pageCount = null,
                 summary = state.kind?.let { resources.getString(R.string.convert_document_summary, file.displayName, resources.getString(it.labelRes())) }
                     ?: file.displayName,
                 removeActionLabel = stringResource(R.string.single_file_remove_action),

@@ -127,6 +127,7 @@ fun OrganizeScreen(
             }
         },
         onRetry = viewModel::retry,
+        onFocusHandled = viewModel::focusHandled,
         onSubmitPassword = viewModel::submitPassword,
         onDismissPassword = viewModel::dismissPassword,
         snackbarHostState = snackbarHostState,
@@ -154,6 +155,7 @@ fun OrganizeScreenContent(
     onSave: () -> Unit,
     onShare: () -> Unit,
     onRetry: () -> Unit,
+    onFocusHandled: () -> Unit = {},
     onSubmitPassword: (String) -> Unit = {},
     onDismissPassword: () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
@@ -220,6 +222,8 @@ fun OrganizeScreenContent(
         }
         if (file != null) {
             SelectedPdfCard(
+                file = file,
+                pageCount = state.pageCount,
                 summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
                 removeActionLabel = stringResource(R.string.single_file_remove_action),
                 removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
@@ -252,6 +256,17 @@ fun OrganizeScreenContent(
                 // A cell keeps its picture when pages are reordered around it.
                 thumbnailKey = { i -> edits.getOrNull(i)?.sourceIndex ?: i },
                 gridHeight = 520.dp,
+                // Cells say which original page they hold, so the order can be checked after any edit.
+                cellLabel = { i ->
+                    val edit = edits[i]
+                    val isCopy = edits.take(i).any { it.sourceIndex == edit.sourceIndex }
+                    resources.getString(
+                        if (isCopy) R.string.organize_cell_copy else R.string.organize_cell,
+                        i + 1, edits.size, edit.sourceIndex + 1,
+                    )
+                },
+                focusIndex = state.focusIndex,
+                onFocusHandled = onFocusHandled,
             )
         }
         Button(

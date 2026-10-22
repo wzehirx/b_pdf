@@ -142,7 +142,7 @@ fun ImagesToPdfScreenContent(
                 modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
             )
         }
-        SelectedFileList(files = state.images, onMove = onMove, onRemove = onRemove, enabled = !busy)
+        SelectedFileList(files = state.images, onMove = onMove, onRemove = onRemove, enabled = !busy, announceAdded = false)
         ChoiceRow(
             label = stringResource(R.string.images_page_size_label),
             options = PageSizeOption.entries,

@@ -149,6 +149,8 @@ fun SplitScreenContent(
         }
         if (file != null) {
             SelectedPdfCard(
+                file = file,
+                pageCount = state.pageCount,
                 summary = pluralStringResource(R.plurals.split_file_summary, state.pageCount, file.displayName, state.pageCount),
                 removeActionLabel = stringResource(R.string.split_remove_action),
                 removeButtonDescription = stringResource(R.string.split_remove_file, file.displayName),

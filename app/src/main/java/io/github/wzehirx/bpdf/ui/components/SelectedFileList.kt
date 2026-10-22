@@ -16,10 +16,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -40,10 +47,33 @@ fun SelectedFileList(
     onRemove: (index: Int) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    announceAdded: Boolean = true,
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
     val announce = rememberAnnouncer()
+    val focusManager = LocalFocusManager.current
+    // The picker returns silently: say what was added. A screen that already announces additions
+    // itself passes announceAdded = false. Not repeated after a rotation.
+    var knownCount by rememberSaveable { mutableIntStateOf(files.size) }
+    LaunchedEffect(files.size) {
+        val added = files.size - knownCount
+        knownCount = files.size
+        if (announceAdded && added > 0) {
+            announce(
+                if (added == 1) {
+                    resources.getQuantityString(R.plurals.file_list_added, files.size, files.last().displayName, files.size)
+                } else {
+                    resources.getQuantityString(R.plurals.file_list_added_many, added, added)
+                },
+            )
+        }
+    }
+    val remove: (Int) -> Unit = { index ->
+        announce(resources.getQuantityString(R.plurals.file_list_removed, files.size - 1, files[index].displayName, files.size - 1))
+        focusManager.moveFocus(FocusDirection.Up)
+        onRemove(index)
+    }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         files.forEachIndexed { index, file ->
             val move: (Int, Int) -> Unit = { from, to ->
@@ -56,7 +86,7 @@ fun SelectedFileList(
                         Modifier
                             .padding(start = 16.dp, end = 4.dp)
                             .semantics(mergeDescendants = true) {}
-                            .then(if (enabled) Modifier.reorderable(index, files.size, move) { onRemove(index) } else Modifier),
+                            .then(if (enabled) Modifier.reorderable(index, files.size, move) { remove(index) } else Modifier),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
@@ -79,7 +109,7 @@ fun SelectedFileList(
                                 contentDescription = stringResource(R.string.file_move_down_named, file.displayName),
                             )
                         }
-                        IconButton(onClick = { onRemove(index) }, enabled = enabled) {
+                        IconButton(onClick = { remove(index) }, enabled = enabled) {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = stringResource(R.string.file_remove_named, file.displayName),

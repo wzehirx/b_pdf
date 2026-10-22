@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,6 +42,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -61,6 +64,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.wzehirx.bpdf.R
 import io.github.wzehirx.bpdf.core.a11y.rememberAnnouncer
+import io.github.wzehirx.bpdf.core.a11y.requestFocusWhenReady
 import io.github.wzehirx.bpdf.core.pdf.ThumbnailLoader
 import java.io.File
 
@@ -102,6 +106,10 @@ fun rememberPageThumbnails(file: File?, password: String? = null): suspend (Int)
  * [pageActions] supplies the screen-reader actions for a page; with [overflowMenu] the same actions
  * are also offered in a per-cell menu button. While not [enabled] nothing can be changed.
  * The grid scrolls inside a [gridHeight] tall area so it can sit in a scrolling screen.
+ *
+ * [cellLabel] replaces the default "Page N of M" label (a rotation is still appended), for grids
+ * where a cell's position and its page differ. When [focusIndex] is set the grid scrolls to that cell,
+ * moves screen-reader focus onto it and calls [onFocusHandled].
  */
 @Composable
 fun PageGrid(
@@ -118,9 +126,23 @@ fun PageGrid(
     overflowMenu: Boolean = false,
     thumbnailKey: (Int) -> Any = { it },
     gridHeight: Dp = 420.dp,
+    cellLabel: ((index: Int) -> String)? = null,
+    focusIndex: Int? = null,
+    onFocusHandled: () -> Unit = {},
 ) {
     val resources = LocalResources.current
     val announce = rememberAnnouncer()
+    val gridState = rememberLazyGridState()
+    val focusRequesters = remember { HashMap<Int, FocusRequester>() }
+    val currentHandled by rememberUpdatedState(onFocusHandled)
+    LaunchedEffect(focusIndex) {
+        val target = focusIndex ?: return@LaunchedEffect
+        if (target in 0 until pageCount) {
+            gridState.scrollToItem(target)
+            focusRequesters.getOrPut(target) { FocusRequester() }.requestFocusWhenReady()
+        }
+        currentHandled()
+    }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (onToggle != null) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -150,6 +172,7 @@ fun PageGrid(
         }
         LazyVerticalGrid(
             columns = GridCells.Adaptive(120.dp),
+            state = gridState,
             modifier = Modifier.fillMaxWidth().height(gridHeight),
         ) {
             items((0 until pageCount).toList(), key = { it }) { index ->
@@ -160,6 +183,8 @@ fun PageGrid(
                     selectable = onToggle != null,
                     enabled = enabled,
                     rotation = Math.floorMod(rotations[index] ?: 0, 360),
+                    customLabel = cellLabel?.invoke(index),
+                    focusRequester = focusRequesters.getOrPut(index) { FocusRequester() },
                     actions = if (enabled) pageActions(index) else emptyList(),
                     thumbnail = thumbnail,
                     thumbnailKey = thumbnailKey(index),
@@ -179,16 +204,19 @@ private fun PageCell(
     selectable: Boolean,
     enabled: Boolean,
     rotation: Int,
+    customLabel: String?,
+    focusRequester: FocusRequester,
     actions: List<CustomAccessibilityAction>,
     thumbnail: suspend (Int) -> Bitmap?,
     thumbnailKey: Any,
     overflowMenu: Boolean,
     onToggle: () -> Unit,
 ) {
-    val label = if (rotation == 0) {
-        stringResource(R.string.page_grid_cell, index + 1, pageCount)
-    } else {
-        stringResource(R.string.page_grid_cell_rotated, index + 1, pageCount, rotation)
+    val label = when {
+        customLabel != null && rotation == 0 -> customLabel
+        customLabel != null -> stringResource(R.string.page_grid_label_rotated, customLabel, rotation)
+        rotation == 0 -> stringResource(R.string.page_grid_cell, index + 1, pageCount)
+        else -> stringResource(R.string.page_grid_cell_rotated, index + 1, pageCount, rotation)
     }
     val selectedText = stringResource(R.string.page_grid_selected)
     val notSelectedText = stringResource(R.string.page_grid_not_selected)
@@ -209,6 +237,7 @@ private fun PageCell(
                     if (selectable) stateDescription = if (selected) selectedText else notSelectedText
                     customActions = actions
                 }
+                .focusRequester(focusRequester)
                 .then(
                     if (selectable) {
                         Modifier.toggleable(value = selected, enabled = enabled, role = Role.Checkbox) { onToggle() }

@@ -155,6 +155,8 @@ fun ProtectScreenContent(
         }
         if (file != null) {
             SelectedPdfCard(
+                file = file,
+                pageCount = state.pageCount,
                 summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
                 removeActionLabel = stringResource(R.string.single_file_remove_action),
                 removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),

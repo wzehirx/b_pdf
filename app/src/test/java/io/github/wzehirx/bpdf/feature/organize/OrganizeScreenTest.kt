@@ -1,5 +1,7 @@
 package io.github.wzehirx.bpdf.feature.organize
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -87,23 +89,23 @@ class OrganizeScreenTest {
         val button = rule.onNode(hasText("Create organized PDF") and hasClickAction())
         button.assertIsNotEnabled()
         assertEquals("Choose a PDF first", button.fetchSemanticsNode().config.getOrNull(SemanticsProperties.StateDescription))
-        rule.onNodeWithContentDescription("Page 1 of 3").assertDoesNotExist()
+        rule.onNodeWithContentDescription("Position 1 of 3, original page 1").assertDoesNotExist()
         rule.onNodeWithText("Undo").assertDoesNotExist()
     }
 
     @Test
     fun pageCell_hasLabel_andExposesEveryAction() {
         show(threePages)
-        assertEquals(allLabels, cell("Page 2 of 3").actions().map { it.label })
+        assertEquals(allLabels, cell("Position 2 of 3, original page 2").actions().map { it.label })
         // The first page cannot move up and the last cannot move down.
-        assertEquals(allLabels - "Move up", cell("Page 1 of 3").actions().map { it.label })
-        assertEquals(allLabels - "Move down", cell("Page 3 of 3").actions().map { it.label })
+        assertEquals(allLabels - "Move up", cell("Position 1 of 3, original page 1").actions().map { it.label })
+        assertEquals(allLabels - "Move down", cell("Position 3 of 3, original page 3").actions().map { it.label })
     }
 
     @Test
     fun customActions_callBackWithThePageIndex() {
         show(threePages)
-        val page = cell("Page 2 of 3")
+        val page = cell("Position 2 of 3, original page 2")
         for (label in listOf("Move up", "Move down", "Rotate left", "Rotate right", "Duplicate", "Delete")) page.invoke(label)
         assertEquals(listOf("up1", "down1", "left1", "right1", "dup1", "del1"), calls)
     }
@@ -111,8 +113,8 @@ class OrganizeScreenTest {
     @Test
     fun rotatedPage_isInTheLabel() {
         show(threePages.copy(edits = listOf(PageEdit(0), PageEdit(1, 90), PageEdit(2, 270))))
-        cell("Page 2 of 3, rotated 90°").assertExists()
-        cell("Page 3 of 3, rotated 270°").assertExists()
+        cell("Position 2 of 3, original page 2, rotated 90°").assertExists()
+        cell("Position 3 of 3, original page 3, rotated 270°").assertExists()
     }
 
     @Test
@@ -145,7 +147,7 @@ class OrganizeScreenTest {
     @Test
     fun moveToPosition_opensDialog_validatesTheNumber_andMoves() {
         show(threePages)
-        cell("Page 1 of 3").invoke("Move to position…")
+        cell("Position 1 of 3, original page 1").invoke("Move to position…")
         rule.onNodeWithText("Move page 1").assertExists()
         val field = rule.onNode(hasSetTextAction())
         field.performTextClearance()
@@ -168,7 +170,7 @@ class OrganizeScreenTest {
     @Test
     fun moveToPosition_error_isExposedAsFieldError_andCancelClosesWithoutMoving() {
         show(threePages)
-        cell("Page 2 of 3").invoke("Move to position…")
+        cell("Position 2 of 3, original page 2").invoke("Move to position…")
         val field = rule.onNode(hasSetTextAction())
         field.performTextClearance()
         field.performTextInput("x")
@@ -183,7 +185,7 @@ class OrganizeScreenTest {
     @Test
     fun moveToPosition_startsAtTheCurrentPosition_withAHint() {
         show(threePages)
-        cell("Page 2 of 3").invoke("Move to position…")
+        cell("Position 2 of 3, original page 2").invoke("Move to position…")
         rule.onNodeWithText("Enter a number from 1 to 3.").assertExists()
         rule.onNode(hasSetTextAction() and hasText("2")).assertExists()
     }
@@ -217,7 +219,7 @@ class OrganizeScreenTest {
     @Test
     fun running_removesActions_andDisablesControls() {
         show(threePages.copy(undoDepth = 1, operation = OperationState.Running(0.3f)))
-        assertTrue(cell("Page 2 of 3").actions().isEmpty())
+        assertTrue(cell("Position 2 of 3, original page 2").actions().isEmpty())
         rule.onNode(hasContentDescription("Actions for page 2")).assertDoesNotExist()
         rule.onNode(hasText("Undo") and hasClickAction()).assertIsNotEnabled()
         rule.onNode(hasText("Create organized PDF") and hasClickAction()).assertIsNotEnabled()
@@ -251,6 +253,42 @@ class OrganizeScreenTest {
     }
 
     @Test
+    fun cellsSayWhichOriginalPageTheyHold_afterMovesAndCopies() {
+        // Original page 4 now sits first, and page 2 appears twice.
+        show(
+            OrganizeUiState(
+                file = threePages.file, pageCount = 4,
+                edits = listOf(PageEdit(3), PageEdit(1), PageEdit(1, 90), PageEdit(0)),
+            ),
+        )
+        cell("Position 1 of 4, original page 4").assertExists()
+        cell("Position 2 of 4, original page 2").assertExists()
+        cell("Position 3 of 4, copy of original page 2, rotated 90°").assertExists()
+        cell("Position 4 of 4, original page 1").assertExists()
+    }
+
+    @Test
+    fun focusIndex_movesFocusToThatCell_thenReportsHandled() {
+        val handled = mutableListOf<String>()
+        var focus by androidx.compose.runtime.mutableStateOf<Int?>(null)
+        rule.setContent {
+            OrganizeScreenContent(
+                state = threePages.copy(focusIndex = focus),
+                onBack = {}, onPickFile = {}, onRemoveFile = {}, onMoveUp = {}, onMoveDown = {}, onMoveTo = { _, _ -> },
+                onRotateLeft = {}, onRotateRight = {}, onDuplicate = {}, onDelete = {}, onUndo = {}, onOrganize = {},
+                onCancel = {}, onSave = {}, onShare = {}, onRetry = {},
+                onFocusHandled = { handled += "handled"; focus = null },
+            )
+        }
+        rule.runOnIdle { focus = 1 }
+        rule.waitForIdle()
+        rule.waitUntil(5_000) { handled.isNotEmpty() }
+        cell("Position 2 of 3, original page 2").assertIsFocused()
+        // a second action on the same slot is possible: the cell still offers its actions
+        assertTrue(cell("Position 2 of 3, original page 2").actions().isNotEmpty())
+    }
+
+    @Test
     fun announcements_areSpecificAndLocalized() {
         val resources = ApplicationProvider.getApplicationContext<android.content.Context>().resources
         assertEquals("Page 3 moved to position 1", OrganizeEvent.Moved(3, 1).message(resources))
@@ -271,7 +309,7 @@ class OrganizeScreenTest {
         show(threePages)
         assertEquals(
             listOf("Yukarı taşı", "Aşağı taşı", "Konuma taşı…", "Sola döndür", "Sağa döndür", "Çoğalt", "Sil"),
-            cell("2. sayfa, toplam 3").actions().map { it.label },
+            cell("Konum 2, toplam 3, özgün sayfa 2").actions().map { it.label },
         )
         rule.onNodeWithText("Geri al").assertExists()
         val resources = ApplicationProvider.getApplicationContext<android.content.Context>().resources

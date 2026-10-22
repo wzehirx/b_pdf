@@ -112,6 +112,27 @@ class OrganizeViewModelTest {
     }
 
     @Test
+    fun events_reportTheOriginalPageNumber_andFocusFollowsTheChangedCell() {
+        val vm = newVm()
+        vm.pick(5)
+        vm.moveUp(3) // original page 4 -> position 3
+        assertEquals(OrganizeEvent.Moved(page = 4, position = 3), vm.next())
+        assertEquals(2, vm.settled { it.focusIndex == 2 }.focusIndex)
+        vm.focusHandled()
+        assertNull(vm.settled { it.focusIndex == null }.focusIndex)
+        // the moved page is at index 2 now: moving it again moves that same page, not its old neighbour
+        vm.moveUp(2)
+        assertEquals(OrganizeEvent.Moved(page = 4, position = 2), vm.next())
+        assertEquals(listOf(0, 3, 1, 2, 4), vm.settled { it.edits[1].sourceIndex == 3 }.edits.map { it.sourceIndex })
+        vm.duplicate(1)
+        assertEquals(OrganizeEvent.Duplicated(page = 4), vm.next())
+        assertEquals(2, vm.settled { it.focusIndex == 2 }.focusIndex)
+        vm.delete(5)
+        assertEquals(OrganizeEvent.Deleted(page = 5), vm.next())
+        assertEquals(4, vm.settled { it.edits.size == 5 && it.focusIndex == 4 }.focusIndex)
+    }
+
+    @Test
     fun moveUp_atTop_andMoveDown_atBottom_doNothing() {
         val vm = newVm()
         vm.pick(3)
@@ -137,7 +158,7 @@ class OrganizeViewModelTest {
         assertEquals(OrganizeEvent.Moved(page = 3, position = 1), vm.next())
         assertEquals(listOf(2, 0, 1, 3, 4), vm.settled { it.edits[0].sourceIndex == 2 }.edits.map { it.sourceIndex })
         vm.moveTo(from = 0, to = 4)
-        assertEquals(OrganizeEvent.Moved(page = 1, position = 5), vm.next())
+        assertEquals(OrganizeEvent.Moved(page = 3, position = 5), vm.next())
         assertEquals(listOf(0, 1, 3, 4, 2), vm.settled { it.edits[4].sourceIndex == 2 }.edits.map { it.sourceIndex })
     }
 

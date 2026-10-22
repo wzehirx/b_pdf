@@ -43,8 +43,9 @@ data class OrganizeResult(
 )
 
 /**
- * What just happened to the page list, for the screen to announce. Pages and positions are
- * 1-based, as the user sees them.
+ * What just happened to the page list, for the screen to announce. Positions are 1-based, as the
+ * user sees them; a [page] is the page's number in the original document, which is also what the
+ * page's cell says ("original page N"), so what is announced and what is read agree.
  */
 sealed interface OrganizeEvent {
     data class Moved(val page: Int, val position: Int) : OrganizeEvent
@@ -67,6 +68,8 @@ data class OrganizeUiState(
     /** How many changes [OrganizeViewModel.undo] can take back. */
     val undoDepth: Int = 0,
     val importing: Boolean = false,
+    /** The cell (0-based) that should take screen-reader focus after a change; see [OrganizeViewModel.focusHandled]. */
+    val focusIndex: Int? = null,
     /** True while the result is being written to its target; edits and further saves are ignored. */
     val saving: Boolean = false,
     /** Set while the user is asked for the file's password. */
@@ -91,6 +94,7 @@ class OrganizeViewModel(
         /** An input needed a password, so the saved copy has none. */
         val protectedInput: Boolean = false,
         val pendingImports: Int = 0,
+        val focusIndex: Int? = null,
         val saving: Boolean = false,
         /** Import or save failure; takes precedence over the runner's state until cleared. */
         val error: Throwable? = null,
@@ -109,6 +113,7 @@ class OrganizeViewModel(
             edits = l.edits,
             undoDepth = l.undo.size,
             importing = l.pendingImports > 0,
+            focusIndex = l.focusIndex,
             saving = l.saving,
             copyUnprotected = l.protectedInput,
             passwordPrompt = prompt,
@@ -146,7 +151,7 @@ class OrganizeViewModel(
                 }
                 val old = local.value.file
                 local.update {
-                    it.copy(file = imported, protectedInput = passwordGate.passwordOf(imported.file) != null, pageCount = pages, edits = List(pages) { i -> PageEdit(i) }, undo = emptyList())
+                    it.copy(file = imported, protectedInput = passwordGate.wasEncrypted(imported.file), pageCount = pages, edits = List(pages) { i -> PageEdit(i) }, undo = emptyList(), focusIndex = null)
                 }
                 old?.let { passwordGate.forget(it.file); it.file.delete() }
             } catch (e: CancellationException) {
@@ -163,7 +168,7 @@ class OrganizeViewModel(
         val file = local.value.file ?: return
         if (busy) return
         resetResult()
-        local.update { it.copy(file = null, protectedInput = false, pageCount = 0, edits = emptyList(), undo = emptyList()) }
+        local.update { it.copy(file = null, protectedInput = false, pageCount = 0, edits = emptyList(), undo = emptyList(), focusIndex = null) }
         passwordGate.forget(file.file)
         file.file.delete()
     }
@@ -178,22 +183,27 @@ class OrganizeViewModel(
     fun moveTo(from: Int, to: Int) = change { edits ->
         if (from !in edits.indices || to !in edits.indices || from == to) return@change null
         val next = edits.toMutableList()
-        next.add(to, next.removeAt(from))
-        next to OrganizeEvent.Moved(page = from + 1, position = to + 1)
+        val moved = next.removeAt(from)
+        next.add(to, moved)
+        Change(next, OrganizeEvent.Moved(page = moved.sourceIndex + 1, position = to + 1), focus = to)
     }
 
     fun rotateRight(index: Int) = change { edits ->
-        turned(edits, index, 90)?.let { it to OrganizeEvent.RotatedRight(index + 1) }
+        turned(edits, index, 90)?.let { Change(it, OrganizeEvent.RotatedRight(edits[index].sourceIndex + 1), focus = index) }
     }
 
     fun rotateLeft(index: Int) = change { edits ->
-        turned(edits, index, 270)?.let { it to OrganizeEvent.RotatedLeft(index + 1) }
+        turned(edits, index, 270)?.let { Change(it, OrganizeEvent.RotatedLeft(edits[index].sourceIndex + 1), focus = index) }
     }
 
-    /** Inserts a copy of page [index] (with its rotation) right after it. */
+    /** Inserts a copy of page [index] (with its rotation) right after it; focus goes to the copy. */
     fun duplicate(index: Int) = change { edits ->
         if (index !in edits.indices) return@change null
-        (edits.take(index + 1) + edits[index] + edits.drop(index + 1)) to OrganizeEvent.Duplicated(index + 1)
+        Change(
+            edits.take(index + 1) + edits[index] + edits.drop(index + 1),
+            OrganizeEvent.Duplicated(edits[index].sourceIndex + 1),
+            focus = index + 1,
+        )
     }
 
     /** Takes page [index] out; the only remaining page is kept and [OrganizeEvent.LastPageBlocked] is sent. */
@@ -205,7 +215,14 @@ class OrganizeViewModel(
             eventChannel.trySend(OrganizeEvent.LastPageBlocked)
             return
         }
-        change { current -> (current.take(index) + current.drop(index + 1)) to OrganizeEvent.Deleted(index + 1) }
+        // The deleted cell is gone: focus goes to the page that took its place (or the new last one).
+        change { current ->
+            Change(
+                current.take(index) + current.drop(index + 1),
+                OrganizeEvent.Deleted(current[index].sourceIndex + 1),
+                focus = minOf(index, current.size - 2),
+            )
+        }
     }
 
     /** Takes back the latest change. */
@@ -222,16 +239,24 @@ class OrganizeViewModel(
         return edits.toMutableList().also { it[index] = edit.copy(rotation = (edit.rotation + degrees) % 360) }
     }
 
+    /** A new page list, what to announce about it and the cell that takes focus. */
+    private class Change(val edits: List<PageEdit>, val event: OrganizeEvent, val focus: Int)
+
     /** Applies [transform] to the page list (null = nothing to do), remembering the old list for [undo]. */
-    private fun change(transform: (List<PageEdit>) -> Pair<List<PageEdit>, OrganizeEvent>?) {
+    private fun change(transform: (List<PageEdit>) -> Change?) {
         if (busy) return
         val l = local.value
         if (l.file == null) return
-        val (next, event) = transform(l.edits) ?: return
+        val change = transform(l.edits) ?: return
         resetResult()
-        local.update { it.copy(edits = next, undo = (it.undo + listOf(l.edits)).takeLast(MAX_UNDO)) }
-        eventChannel.trySend(event)
+        local.update {
+            it.copy(edits = change.edits, undo = (it.undo + listOf(l.edits)).takeLast(MAX_UNDO), focusIndex = change.focus)
+        }
+        eventChannel.trySend(change.event)
     }
+
+    /** The screen has moved focus to [OrganizeUiState.focusIndex]. */
+    fun focusHandled() = local.update { it.copy(focusIndex = null) }
 
     fun organize() {
         val l = local.value

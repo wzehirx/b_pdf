@@ -139,6 +139,24 @@
     <string name="single_file_importing">Dosya açılıyor…</string>
     <string name="single_file_remove">%1$s dosyasını kaldır</string>
     <string name="single_file_remove_action">Dosyayı kaldır</string>
+    <plurals name="single_file_loaded">
+        <item quantity="one">%1$s yüklendi, %2$d sayfa</item>
+        <item quantity="other">%1$s yüklendi, %2$d sayfa</item>
+    </plurals>
+    <string name="single_file_loaded_no_count">%1$s yüklendi</string>
+    <string name="single_file_removed">%1$s kaldırıldı</string>
+    <plurals name="file_list_added">
+        <item quantity="one">%1$s eklendi, listede %2$d dosya var</item>
+        <item quantity="other">%1$s eklendi, listede %2$d dosya var</item>
+    </plurals>
+    <plurals name="file_list_added_many">
+        <item quantity="one">%1$d dosya eklendi</item>
+        <item quantity="other">%1$d dosya eklendi</item>
+    </plurals>
+    <plurals name="file_list_removed">
+        <item quantity="one">%1$s kaldırıldı, %2$d dosya kaldı</item>
+        <item quantity="other">%1$s kaldırıldı, %2$d dosya kaldı</item>
+    </plurals>
     <plurals name="single_file_summary">
         <item quantity="one">%1$s, %2$d sayfa</item>
         <item quantity="other">%1$s, %2$d sayfa</item>
@@ -179,6 +197,7 @@
         <item quantity="other">%1$d sayfa döndürüldü</item>
     </plurals>
     <string name="page_grid_cell">%1$d. sayfa, toplam %2$d</string>
+    <string name="page_grid_label_rotated">%1$s, %2$d° döndürülmüş</string>
     <string name="page_grid_cell_rotated">%1$d. sayfa, toplam %2$d, %3$d° döndürülmüş</string>
     <string name="page_grid_selected">Seçili</string>
     <string name="page_grid_not_selected">Seçili değil</string>
@@ -207,6 +226,8 @@
         <item quantity="one">%1$d sayfalık bir PDF oluşturuldu</item>
         <item quantity="other">%1$d sayfalık bir PDF oluşturuldu</item>
     </plurals>
+    <string name="organize_cell">Konum %1$d, toplam %2$d, özgün sayfa %3$d</string>
+    <string name="organize_cell_copy">Konum %1$d, toplam %2$d, özgün %3$d. sayfanın kopyası</string>
     <string name="organize_moved">%1$d. sayfa %2$d. konuma taşındı</string>
     <string name="organize_rotated_right">%1$d. sayfa sağa döndürüldü</string>
     <string name="organize_rotated_left">%1$d. sayfa sola döndürüldü</string>

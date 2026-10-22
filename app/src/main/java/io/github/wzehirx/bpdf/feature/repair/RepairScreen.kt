@@ -112,6 +112,8 @@ fun RepairScreenContent(
         }
         if (file != null) {
             SelectedPdfCard(
+                file = file,
+                pageCount = state.pageCount,
                 summary = state.pageCount?.let { pluralStringResource(R.plurals.single_file_summary, it, file.displayName, it) }
                     ?: stringResource(R.string.repair_file_unreadable, file.displayName),
                 removeActionLabel = stringResource(R.string.single_file_remove_action),
