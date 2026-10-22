@@ -5,7 +5,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
-## [1.0.0] - 2026-10-21
+## [1.0.0] - 2026-10-22
 
 First stable release: all 21 tools, audited for accessibility.
 
@@ -23,6 +23,18 @@ Tools: Merge, Split, Remove pages, Extract pages, Organize pages, Rotate, Images
 ### Fixed
 - Dialog titles (password, go to page, move page) are announced as headings.
 - Turkish page labels in the page grids no longer contain a slash that screen readers read aloud ("2. sayfa, toplam 7").
+- Unencrypted working copies of password-protected PDFs and PDF library temp files are deleted at every app start, and Clear cache counts and removes them.
+- Organize pages: each page says its position and which original page it holds, focus follows a moved, copied or deleted page, and announcements use the original page number.
+- Choosing a file now announces "<name> loaded, N pages", removing it announces "<name> removed", and the Merge list announces additions and removals.
+- After a wrong password the field is cleared, and a shown password uses a plain text keyboard so it can be checked by ear.
+- PDFs that open without a password but have print or copy restrictions now show the "saved copy has no password" notice in every tool.
+- The reader's "Open with tool" list includes PDF to Word, Excel and HTML.
+- Out-of-memory on a large file gives a specific message instead of "Something went wrong".
+- A failed or cancelled save no longer leaves an empty file where you chose to save, and leaving a tool during a save no longer loses the result.
+- A damaged settings or recent files store is replaced instead of crashing the app on the next change.
+- Word and Excel files: documents with a DOCTYPE or that unpack to more than 64 MB are refused as unreadable, and very large pictures in a PDF are decoded at reduced size when converting to Word or HTML.
+- The Word, Excel and text to PDF picker now offers .csv, .md, .log and files whose type the provider does not know.
+- Release pipeline: secrets no longer pass through the script text, a release without the four signing secrets fails with a clear message instead of publishing a debug-signed APK, and a pushed tag must match the version.
 
 ## [0.7.0] - 2026-10-21
 
