@@ -7,7 +7,7 @@ English | [Türkçe](#türkçe)
 
 ## İndir / Download
 
-**[b PDF 1.0.0 APK'yı indir / Download the APK](apk/b-pdf-v1.0.0.apk?raw=1)** (44 MB, Android 8.0+)
+**[b PDF 1.0.0 APK'yı indir / Download the APK](https://github.com/wzehirx/b_pdf/raw/ccr-b3c31da5-4het63/apk/b-pdf-v1.0.0.apk)** (44 MB, Android 8.0+)
 
 - TR: Bu APK, projenin kalıcı release anahtarıyla imzalıdır; sonraki sürümler bunun üstüne kurulur. Releases sayfasındaki APK'lar ise debug anahtarıyla imzalıdır; ikisi birbirinin üstüne kurulmaz, birinden diğerine geçerken önce uygulamayı kaldırın.
 - EN: This APK is signed with the project's permanent release key, so later versions install over it. The APKs on the Releases page are debug-signed; the two cannot be installed over each other, so uninstall first when switching.
