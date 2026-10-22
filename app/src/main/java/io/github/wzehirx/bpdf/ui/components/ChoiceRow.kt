@@ -34,7 +34,7 @@ fun <T> ChoiceRow(
     optionDescription: ((T) -> String?)? = null,
 ) {
     Column(modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(label, style = MaterialTheme.typography.titleSmall)
+        Text(label, style = MaterialTheme.typography.titleMedium)
         options.forEach { option ->
             val label = optionLabel(option)
             // A spoken replacement only matters when it differs; then the visible label is hidden from screen readers.

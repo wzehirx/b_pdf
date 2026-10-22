@@ -36,7 +36,7 @@ fun LabelledSlider(
     Column(modifier.fillMaxWidth()) {
         Text(
             "$label: $spoken",
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.clearAndSetSemantics { },
         )
         Slider(

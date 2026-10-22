@@ -34,6 +34,8 @@ import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
 import io.github.wzehirx.bpdf.ui.components.shareFile
@@ -113,56 +115,51 @@ fun MetadataScreenContent(
     val info = state.info
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_metadata_title), onBack = onBack) {
-        Text(stringResource(R.string.metadata_instructions))
-        PickFilesButton(
-            label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
-            mimeTypes = arrayOf("application/pdf"),
-            multiple = false,
-            onPicked = onPickFile,
-            enabled = !busy,
-        )
-        if (state.importing) {
-            Text(
-                stringResource(R.string.single_file_importing),
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        ToolSection {
+            Text(stringResource(R.string.metadata_instructions))
+            PickFilesButton(
+                label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
+                mimeTypes = arrayOf("application/pdf"),
+                multiple = false,
+                onPicked = onPickFile,
+                enabled = !busy,
             )
+            if (state.importing) {
+                Text(
+                    stringResource(R.string.single_file_importing),
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                )
+            }
+            if (file != null && info != null) {
+                SelectedPdfCard(
+                    file = file,
+                    pageCount = info.pageCount,
+                    summary = pluralStringResource(R.plurals.single_file_summary, info.pageCount, file.displayName, info.pageCount),
+                    removeActionLabel = stringResource(R.string.single_file_remove_action),
+                    removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
+                    enabled = !busy,
+                    onRemove = onRemoveFile,
+                )
+            }
         }
         if (file != null && info != null) {
-            SelectedPdfCard(
-                file = file,
-                pageCount = info.pageCount,
-                summary = pluralStringResource(R.plurals.single_file_summary, info.pageCount, file.displayName, info.pageCount),
-                removeActionLabel = stringResource(R.string.single_file_remove_action),
-                removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
-                enabled = !busy,
-                onRemove = onRemoveFile,
-            )
-            Text(
-                stringResource(R.string.metadata_info_heading),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.semantics { heading() },
-            )
-            InfoLines(info)
-            Text(
-                stringResource(R.string.metadata_edit_heading),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.semantics { heading() },
-            )
-            MetadataField(state.title, onTitleChange, R.string.metadata_title_label, !busy)
-            MetadataField(state.author, onAuthorChange, R.string.metadata_author_label, !busy)
-            MetadataField(state.subject, onSubjectChange, R.string.metadata_subject_label, !busy)
-            MetadataField(state.keywords, onKeywordsChange, R.string.metadata_keywords_label, !busy, hint = R.string.metadata_keywords_hint)
-            MetadataField(state.creator, onCreatorChange, R.string.metadata_creator_label, !busy, last = true)
+            ToolSection(title = stringResource(R.string.metadata_info_heading)) {
+                InfoLines(info)
+            }
+            ToolSection(title = stringResource(R.string.metadata_edit_heading)) {
+                MetadataField(state.title, onTitleChange, R.string.metadata_title_label, !busy)
+                MetadataField(state.author, onAuthorChange, R.string.metadata_author_label, !busy)
+                MetadataField(state.subject, onSubjectChange, R.string.metadata_subject_label, !busy)
+                MetadataField(state.keywords, onKeywordsChange, R.string.metadata_keywords_label, !busy, hint = R.string.metadata_keywords_hint)
+                MetadataField(state.creator, onCreatorChange, R.string.metadata_creator_label, !busy, last = true)
+            }
         }
-        Button(
+        PrimaryButton(
+            text = stringResource(R.string.metadata_button),
             onClick = onWrite,
             enabled = file != null && info != null && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (file == null) stateDescription = needFile },
-        ) {
-            Text(stringResource(R.string.metadata_button))
-        }
+            disabledReason = if (file == null) needFile else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { resources.getString(R.string.metadata_success) },

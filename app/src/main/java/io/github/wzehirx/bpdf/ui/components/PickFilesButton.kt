@@ -3,8 +3,9 @@ package io.github.wzehirx.bpdf.ui.components
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -12,7 +13,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-/** Button that opens the system document picker for [mimeTypes]. */
+/** Full-width outlined (secondary) button that opens the system document picker for [mimeTypes]. */
 @Composable
 fun PickFilesButton(
     label: String,
@@ -29,10 +30,10 @@ fun PickFilesButton(
     val many = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) {
         if (it.isNotEmpty()) current(it)
     }
-    Button(
+    OutlinedButton(
         enabled = enabled,
         onClick = { if (multiple) many.launch(mimeTypes) else single.launch(mimeTypes) },
-        modifier = modifier.heightIn(min = 48.dp),
+        modifier = modifier.fillMaxWidth().heightIn(min = 48.dp),
     ) {
         Text(label)
     }

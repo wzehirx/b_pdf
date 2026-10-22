@@ -18,7 +18,7 @@ Merge (`feature/merge`, `core/pdf/MergeOperation.kt`) is the reference. Copy its
 
 ## Screen
 - Stateful `<X>Screen(onBack, viewModel = viewModel(factory = ...Factory))` wires pickers (`rememberSaveDocumentLauncher`, `Context.shareFile`), the announcer and the ViewModel.
-- Stateless `<X>ScreenContent(state, callbacks...)` holds all layout: `ToolScaffold` -> instructions -> `PickFilesButton` -> `SelectedFileList` -> primary action (disabled with a `stateDescription` that says why) -> `OperationStatusPanel`.
+- Stateless `<X>ScreenContent(state, callbacks...)` holds all layout, built from the shared components (16dp gutters, 24dp between sections, 12dp inside): `ToolScaffold` -> `ToolSection { instructions, PickFilesButton, SelectedFileList/SelectedPdfCard }` -> `OptionsCard { ChoiceRow, fields, switches }` -> `PrimaryButton` (full width, `disabledReason` is spoken while disabled) -> `OperationStatusPanel`. Do not add ad-hoc paddings or spacers in a feature screen.
 - `OperationStatusPanel<T>` is typed: `successText = { result -> ... }` receives the result. It moves focus to the result or error text; "Saved" is announced from `savedEvents`.
 - Result text and success announcements come from string resources; the success summary is a plurals resource.
 

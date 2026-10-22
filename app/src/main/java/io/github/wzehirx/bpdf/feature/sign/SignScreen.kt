@@ -38,6 +38,9 @@ import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.SinglePdfSection
 import io.github.wzehirx.bpdf.ui.components.SwitchRow
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
+import io.github.wzehirx.bpdf.ui.components.OptionsCard
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
 import io.github.wzehirx.bpdf.ui.components.shareFile
@@ -135,78 +138,79 @@ fun SignScreenContent(
     val file = state.file
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_sign_title), onBack = onBack) {
-        Text(stringResource(R.string.sign_instructions))
-        SinglePdfSection(file, state.pageCount, state.importing, busy, onPickFile, onRemoveFile)
-        if (file != null) {
-            ChoiceRow(
-                label = stringResource(R.string.sign_mode_label),
-                options = SignMode.entries,
-                selected = state.mode,
-                optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onModeChange,
-                enabled = !busy,
-            )
-            when (state.mode) {
-                SignMode.TYPED -> {
-                    val textError = if (SignFieldError.TEXT_MISSING in state.fieldErrors) stringResource(R.string.sign_text_error) else null
-                    OutlinedTextField(
-                        value = state.typedText,
-                        onValueChange = onTypedTextChange,
-                        label = { Text(stringResource(R.string.sign_text_label)) },
-                        isError = textError != null,
-                        supportingText = textError?.let { { Text(it) } },
-                        singleLine = true,
-                        enabled = !busy,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .semantics { if (textError != null) error(textError) },
-                    )
-                }
-                SignMode.DRAWN -> DrawnSignature(state, busy, onStroke, onClearDrawing)
-            }
-            val pageError = if (SignFieldError.PAGE_INVALID in state.fieldErrors) {
-                stringResource(R.string.sign_page_error, state.pageCount)
-            } else {
-                null
-            }
-            OutlinedTextField(
-                value = state.pageText,
-                onValueChange = onPageChange,
-                label = { Text(stringResource(R.string.sign_page_label)) },
-                isError = pageError != null,
-                supportingText = { Text(pageError ?: stringResource(R.string.sign_page_hint, state.pageCount)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                enabled = !busy,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .semantics { if (pageError != null) error(pageError) },
-            )
-            ChoiceRow(
-                label = stringResource(R.string.sign_position_label),
-                options = SignPosition.entries.sortedBy { it.order() },
-                selected = state.position,
-                optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onPositionChange,
-                enabled = !busy,
-            )
-            SwitchRow(
-                label = stringResource(R.string.sign_date_label),
-                checked = state.addDate,
-                stateText = stringResource(if (state.addDate) R.string.sign_date_on else R.string.sign_date_off),
-                enabled = !busy,
-                onChange = onAddDateChange,
-            )
+        ToolSection {
+            Text(stringResource(R.string.sign_instructions))
+            SinglePdfSection(file, state.pageCount, state.importing, busy, onPickFile, onRemoveFile)
         }
-        Button(
+        if (file != null) {
+            OptionsCard {
+                ChoiceRow(
+                    label = stringResource(R.string.sign_mode_label),
+                    options = SignMode.entries,
+                    selected = state.mode,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onModeChange,
+                    enabled = !busy,
+                )
+                when (state.mode) {
+                    SignMode.TYPED -> {
+                        val textError = if (SignFieldError.TEXT_MISSING in state.fieldErrors) stringResource(R.string.sign_text_error) else null
+                        OutlinedTextField(
+                            value = state.typedText,
+                            onValueChange = onTypedTextChange,
+                            label = { Text(stringResource(R.string.sign_text_label)) },
+                            isError = textError != null,
+                            supportingText = textError?.let { { Text(it) } },
+                            singleLine = true,
+                            enabled = !busy,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .semantics { if (textError != null) error(textError) },
+                        )
+                    }
+                    SignMode.DRAWN -> DrawnSignature(state, busy, onStroke, onClearDrawing)
+                }
+                val pageError = if (SignFieldError.PAGE_INVALID in state.fieldErrors) {
+                    stringResource(R.string.sign_page_error, state.pageCount)
+                } else {
+                    null
+                }
+                OutlinedTextField(
+                    value = state.pageText,
+                    onValueChange = onPageChange,
+                    label = { Text(stringResource(R.string.sign_page_label)) },
+                    isError = pageError != null,
+                    supportingText = { Text(pageError ?: stringResource(R.string.sign_page_hint, state.pageCount)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    enabled = !busy,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .semantics { if (pageError != null) error(pageError) },
+                )
+                ChoiceRow(
+                    label = stringResource(R.string.sign_position_label),
+                    options = SignPosition.entries.sortedBy { it.order() },
+                    selected = state.position,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onPositionChange,
+                    enabled = !busy,
+                )
+                SwitchRow(
+                    label = stringResource(R.string.sign_date_label),
+                    checked = state.addDate,
+                    stateText = stringResource(if (state.addDate) R.string.sign_date_on else R.string.sign_date_off),
+                    enabled = !busy,
+                    onChange = onAddDateChange,
+                )
+            }
+        }
+        PrimaryButton(
+            text = stringResource(R.string.sign_button),
             onClick = onSign,
             enabled = file != null && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (file == null) stateDescription = needFile },
-        ) {
-            Text(stringResource(R.string.sign_button))
-        }
+            disabledReason = if (file == null) needFile else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { result -> resources.getString(R.string.sign_success, result.page) },

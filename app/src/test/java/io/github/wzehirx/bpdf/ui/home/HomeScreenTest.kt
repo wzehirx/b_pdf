@@ -163,6 +163,42 @@ class HomeScreenTest {
     }
 
     @Test
+    @org.robolectric.annotation.Config(qualifiers = "w360dp-h640dp")
+    fun recentsThatLoadLater_appearAtTheTop_notScrolledAway() {
+        var list by androidx.compose.runtime.mutableStateOf(emptyList<RecentFile>())
+        rule.setContent { BPdfTheme { HomeScreen(onOpenTool = {}, recents = list) } }
+        rule.waitForIdle()
+        rule.runOnUiThread { list = recentFiles }
+        rule.waitForIdle()
+        rule.onNodeWithText("annual report.pdf").assertIsDisplayed()
+        rule.onNodeWithText("Recent files").assertIsDisplayed()
+    }
+
+    @Test
+    fun phone_listsToolsInOneColumn_ofFullWidthRows() {
+        show(available = Tool.entries.toSet())
+        val merge = row(Tool.MERGE).fetchSemanticsNode().boundsInRoot
+        val split = row(Tool.SPLIT).fetchSemanticsNode().boundsInRoot
+        assertEquals(merge.left, split.left, 0.5f)
+        assertTrue(split.top >= merge.bottom - 0.5f)
+        // 16dp gutters on both sides.
+        val gutter = 16 * rule.density.density
+        assertEquals(gutter, merge.left, 1f)
+    }
+
+    @Test
+    @org.robolectric.annotation.Config(qualifiers = "w900dp-h4000dp")
+    fun wideScreen_usesTwoColumns_ofEqualHeightRows() {
+        show(available = Tool.entries.toSet())
+        val merge = row(Tool.MERGE).fetchSemanticsNode().boundsInRoot
+        val split = row(Tool.SPLIT).fetchSemanticsNode().boundsInRoot
+        assertEquals(merge.top, split.top, 0.5f)
+        assertTrue(split.left > merge.left)
+        assertEquals(merge.height, split.height, 0.5f)
+        assertEquals(merge.width, split.width, 1f)
+    }
+
+    @Test
     fun toolEnum_listsAllTools_withUniqueRoutes() {
         assertEquals(21, Tool.entries.size)
         assertEquals(Tool.entries.size, Tool.entries.map { it.route }.toSet().size)

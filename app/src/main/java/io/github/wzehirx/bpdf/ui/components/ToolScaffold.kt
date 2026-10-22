@@ -1,6 +1,9 @@
 package io.github.wzehirx.bpdf.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,6 +42,11 @@ private fun ToolTopBar(title: String, onBack: () -> Unit) {
     )
 }
 
+/**
+ * The frame of every tool screen: top app bar (title and back), then the content in one scrolling column with 16dp
+ * gutters and 24dp between sections. Build a section with [ToolSection] (12dp inside), group options in an
+ * [OptionsCard], and end the form with a [PrimaryButton]; the result panel follows as the last section.
+ */
 @Composable
 fun ToolScaffold(
     title: String,
@@ -50,14 +58,16 @@ fun ToolScaffold(
         snackbarHost = snackbarHost,
         topBar = { ToolTopBar(title, onBack) },
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            content = content,
-        )
+        Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
+            Column(
+                modifier = Modifier
+                    .widthIn(max = 640.dp)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                content = content,
+            )
+        }
     }
 }

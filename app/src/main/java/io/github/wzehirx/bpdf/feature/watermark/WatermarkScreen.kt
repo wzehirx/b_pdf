@@ -35,6 +35,9 @@ import io.github.wzehirx.bpdf.ui.components.PageChooser
 import io.github.wzehirx.bpdf.ui.components.PageRangeField
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.SinglePdfSection
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
+import io.github.wzehirx.bpdf.ui.components.OptionsCard
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberPageThumbnails
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
@@ -135,106 +138,107 @@ fun WatermarkScreenContent(
     val file = state.file
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_watermark_title), onBack = onBack) {
-        Text(stringResource(R.string.watermark_instructions))
-        SinglePdfSection(file, state.pageCount, state.importing, busy, onPickFile, onRemoveFile)
+        ToolSection {
+            Text(stringResource(R.string.watermark_instructions))
+            SinglePdfSection(file, state.pageCount, state.importing, busy, onPickFile, onRemoveFile)
+        }
         if (file != null) {
-            val textError = if (state.textMissing) stringResource(R.string.watermark_text_error) else null
-            OutlinedTextField(
-                value = state.text,
-                onValueChange = onTextChange,
-                label = { Text(stringResource(R.string.watermark_text_label)) },
-                isError = textError != null,
-                supportingText = textError?.let { { Text(it) } },
-                singleLine = true,
-                enabled = !busy,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .semantics { if (textError != null) error(textError) },
-            )
-            LabelledSlider(
-                label = stringResource(R.string.text_size_label),
-                value = state.fontSize.toFloat(),
-                onValueChange = { onFontSizeChange(it.roundToInt()) },
-                valueRange = WatermarkViewModel.MIN_FONT_SIZE.toFloat()..WatermarkViewModel.MAX_FONT_SIZE.toFloat(),
-                step = WatermarkViewModel.FONT_STEP.toFloat(),
-                valueText = { resources.getQuantityString(R.plurals.text_size_value, it.roundToInt(), it.roundToInt()) },
-                enabled = !busy,
-            )
-            LabelledSlider(
-                label = stringResource(R.string.watermark_opacity_label),
-                value = state.opacityPercent.toFloat(),
-                onValueChange = { onOpacityChange(it.roundToInt()) },
-                valueRange = WatermarkViewModel.MIN_OPACITY.toFloat()..WatermarkViewModel.MAX_OPACITY.toFloat(),
-                step = WatermarkViewModel.OPACITY_STEP.toFloat(),
-                valueText = { resources.getString(R.string.watermark_opacity_value, it.roundToInt()) },
-                enabled = !busy,
-            )
-            LabelledSlider(
-                label = stringResource(R.string.watermark_rotation_label),
-                value = state.rotation.toFloat(),
-                onValueChange = { onRotationChange(it.roundToInt()) },
-                valueRange = -WatermarkViewModel.MAX_ROTATION.toFloat()..WatermarkViewModel.MAX_ROTATION.toFloat(),
-                step = WatermarkViewModel.ROTATION_STEP.toFloat(),
-                valueText = {
-                    val degrees = it.roundToInt()
-                    when {
-                        degrees > 0 -> resources.getString(R.string.watermark_rotation_ccw, degrees)
-                        degrees < 0 -> resources.getString(R.string.watermark_rotation_cw, abs(degrees))
-                        else -> resources.getString(R.string.watermark_rotation_none)
-                    }
-                },
-                enabled = !busy,
-            )
-            ChoiceRow(
-                label = stringResource(R.string.watermark_position_label),
-                options = WatermarkPosition.entries,
-                selected = state.position,
-                optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onPositionChange,
-                enabled = !busy,
-            )
-            ChoiceRow(
-                label = stringResource(R.string.watermark_color_label),
-                options = WatermarkColor.entries,
-                selected = state.color,
-                optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onColorChange,
-                enabled = !busy,
-            )
-            ChoiceRow(
-                label = stringResource(R.string.watermark_scope_label),
-                options = PageScope.entries,
-                selected = state.scope,
-                optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onScopeChange,
-                enabled = !busy,
-            )
-            if (state.scope == PageScope.SELECTED) {
-                PageRangeField(
-                    value = state.rangeText,
-                    onValueChange = onRangeChange,
-                    pageCount = state.pageCount,
-                    error = state.rangeError,
+            OptionsCard {
+                val textError = if (state.textMissing) stringResource(R.string.watermark_text_error) else null
+                OutlinedTextField(
+                    value = state.text,
+                    onValueChange = onTextChange,
+                    label = { Text(stringResource(R.string.watermark_text_label)) },
+                    isError = textError != null,
+                    supportingText = textError?.let { { Text(it) } },
+                    singleLine = true,
+                    enabled = !busy,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .semantics { if (textError != null) error(textError) },
+                )
+                LabelledSlider(
+                    label = stringResource(R.string.text_size_label),
+                    value = state.fontSize.toFloat(),
+                    onValueChange = { onFontSizeChange(it.roundToInt()) },
+                    valueRange = WatermarkViewModel.MIN_FONT_SIZE.toFloat()..WatermarkViewModel.MAX_FONT_SIZE.toFloat(),
+                    step = WatermarkViewModel.FONT_STEP.toFloat(),
+                    valueText = { resources.getQuantityString(R.plurals.text_size_value, it.roundToInt(), it.roundToInt()) },
                     enabled = !busy,
                 )
-                PageChooser(
-                    rangeText = state.rangeText,
-                    pageCount = state.pageCount,
-                    onRangeChange = onRangeChange,
-                    thumbnail = thumbnail,
+                LabelledSlider(
+                    label = stringResource(R.string.watermark_opacity_label),
+                    value = state.opacityPercent.toFloat(),
+                    onValueChange = { onOpacityChange(it.roundToInt()) },
+                    valueRange = WatermarkViewModel.MIN_OPACITY.toFloat()..WatermarkViewModel.MAX_OPACITY.toFloat(),
+                    step = WatermarkViewModel.OPACITY_STEP.toFloat(),
+                    valueText = { resources.getString(R.string.watermark_opacity_value, it.roundToInt()) },
                     enabled = !busy,
                 )
+                LabelledSlider(
+                    label = stringResource(R.string.watermark_rotation_label),
+                    value = state.rotation.toFloat(),
+                    onValueChange = { onRotationChange(it.roundToInt()) },
+                    valueRange = -WatermarkViewModel.MAX_ROTATION.toFloat()..WatermarkViewModel.MAX_ROTATION.toFloat(),
+                    step = WatermarkViewModel.ROTATION_STEP.toFloat(),
+                    valueText = {
+                        val degrees = it.roundToInt()
+                        when {
+                            degrees > 0 -> resources.getString(R.string.watermark_rotation_ccw, degrees)
+                            degrees < 0 -> resources.getString(R.string.watermark_rotation_cw, abs(degrees))
+                            else -> resources.getString(R.string.watermark_rotation_none)
+                        }
+                    },
+                    enabled = !busy,
+                )
+                ChoiceRow(
+                    label = stringResource(R.string.watermark_position_label),
+                    options = WatermarkPosition.entries,
+                    selected = state.position,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onPositionChange,
+                    enabled = !busy,
+                )
+                ChoiceRow(
+                    label = stringResource(R.string.watermark_color_label),
+                    options = WatermarkColor.entries,
+                    selected = state.color,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onColorChange,
+                    enabled = !busy,
+                )
+                ChoiceRow(
+                    label = stringResource(R.string.watermark_scope_label),
+                    options = PageScope.entries,
+                    selected = state.scope,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onScopeChange,
+                    enabled = !busy,
+                )
+                if (state.scope == PageScope.SELECTED) {
+                    PageRangeField(
+                        value = state.rangeText,
+                        onValueChange = onRangeChange,
+                        pageCount = state.pageCount,
+                        error = state.rangeError,
+                        enabled = !busy,
+                    )
+                    PageChooser(
+                        rangeText = state.rangeText,
+                        pageCount = state.pageCount,
+                        onRangeChange = onRangeChange,
+                        thumbnail = thumbnail,
+                        enabled = !busy,
+                    )
+                }
             }
         }
-        Button(
+        PrimaryButton(
+            text = stringResource(R.string.watermark_button),
             onClick = onApply,
             enabled = file != null && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (file == null) stateDescription = needFile },
-        ) {
-            Text(stringResource(R.string.watermark_button))
-        }
+            disabledReason = if (file == null) needFile else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { result ->

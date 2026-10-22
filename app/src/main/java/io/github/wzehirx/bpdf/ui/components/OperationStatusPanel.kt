@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -76,29 +79,39 @@ fun <T> OperationStatusPanel(
                 } else {
                     LinearProgressIndicator(progress = { p }, modifier = Modifier.fillMaxWidth())
                 }
-                OutlinedButton(onClick = onCancel, modifier = Modifier.heightIn(min = 48.dp)) {
-                    Text(stringResource(R.string.cancel))
-                }
+                SecondaryButton(text = stringResource(R.string.cancel), onClick = onCancel)
             }
             is OperationState.Success -> {
-                Text(
-                    text = successText(state.value).withUnprotectedNote(resources, unprotectedOutput),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = resultModifier,
-                )
+                ResultCard(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer) {
+                    Text(
+                        text = successText(state.value).withUnprotectedNote(resources, unprotectedOutput),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = resultModifier,
+                    )
+                }
                 successActions()
             }
             is OperationState.Failed -> {
-                Text(
-                    text = state.error.toUserMessage(resources),
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = resultModifier,
-                )
-                OutlinedButton(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp)) {
-                    Text(stringResource(R.string.retry))
+                ResultCard(MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.onErrorContainer) {
+                    Text(
+                        text = state.error.toUserMessage(resources),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = resultModifier,
+                    )
                 }
+                SecondaryButton(text = stringResource(R.string.retry), onClick = onRetry)
             }
         }
+    }
+}
+
+/** The tinted box around a result or an error; the text inside (not the colour) says which it is. */
+@Composable
+private fun ResultCard(container: Color, content: Color, text: @Composable () -> Unit) {
+    Card(
+        Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = container, contentColor = content),
+    ) {
+        Column(Modifier.padding(16.dp)) { text() }
     }
 }

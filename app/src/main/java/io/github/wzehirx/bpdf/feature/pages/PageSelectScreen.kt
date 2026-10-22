@@ -33,6 +33,9 @@ import io.github.wzehirx.bpdf.ui.components.PageRangeField
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
+import io.github.wzehirx.bpdf.ui.components.ToolSection
+import io.github.wzehirx.bpdf.ui.components.OptionsCard
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
 import io.github.wzehirx.bpdf.ui.components.shareFile
@@ -118,62 +121,62 @@ fun PageSelectScreenContent(
         title = stringResource(if (removing) R.string.tool_remove_pages_title else R.string.tool_extract_pages_title),
         onBack = onBack,
     ) {
-        Text(stringResource(if (removing) R.string.pages_remove_instructions else R.string.pages_extract_instructions))
-        PickFilesButton(
-            label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
-            mimeTypes = arrayOf("application/pdf"),
-            multiple = false,
-            onPicked = onPickFile,
-            enabled = !busy,
-        )
-        if (state.importing) {
-            Text(
-                stringResource(R.string.single_file_importing),
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        ToolSection {
+            Text(stringResource(if (removing) R.string.pages_remove_instructions else R.string.pages_extract_instructions))
+            PickFilesButton(
+                label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
+                mimeTypes = arrayOf("application/pdf"),
+                multiple = false,
+                onPicked = onPickFile,
+                enabled = !busy,
             )
+            if (state.importing) {
+                Text(
+                    stringResource(R.string.single_file_importing),
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                )
+            }
+            if (file != null) {
+                SelectedPdfCard(
+                    file = file,
+                    pageCount = state.pageCount,
+                    summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
+                    removeActionLabel = stringResource(R.string.single_file_remove_action),
+                    removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
+                    enabled = !busy,
+                    onRemove = onRemoveFile,
+                )
+            }
         }
         if (file != null) {
-            SelectedPdfCard(
-                file = file,
-                pageCount = state.pageCount,
-                summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
-                removeActionLabel = stringResource(R.string.single_file_remove_action),
-                removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
-                enabled = !busy,
-                onRemove = onRemoveFile,
-            )
-            Text(
-                stringResource(if (removing) R.string.pages_remove_hint else R.string.pages_extract_hint),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            PageRangeField(
-                value = state.rangeText,
-                onValueChange = onRangeChange,
-                pageCount = state.pageCount,
-                error = state.rangeError,
-                enabled = !busy,
-                selectionError = if (state.removesAllPages) removeAllError else null,
-            )
-            PageChooser(
-                rangeText = state.rangeText,
-                pageCount = state.pageCount,
-                onRangeChange = onRangeChange,
-                thumbnail = thumbnail,
-                enabled = !busy,
-            )
+            OptionsCard {
+                Text(
+                    stringResource(if (removing) R.string.pages_remove_hint else R.string.pages_extract_hint),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                PageRangeField(
+                    value = state.rangeText,
+                    onValueChange = onRangeChange,
+                    pageCount = state.pageCount,
+                    error = state.rangeError,
+                    enabled = !busy,
+                    selectionError = if (state.removesAllPages) removeAllError else null,
+                )
+                PageChooser(
+                    rangeText = state.rangeText,
+                    pageCount = state.pageCount,
+                    onRangeChange = onRangeChange,
+                    thumbnail = thumbnail,
+                    enabled = !busy,
+                )
+            }
         }
-        Button(
+        PrimaryButton(
+            text = stringResource(if (removing) R.string.pages_remove_button else R.string.pages_extract_button),
             onClick = onRun,
             enabled = file != null && !state.removesAllPages && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics {
-                    if (file == null) stateDescription = needFile
-                    else if (state.removesAllPages) stateDescription = removeAllError
-                },
-        ) {
-            Text(stringResource(if (removing) R.string.pages_remove_button else R.string.pages_extract_button))
-        }
+            disabledReason = if (file == null) needFile else if (state.removesAllPages) removeAllError else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { result ->

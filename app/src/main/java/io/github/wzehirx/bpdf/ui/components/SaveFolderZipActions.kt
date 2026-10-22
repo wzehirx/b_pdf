@@ -24,7 +24,7 @@ fun SaveFolderZipActions(
     enabled: Boolean = true,
 ) {
     val shareFirst = LocalSaveBehavior.current == SaveBehavior.SHARE
-    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (shareFirst) {
             Button(onClick = onShare, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.share))
@@ -33,7 +33,7 @@ fun SaveFolderZipActions(
         Button(onClick = onSaveToFolder, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
             Text(stringResource(R.string.save_folder))
         }
-        Button(onClick = onSaveZip, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+        OutlinedButton(onClick = onSaveZip, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
             Text(stringResource(R.string.save_zip))
         }
         if (!shareFirst) {

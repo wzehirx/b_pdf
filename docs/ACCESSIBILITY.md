@@ -14,6 +14,8 @@ b PDF is designed so that a blind or low-vision user can complete every task wit
 8. Page thumbnails expose "Page N of M" plus rotation and selection state.
 9. Every screen has a Compose UI test (Robolectric) asserting labels, headings and custom actions.
 
+10. Nothing is spoken twice. A merged node (a clickable row, a toggle, a card) must not set a `contentDescription` over visible Text that says the same thing; let the merged Texts speak, or hide the children with `clearAndSetSemantics` when a different spoken label is really needed. `DoubleSpeechAuditTest` and `ComponentSpeechTest` (helper `assertNoDoubleSpeech`) fail when an element repeats a phrase.
+
 All strings must exist in English and Turkish.
 
 ## Audit for 1.0.0

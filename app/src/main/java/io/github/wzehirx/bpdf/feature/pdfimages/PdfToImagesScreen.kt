@@ -38,6 +38,9 @@ import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SaveFolderZipActions
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
+import io.github.wzehirx.bpdf.ui.components.OptionsCard
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberPageThumbnails
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
@@ -130,81 +133,84 @@ fun PdfToImagesScreenContent(
     val file = state.file
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_pdf_to_images_title), onBack = onBack) {
-        Text(stringResource(R.string.images_out_instructions))
-        PickFilesButton(
-            label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
-            mimeTypes = arrayOf("application/pdf"),
-            multiple = false,
-            onPicked = onPickFile,
-            enabled = !busy,
-        )
-        if (state.importing) {
-            Text(
-                stringResource(R.string.single_file_importing),
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        ToolSection {
+            Text(stringResource(R.string.images_out_instructions))
+            PickFilesButton(
+                label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
+                mimeTypes = arrayOf("application/pdf"),
+                multiple = false,
+                onPicked = onPickFile,
+                enabled = !busy,
             )
+            if (state.importing) {
+                Text(
+                    stringResource(R.string.single_file_importing),
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                )
+            }
+            if (file != null) {
+                SelectedPdfCard(
+                    file = file,
+                    pageCount = state.pageCount,
+                    summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
+                    removeActionLabel = stringResource(R.string.single_file_remove_action),
+                    removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
+                    enabled = !busy,
+                    onRemove = onRemoveFile,
+                )
+            }
         }
         if (file != null) {
-            SelectedPdfCard(
-                file = file,
-                pageCount = state.pageCount,
-                summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
-                removeActionLabel = stringResource(R.string.single_file_remove_action),
-                removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
-                enabled = !busy,
-                onRemove = onRemoveFile,
-            )
-            ChoiceRow(
-                label = stringResource(R.string.images_out_pages_label),
-                options = PageScope.entries,
-                selected = state.scope,
-                optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onScopeChange,
-                enabled = !busy,
-            )
-            if (state.scope == PageScope.SELECTED) {
-                Text(stringResource(R.string.images_out_range_hint), style = MaterialTheme.typography.bodyMedium)
-                PageRangeField(
-                    value = state.rangeText,
-                    onValueChange = onRangeChange,
-                    pageCount = state.pageCount,
-                    error = state.rangeError,
+            OptionsCard {
+                ChoiceRow(
+                    label = stringResource(R.string.images_out_pages_label),
+                    options = PageScope.entries,
+                    selected = state.scope,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onScopeChange,
                     enabled = !busy,
                 )
-                PageChooser(
-                    rangeText = state.rangeText,
-                    pageCount = state.pageCount,
-                    onRangeChange = onRangeChange,
-                    thumbnail = thumbnail,
+                if (state.scope == PageScope.SELECTED) {
+                    Text(stringResource(R.string.images_out_range_hint), style = MaterialTheme.typography.bodyMedium)
+                    PageRangeField(
+                        value = state.rangeText,
+                        onValueChange = onRangeChange,
+                        pageCount = state.pageCount,
+                        error = state.rangeError,
+                        enabled = !busy,
+                    )
+                    PageChooser(
+                        rangeText = state.rangeText,
+                        pageCount = state.pageCount,
+                        onRangeChange = onRangeChange,
+                        thumbnail = thumbnail,
+                        enabled = !busy,
+                    )
+                }
+                ChoiceRow(
+                    label = stringResource(R.string.images_out_dpi_label),
+                    options = DpiChoice.entries,
+                    selected = state.dpi,
+                    optionLabel = { resources.getString(R.string.images_out_dpi_option, it.dpi, resources.getString(it.hintRes())) },
+                    onSelect = onDpiChange,
+                    enabled = !busy,
+                )
+                ChoiceRow(
+                    label = stringResource(R.string.images_out_format_label),
+                    options = ImageFormat.entries,
+                    selected = state.format,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onFormatChange,
                     enabled = !busy,
                 )
             }
-            ChoiceRow(
-                label = stringResource(R.string.images_out_dpi_label),
-                options = DpiChoice.entries,
-                selected = state.dpi,
-                optionLabel = { resources.getString(R.string.images_out_dpi_option, it.dpi, resources.getString(it.hintRes())) },
-                onSelect = onDpiChange,
-                enabled = !busy,
-            )
-            ChoiceRow(
-                label = stringResource(R.string.images_out_format_label),
-                options = ImageFormat.entries,
-                selected = state.format,
-                optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onFormatChange,
-                enabled = !busy,
-            )
         }
-        Button(
+        PrimaryButton(
+            text = stringResource(R.string.images_out_button),
             onClick = onConvert,
             enabled = file != null && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (file == null) stateDescription = needFile },
-        ) {
-            Text(stringResource(R.string.images_out_button))
-        }
+            disabledReason = if (file == null) needFile else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { result ->

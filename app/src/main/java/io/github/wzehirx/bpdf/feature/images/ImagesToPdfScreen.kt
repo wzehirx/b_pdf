@@ -36,6 +36,9 @@ import io.github.wzehirx.bpdf.core.work.OperationState
 import io.github.wzehirx.bpdf.ui.components.ChoiceRow
 import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.SelectedFileList
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
+import io.github.wzehirx.bpdf.ui.components.OptionsCard
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
 import io.github.wzehirx.bpdf.ui.components.shareFile
@@ -127,57 +130,58 @@ fun ImagesToPdfScreenContent(
     val empty = state.images.isEmpty()
     val busy = state.importing || state.saving || state.operation is OperationState.Running
     ToolScaffold(title = stringResource(R.string.tool_images_to_pdf_title), onBack = onBack) {
-        Text(stringResource(R.string.images_instructions))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = onPickFromGallery, enabled = !busy, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                Text(stringResource(R.string.images_choose))
+        ToolSection {
+            Text(stringResource(R.string.images_instructions))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedButton(onClick = onPickFromGallery, enabled = !busy, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                    Text(stringResource(R.string.images_choose))
+                }
+                OutlinedButton(onClick = onTakePhoto, enabled = !busy, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                    Text(stringResource(R.string.images_take_photo))
+                }
             }
-            OutlinedButton(onClick = onTakePhoto, enabled = !busy, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                Text(stringResource(R.string.images_take_photo))
+            if (state.importing) {
+                Text(
+                    stringResource(R.string.images_importing),
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                )
             }
+            SelectedFileList(files = state.images, onMove = onMove, onRemove = onRemove, enabled = !busy, announceAdded = false)
         }
-        if (state.importing) {
-            Text(
-                stringResource(R.string.images_importing),
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-            )
-        }
-        SelectedFileList(files = state.images, onMove = onMove, onRemove = onRemove, enabled = !busy, announceAdded = false)
-        ChoiceRow(
-            label = stringResource(R.string.images_page_size_label),
-            options = PageSizeOption.entries,
-            selected = state.pageSize,
-            optionLabel = { resources.getString(it.labelRes()) },
-            onSelect = onPageSizeChange,
-            enabled = !busy,
-        )
-        if (state.pageSize != PageSizeOption.FIT_IMAGE) {
+        OptionsCard {
             ChoiceRow(
-                label = stringResource(R.string.images_orientation_label),
-                options = Orientation.entries,
-                selected = state.orientation,
+                label = stringResource(R.string.images_page_size_label),
+                options = PageSizeOption.entries,
+                selected = state.pageSize,
                 optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onOrientationChange,
+                onSelect = onPageSizeChange,
+                enabled = !busy,
+            )
+            if (state.pageSize != PageSizeOption.FIT_IMAGE) {
+                ChoiceRow(
+                    label = stringResource(R.string.images_orientation_label),
+                    options = Orientation.entries,
+                    selected = state.orientation,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onOrientationChange,
+                    enabled = !busy,
+                )
+            }
+            ChoiceRow(
+                label = stringResource(R.string.images_margin_label),
+                options = MarginChoice.entries,
+                selected = state.margin,
+                optionLabel = { resources.getString(it.labelRes()) },
+                onSelect = onMarginChange,
                 enabled = !busy,
             )
         }
-        ChoiceRow(
-            label = stringResource(R.string.images_margin_label),
-            options = MarginChoice.entries,
-            selected = state.margin,
-            optionLabel = { resources.getString(it.labelRes()) },
-            onSelect = onMarginChange,
-            enabled = !busy,
-        )
-        Button(
+        PrimaryButton(
+            text = stringResource(R.string.images_convert_button),
             onClick = onConvert,
             enabled = !empty && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (empty) stateDescription = needImage },
-        ) {
-            Text(stringResource(R.string.images_convert_button))
-        }
+            disabledReason = if (empty) needImage else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { result ->

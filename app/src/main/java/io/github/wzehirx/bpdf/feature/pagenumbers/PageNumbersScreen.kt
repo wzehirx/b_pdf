@@ -36,6 +36,9 @@ import io.github.wzehirx.bpdf.ui.components.PageChooser
 import io.github.wzehirx.bpdf.ui.components.PageRangeField
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.SinglePdfSection
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
+import io.github.wzehirx.bpdf.ui.components.OptionsCard
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberPageThumbnails
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
@@ -135,106 +138,107 @@ fun PageNumbersScreenContent(
     val sampleTotal = state.pageCount.coerceAtLeast(1)
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_page_numbers_title), onBack = onBack) {
-        Text(stringResource(R.string.page_numbers_instructions))
-        SinglePdfSection(file, state.pageCount, state.importing, busy, onPickFile, onRemoveFile)
+        ToolSection {
+            Text(stringResource(R.string.page_numbers_instructions))
+            SinglePdfSection(file, state.pageCount, state.importing, busy, onPickFile, onRemoveFile)
+        }
         if (file != null) {
-            ChoiceRow(
-                label = stringResource(R.string.page_numbers_position_label),
-                options = NumberPosition.entries,
-                selected = state.position,
-                optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onPositionChange,
-                enabled = !busy,
-            )
-            ChoiceRow(
-                label = stringResource(R.string.page_numbers_format_label),
-                options = NumberFormat.entries,
-                selected = state.format,
-                optionLabel = { resources.getString(it.labelRes(), sampleTotal) },
-                optionDescription = { it.descriptionRes()?.let { res -> resources.getString(res, sampleTotal) } },
-                onSelect = onFormatChange,
-                enabled = !busy,
-            )
-            if (state.format == NumberFormat.CUSTOM) {
-                val formatError = if (NumberFieldError.FORMAT_EMPTY in state.fieldErrors) {
-                    stringResource(R.string.page_numbers_format_error)
+            OptionsCard {
+                ChoiceRow(
+                    label = stringResource(R.string.page_numbers_position_label),
+                    options = NumberPosition.entries,
+                    selected = state.position,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onPositionChange,
+                    enabled = !busy,
+                )
+                ChoiceRow(
+                    label = stringResource(R.string.page_numbers_format_label),
+                    options = NumberFormat.entries,
+                    selected = state.format,
+                    optionLabel = { resources.getString(it.labelRes(), sampleTotal) },
+                    optionDescription = { it.descriptionRes()?.let { res -> resources.getString(res, sampleTotal) } },
+                    onSelect = onFormatChange,
+                    enabled = !busy,
+                )
+                if (state.format == NumberFormat.CUSTOM) {
+                    val formatError = if (NumberFieldError.FORMAT_EMPTY in state.fieldErrors) {
+                        stringResource(R.string.page_numbers_format_error)
+                    } else {
+                        null
+                    }
+                    OutlinedTextField(
+                        value = state.customFormat,
+                        onValueChange = onCustomFormatChange,
+                        label = { Text(stringResource(R.string.page_numbers_custom_label)) },
+                        isError = formatError != null,
+                        supportingText = { Text(formatError ?: stringResource(R.string.page_numbers_custom_hint)) },
+                        singleLine = true,
+                        enabled = !busy,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics { if (formatError != null) error(formatError) },
+                    )
+                }
+                val startError = if (NumberFieldError.START_INVALID in state.fieldErrors) {
+                    stringResource(R.string.page_numbers_start_error)
                 } else {
                     null
                 }
                 OutlinedTextField(
-                    value = state.customFormat,
-                    onValueChange = onCustomFormatChange,
-                    label = { Text(stringResource(R.string.page_numbers_custom_label)) },
-                    isError = formatError != null,
-                    supportingText = { Text(formatError ?: stringResource(R.string.page_numbers_custom_hint)) },
+                    value = state.startText,
+                    onValueChange = onStartChange,
+                    label = { Text(stringResource(R.string.page_numbers_start_label)) },
+                    isError = startError != null,
+                    supportingText = startError?.let { { Text(it) } },
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     enabled = !busy,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .semantics { if (formatError != null) error(formatError) },
+                        .semantics { if (startError != null) error(startError) },
                 )
-            }
-            val startError = if (NumberFieldError.START_INVALID in state.fieldErrors) {
-                stringResource(R.string.page_numbers_start_error)
-            } else {
-                null
-            }
-            OutlinedTextField(
-                value = state.startText,
-                onValueChange = onStartChange,
-                label = { Text(stringResource(R.string.page_numbers_start_label)) },
-                isError = startError != null,
-                supportingText = startError?.let { { Text(it) } },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                enabled = !busy,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .semantics { if (startError != null) error(startError) },
-            )
-            LabelledSlider(
-                label = stringResource(R.string.text_size_label),
-                value = state.fontSize.toFloat(),
-                onValueChange = { onFontSizeChange(it.roundToInt()) },
-                valueRange = PageNumbersViewModel.MIN_FONT_SIZE.toFloat()..PageNumbersViewModel.MAX_FONT_SIZE.toFloat(),
-                step = 1f,
-                valueText = { resources.getQuantityString(R.plurals.text_size_value, it.roundToInt(), it.roundToInt()) },
-                enabled = !busy,
-            )
-            ChoiceRow(
-                label = stringResource(R.string.page_numbers_scope_label),
-                options = PageScope.entries,
-                selected = state.scope,
-                optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onScopeChange,
-                enabled = !busy,
-            )
-            if (state.scope == PageScope.SELECTED) {
-                PageRangeField(
-                    value = state.rangeText,
-                    onValueChange = onRangeChange,
-                    pageCount = state.pageCount,
-                    error = state.rangeError,
+                LabelledSlider(
+                    label = stringResource(R.string.text_size_label),
+                    value = state.fontSize.toFloat(),
+                    onValueChange = { onFontSizeChange(it.roundToInt()) },
+                    valueRange = PageNumbersViewModel.MIN_FONT_SIZE.toFloat()..PageNumbersViewModel.MAX_FONT_SIZE.toFloat(),
+                    step = 1f,
+                    valueText = { resources.getQuantityString(R.plurals.text_size_value, it.roundToInt(), it.roundToInt()) },
                     enabled = !busy,
                 )
-                PageChooser(
-                    rangeText = state.rangeText,
-                    pageCount = state.pageCount,
-                    onRangeChange = onRangeChange,
-                    thumbnail = thumbnail,
+                ChoiceRow(
+                    label = stringResource(R.string.page_numbers_scope_label),
+                    options = PageScope.entries,
+                    selected = state.scope,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onScopeChange,
                     enabled = !busy,
                 )
+                if (state.scope == PageScope.SELECTED) {
+                    PageRangeField(
+                        value = state.rangeText,
+                        onValueChange = onRangeChange,
+                        pageCount = state.pageCount,
+                        error = state.rangeError,
+                        enabled = !busy,
+                    )
+                    PageChooser(
+                        rangeText = state.rangeText,
+                        pageCount = state.pageCount,
+                        onRangeChange = onRangeChange,
+                        thumbnail = thumbnail,
+                        enabled = !busy,
+                    )
+                }
             }
         }
-        Button(
+        PrimaryButton(
+            text = stringResource(R.string.page_numbers_button),
             onClick = onApply,
             enabled = file != null && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (file == null) stateDescription = needFile },
-        ) {
-            Text(stringResource(R.string.page_numbers_button))
-        }
+            disabledReason = if (file == null) needFile else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { result ->

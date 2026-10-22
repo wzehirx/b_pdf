@@ -28,6 +28,12 @@ class HighContrastColorsTest {
         "onErrorContainer/errorContainer" to (c.onErrorContainer to c.errorContainer),
         "onSurface/surfaceContainer" to (c.onSurface to c.surfaceContainer),
         "onSurface/surfaceContainerHighest" to (c.onSurface to c.surfaceContainerHighest),
+        // Cards and grouped rows sit on these container surfaces.
+        "onSurface/surfaceContainerLow" to (c.onSurface to c.surfaceContainerLow),
+        "onSurface/surfaceContainerHigh" to (c.onSurface to c.surfaceContainerHigh),
+        "onSurfaceVariant/surfaceContainerLow" to (c.onSurfaceVariant to c.surfaceContainerLow),
+        "onSurfaceVariant/surfaceContainerHighest" to (c.onSurfaceVariant to c.surfaceContainerHighest),
+        "primary/surfaceContainerLow" to (c.primary to c.surfaceContainerLow),
         // Text and icons coloured with the accent sit directly on the surface.
         "primary/background" to (c.primary to c.background),
         "error/background" to (c.error to c.background),

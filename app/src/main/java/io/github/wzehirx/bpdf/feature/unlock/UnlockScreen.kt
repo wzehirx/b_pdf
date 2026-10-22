@@ -28,6 +28,8 @@ import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
 import io.github.wzehirx.bpdf.ui.components.shareFile
@@ -101,43 +103,40 @@ fun UnlockScreenContent(
     val file = state.file
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_unlock_title), onBack = onBack) {
-        Text(stringResource(R.string.unlock_instructions))
-        PickFilesButton(
-            label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
-            mimeTypes = arrayOf("application/pdf"),
-            multiple = false,
-            onPicked = onPickFile,
-            enabled = !busy,
-        )
-        if (state.importing) {
-            Text(
-                stringResource(R.string.single_file_importing),
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-            )
-        }
-        if (file != null) {
-            SelectedPdfCard(
-                file = file,
-                pageCount = state.pageCount,
-                summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
-                removeActionLabel = stringResource(R.string.single_file_remove_action),
-                removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
+        ToolSection {
+            Text(stringResource(R.string.unlock_instructions))
+            PickFilesButton(
+                label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
+                mimeTypes = arrayOf("application/pdf"),
+                multiple = false,
+                onPicked = onPickFile,
                 enabled = !busy,
-                onRemove = onRemoveFile,
             )
-            if (state.notProtected) Text(notProtected)
+            if (state.importing) {
+                Text(
+                    stringResource(R.string.single_file_importing),
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                )
+            }
+            if (file != null) {
+                SelectedPdfCard(
+                    file = file,
+                    pageCount = state.pageCount,
+                    summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
+                    removeActionLabel = stringResource(R.string.single_file_remove_action),
+                    removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
+                    enabled = !busy,
+                    onRemove = onRemoveFile,
+                )
+                if (state.notProtected) Text(notProtected)
+            }
         }
-        Button(
+        PrimaryButton(
+            text = stringResource(R.string.unlock_button),
             onClick = onUnlock,
             enabled = file != null && !state.notProtected && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics {
-                    if (file == null) stateDescription = needFile else if (state.notProtected) stateDescription = notProtected
-                },
-        ) {
-            Text(stringResource(R.string.unlock_button))
-        }
+            disabledReason = if (file == null) needFile else if (state.notProtected) notProtected else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { result ->

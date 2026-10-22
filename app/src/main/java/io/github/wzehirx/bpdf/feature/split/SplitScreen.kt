@@ -41,6 +41,9 @@ import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SaveFolderZipActions
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
+import io.github.wzehirx.bpdf.ui.components.OptionsCard
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
 import io.github.wzehirx.bpdf.ui.components.shareFiles
@@ -133,62 +136,65 @@ fun SplitScreenContent(
     val file = state.file
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_split_title), onBack = onBack) {
-        Text(stringResource(R.string.split_instructions))
-        PickFilesButton(
-            label = stringResource(if (file == null) R.string.split_choose_file else R.string.split_replace_file),
-            mimeTypes = arrayOf("application/pdf"),
-            multiple = false,
-            onPicked = onPickFile,
-            enabled = !busy,
-        )
-        if (state.importing) {
-            Text(
-                stringResource(R.string.split_importing),
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-            )
-        }
-        if (file != null) {
-            SelectedPdfCard(
-                file = file,
-                pageCount = state.pageCount,
-                summary = pluralStringResource(R.plurals.split_file_summary, state.pageCount, file.displayName, state.pageCount),
-                removeActionLabel = stringResource(R.string.split_remove_action),
-                removeButtonDescription = stringResource(R.string.split_remove_file, file.displayName),
-                enabled = !busy,
-                onRemove = onRemoveFile,
-            )
-            ChoiceRow(
-                label = stringResource(R.string.split_mode_label),
-                options = SplitModeChoice.entries,
-                selected = state.mode,
-                optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onModeChange,
+        ToolSection {
+            Text(stringResource(R.string.split_instructions))
+            PickFilesButton(
+                label = stringResource(if (file == null) R.string.split_choose_file else R.string.split_replace_file),
+                mimeTypes = arrayOf("application/pdf"),
+                multiple = false,
+                onPicked = onPickFile,
                 enabled = !busy,
             )
-            when (state.mode) {
-                SplitModeChoice.RANGES -> {
-                    Text(stringResource(R.string.split_ranges_hint), style = MaterialTheme.typography.bodyMedium)
-                    PageRangeField(
-                        value = state.rangeText,
-                        onValueChange = onRangeChange,
-                        pageCount = state.pageCount,
-                        error = state.rangeError,
-                        enabled = !busy,
-                    )
-                }
-                SplitModeChoice.EVERY_N -> EveryNField(state, onEveryNChange, enabled = !busy)
-                SplitModeChoice.EACH_PAGE -> Unit
+            if (state.importing) {
+                Text(
+                    stringResource(R.string.split_importing),
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                )
+            }
+            if (file != null) {
+                SelectedPdfCard(
+                    file = file,
+                    pageCount = state.pageCount,
+                    summary = pluralStringResource(R.plurals.split_file_summary, state.pageCount, file.displayName, state.pageCount),
+                    removeActionLabel = stringResource(R.string.split_remove_action),
+                    removeButtonDescription = stringResource(R.string.split_remove_file, file.displayName),
+                    enabled = !busy,
+                    onRemove = onRemoveFile,
+                )
             }
         }
-        Button(
+        if (file != null) {
+            OptionsCard {
+                ChoiceRow(
+                    label = stringResource(R.string.split_mode_label),
+                    options = SplitModeChoice.entries,
+                    selected = state.mode,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onModeChange,
+                    enabled = !busy,
+                )
+                when (state.mode) {
+                    SplitModeChoice.RANGES -> {
+                        Text(stringResource(R.string.split_ranges_hint), style = MaterialTheme.typography.bodyMedium)
+                        PageRangeField(
+                            value = state.rangeText,
+                            onValueChange = onRangeChange,
+                            pageCount = state.pageCount,
+                            error = state.rangeError,
+                            enabled = !busy,
+                        )
+                    }
+                    SplitModeChoice.EVERY_N -> EveryNField(state, onEveryNChange, enabled = !busy)
+                    SplitModeChoice.EACH_PAGE -> Unit
+                }
+            }
+        }
+        PrimaryButton(
+            text = stringResource(R.string.split_button),
             onClick = onSplit,
             enabled = file != null && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (file == null) stateDescription = needFile },
-        ) {
-            Text(stringResource(R.string.split_button))
-        }
+            disabledReason = if (file == null) needFile else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { result ->

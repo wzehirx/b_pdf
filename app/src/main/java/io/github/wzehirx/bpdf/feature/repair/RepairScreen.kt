@@ -28,6 +28,8 @@ import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
 import io.github.wzehirx.bpdf.ui.components.shareFile
@@ -96,41 +98,40 @@ fun RepairScreenContent(
     val file = state.file
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_repair_title), onBack = onBack) {
-        Text(stringResource(R.string.repair_instructions))
-        PickFilesButton(
-            label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
-            mimeTypes = arrayOf("application/pdf"),
-            multiple = false,
-            onPicked = onPickFile,
-            enabled = !busy,
-        )
-        if (state.importing) {
-            Text(
-                stringResource(R.string.single_file_importing),
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-            )
-        }
-        if (file != null) {
-            SelectedPdfCard(
-                file = file,
-                pageCount = state.pageCount,
-                summary = state.pageCount?.let { pluralStringResource(R.plurals.single_file_summary, it, file.displayName, it) }
-                    ?: stringResource(R.string.repair_file_unreadable, file.displayName),
-                removeActionLabel = stringResource(R.string.single_file_remove_action),
-                removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
+        ToolSection {
+            Text(stringResource(R.string.repair_instructions))
+            PickFilesButton(
+                label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
+                mimeTypes = arrayOf("application/pdf"),
+                multiple = false,
+                onPicked = onPickFile,
                 enabled = !busy,
-                onRemove = onRemoveFile,
             )
+            if (state.importing) {
+                Text(
+                    stringResource(R.string.single_file_importing),
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                )
+            }
+            if (file != null) {
+                SelectedPdfCard(
+                    file = file,
+                    pageCount = state.pageCount,
+                    summary = state.pageCount?.let { pluralStringResource(R.plurals.single_file_summary, it, file.displayName, it) }
+                        ?: stringResource(R.string.repair_file_unreadable, file.displayName),
+                    removeActionLabel = stringResource(R.string.single_file_remove_action),
+                    removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
+                    enabled = !busy,
+                    onRemove = onRemoveFile,
+                )
+            }
         }
-        Button(
+        PrimaryButton(
+            text = stringResource(R.string.repair_button),
             onClick = onRepair,
             enabled = file != null && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (file == null) stateDescription = needFile },
-        ) {
-            Text(stringResource(R.string.repair_button))
-        }
+            disabledReason = if (file == null) needFile else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { result ->

@@ -171,7 +171,7 @@ fun PageGrid(
             )
         }
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(120.dp),
+            columns = GridCells.Adaptive(100.dp),
             state = gridState,
             modifier = Modifier.fillMaxWidth().height(gridHeight),
         ) {

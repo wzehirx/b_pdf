@@ -33,6 +33,9 @@ import io.github.wzehirx.bpdf.ui.components.PageRangeField
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
+import io.github.wzehirx.bpdf.ui.components.OptionsCard
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
 import io.github.wzehirx.bpdf.ui.components.shareFile
@@ -114,72 +117,75 @@ fun RotateScreenContent(
     val file = state.file
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_rotate_title), onBack = onBack) {
-        Text(stringResource(R.string.rotate_instructions))
-        PickFilesButton(
-            label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
-            mimeTypes = arrayOf("application/pdf"),
-            multiple = false,
-            onPicked = onPickFile,
-            enabled = !busy,
-        )
-        if (state.importing) {
-            Text(
-                stringResource(R.string.single_file_importing),
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-            )
-        }
-        if (file != null) {
-            SelectedPdfCard(
-                file = file,
-                pageCount = state.pageCount,
-                summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
-                removeActionLabel = stringResource(R.string.single_file_remove_action),
-                removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
-                enabled = !busy,
-                onRemove = onRemoveFile,
-            )
-            ChoiceRow(
-                label = stringResource(R.string.rotate_angle_label),
-                options = RotateAngle.entries,
-                selected = state.angle,
-                optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onAngleChange,
+        ToolSection {
+            Text(stringResource(R.string.rotate_instructions))
+            PickFilesButton(
+                label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
+                mimeTypes = arrayOf("application/pdf"),
+                multiple = false,
+                onPicked = onPickFile,
                 enabled = !busy,
             )
-            ChoiceRow(
-                label = stringResource(R.string.rotate_scope_label),
-                options = RotateScope.entries,
-                selected = state.scope,
-                optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onScopeChange,
-                enabled = !busy,
-            )
-            if (state.scope == RotateScope.SELECTED) {
-                PageRangeField(
-                    value = state.rangeText,
-                    onValueChange = onRangeChange,
-                    pageCount = state.pageCount,
-                    error = state.rangeError,
-                    enabled = !busy,
+            if (state.importing) {
+                Text(
+                    stringResource(R.string.single_file_importing),
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 )
-                PageChooser(
-                    rangeText = state.rangeText,
+            }
+            if (file != null) {
+                SelectedPdfCard(
+                    file = file,
                     pageCount = state.pageCount,
-                    onRangeChange = onRangeChange,
-                    thumbnail = thumbnail,
+                    summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
+                    removeActionLabel = stringResource(R.string.single_file_remove_action),
+                    removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
                     enabled = !busy,
+                    onRemove = onRemoveFile,
                 )
             }
         }
-        Button(
+        if (file != null) {
+            OptionsCard {
+                ChoiceRow(
+                    label = stringResource(R.string.rotate_angle_label),
+                    options = RotateAngle.entries,
+                    selected = state.angle,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onAngleChange,
+                    enabled = !busy,
+                )
+                ChoiceRow(
+                    label = stringResource(R.string.rotate_scope_label),
+                    options = RotateScope.entries,
+                    selected = state.scope,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onScopeChange,
+                    enabled = !busy,
+                )
+                if (state.scope == RotateScope.SELECTED) {
+                    PageRangeField(
+                        value = state.rangeText,
+                        onValueChange = onRangeChange,
+                        pageCount = state.pageCount,
+                        error = state.rangeError,
+                        enabled = !busy,
+                    )
+                    PageChooser(
+                        rangeText = state.rangeText,
+                        pageCount = state.pageCount,
+                        onRangeChange = onRangeChange,
+                        thumbnail = thumbnail,
+                        enabled = !busy,
+                    )
+                }
+            }
+        }
+        PrimaryButton(
+            text = stringResource(R.string.rotate_button),
             onClick = onRotate,
             enabled = file != null && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (file == null) stateDescription = needFile },
-        ) {
-            Text(stringResource(R.string.rotate_button))
-        }
+            disabledReason = if (file == null) needFile else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { result ->

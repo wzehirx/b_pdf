@@ -30,6 +30,9 @@ import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
+import io.github.wzehirx.bpdf.ui.components.OptionsCard
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
 import io.github.wzehirx.bpdf.ui.components.shareFile
@@ -112,60 +115,61 @@ fun PdfToDocumentScreenContent(
     val file = state.file
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_pdf_to_document_title), onBack = onBack) {
-        Text(stringResource(R.string.convert_from_pdf_instructions))
-        PickFilesButton(
-            label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
-            mimeTypes = arrayOf("application/pdf"),
-            multiple = false,
-            onPicked = onPickFile,
-            enabled = !busy,
-        )
-        if (state.importing) {
-            Text(
-                stringResource(R.string.single_file_importing),
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-            )
-        }
-        if (file != null) {
-            SelectedPdfCard(
-                file = file,
-                pageCount = state.pageCount,
-                summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
-                removeActionLabel = stringResource(R.string.single_file_remove_action),
-                removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
+        ToolSection {
+            Text(stringResource(R.string.convert_from_pdf_instructions))
+            PickFilesButton(
+                label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
+                mimeTypes = arrayOf("application/pdf"),
+                multiple = false,
+                onPicked = onPickFile,
                 enabled = !busy,
-                onRemove = onRemoveFile,
             )
+            if (state.importing) {
+                Text(
+                    stringResource(R.string.single_file_importing),
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                )
+            }
+            if (file != null) {
+                SelectedPdfCard(
+                    file = file,
+                    pageCount = state.pageCount,
+                    summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
+                    removeActionLabel = stringResource(R.string.single_file_remove_action),
+                    removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
+                    enabled = !busy,
+                    onRemove = onRemoveFile,
+                )
+            }
         }
-        ChoiceRow(
-            label = stringResource(R.string.convert_format_label),
-            options = DocumentFormat.entries,
-            selected = state.format,
-            optionLabel = { resources.getString(it.labelRes()) },
-            onSelect = onFormatChange,
-            enabled = !busy,
-        )
-        if (state.format == DocumentFormat.EXCEL) {
-            Text(stringResource(R.string.convert_excel_note))
-        } else {
+        OptionsCard {
             ChoiceRow(
-                label = stringResource(R.string.convert_layout_label),
-                options = listOf(PdfLayout.TEXT_AND_PICTURES, PdfLayout.EXACT_LOOK),
-                selected = state.layout,
-                optionLabel = { resources.getString(if (it == PdfLayout.EXACT_LOOK) R.string.convert_layout_exact else R.string.convert_layout_text_pictures) },
-                onSelect = onLayoutChange,
+                label = stringResource(R.string.convert_format_label),
+                options = DocumentFormat.entries,
+                selected = state.format,
+                optionLabel = { resources.getString(it.labelRes()) },
+                onSelect = onFormatChange,
                 enabled = !busy,
             )
+            if (state.format == DocumentFormat.EXCEL) {
+                Text(stringResource(R.string.convert_excel_note))
+            } else {
+                ChoiceRow(
+                    label = stringResource(R.string.convert_layout_label),
+                    options = listOf(PdfLayout.TEXT_AND_PICTURES, PdfLayout.EXACT_LOOK),
+                    selected = state.layout,
+                    optionLabel = { resources.getString(if (it == PdfLayout.EXACT_LOOK) R.string.convert_layout_exact else R.string.convert_layout_text_pictures) },
+                    onSelect = onLayoutChange,
+                    enabled = !busy,
+                )
+            }
         }
-        Button(
+        PrimaryButton(
+            text = stringResource(R.string.convert_pdf_button),
             onClick = onConvert,
             enabled = file != null && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (file == null) stateDescription = needFile },
-        ) {
-            Text(stringResource(R.string.convert_pdf_button))
-        }
+            disabledReason = if (file == null) needFile else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { r ->

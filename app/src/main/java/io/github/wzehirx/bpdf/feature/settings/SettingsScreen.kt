@@ -29,6 +29,9 @@ import io.github.wzehirx.bpdf.core.settings.SaveBehavior
 import io.github.wzehirx.bpdf.core.settings.ThemeMode
 import io.github.wzehirx.bpdf.ui.components.ChoiceRow
 import io.github.wzehirx.bpdf.ui.components.SwitchRow
+import io.github.wzehirx.bpdf.ui.components.SecondaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
+import io.github.wzehirx.bpdf.ui.components.OptionsCard
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -102,7 +105,7 @@ fun SettingsScreenContent(
                 enabled = true,
                 onChange = onHighContrast,
             )
-            Text(stringResource(R.string.settings_high_contrast_hint), style = MaterialTheme.typography.bodySmall)
+            Text(stringResource(R.string.settings_high_contrast_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Section(R.string.settings_language) {
             if (languageSupported) {
@@ -115,10 +118,10 @@ fun SettingsScreenContent(
                 )
             } else {
                 Text(stringResource(R.string.settings_language_unsupported))
-                OutlinedButton(
+                SecondaryButton(
+                    text = stringResource(R.string.settings_language_open_system),
                     onClick = onOpenSystemLanguageSettings,
-                    modifier = Modifier.heightIn(min = 48.dp),
-                ) { Text(stringResource(R.string.settings_language_open_system)) }
+                )
             }
         }
         Section(R.string.settings_saving) {
@@ -129,39 +132,32 @@ fun SettingsScreenContent(
                 optionLabel = { resources.getString(saveBehaviorLabel(it)) },
                 onSelect = onSaveBehavior,
             )
-            Text(stringResource(R.string.settings_save_behavior_hint), style = MaterialTheme.typography.bodySmall)
+            Text(stringResource(R.string.settings_save_behavior_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Section(R.string.settings_storage) {
             Text(stringResource(R.string.settings_cache_hint))
             val working = stringResource(R.string.working)
-            Button(
+            SecondaryButton(
+                text = stringResource(R.string.settings_clear_cache),
                 onClick = onClearCache,
                 enabled = !state.clearingCache,
-                modifier = Modifier
-                    .heightIn(min = 48.dp)
-                    .semantics { if (state.clearingCache) stateDescription = working },
-            ) { Text(stringResource(R.string.settings_clear_cache)) }
+                modifier = Modifier.semantics { if (state.clearingCache) stateDescription = working },
+            )
             if (freedText != null) {
                 Text(freedText, modifier = Modifier.fillMaxWidth())
             }
         }
         Section(R.string.about_title) {
-            OutlinedButton(onClick = onOpenAbout, modifier = Modifier.heightIn(min = 48.dp)) {
-                Text(stringResource(R.string.settings_open_about))
-            }
+            SecondaryButton(text = stringResource(R.string.settings_open_about), onClick = onOpenAbout)
         }
     }
 }
 
+/** A titled settings section: its options sit in an outlined card. */
 @Composable
 private fun Section(title: Int, content: @Composable () -> Unit) {
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            stringResource(title),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.semantics { heading() },
-        )
-        content()
+    ToolSection(title = stringResource(title)) {
+        OptionsCard { content() }
     }
 }
 

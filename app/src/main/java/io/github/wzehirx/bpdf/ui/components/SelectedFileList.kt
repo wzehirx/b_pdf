@@ -74,7 +74,7 @@ fun SelectedFileList(
         focusManager.moveFocus(FocusDirection.Up)
         onRemove(index)
     }
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         files.forEachIndexed { index, file ->
             val move: (Int, Int) -> Unit = { from, to ->
                 onMove(from, to)
@@ -84,12 +84,13 @@ fun SelectedFileList(
                 Card(Modifier.fillMaxWidth()) {
                     Row(
                         Modifier
-                            .padding(start = 16.dp, end = 4.dp)
+                            .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp)
                             .semantics(mergeDescendants = true) {}
                             .then(if (enabled) Modifier.reorderable(index, files.size, move) { remove(index) } else Modifier),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
+                        PdfBadge()
+                        Column(Modifier.weight(1f).padding(horizontal = 12.dp, vertical = 8.dp)) {
                             Text(file.displayName, style = MaterialTheme.typography.bodyLarge)
                             Text(
                                 Formatter.formatShortFileSize(context, file.sizeBytes) + " · " +

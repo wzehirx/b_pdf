@@ -43,6 +43,10 @@ import io.github.wzehirx.bpdf.ui.components.PageChooser
 import io.github.wzehirx.bpdf.ui.components.PageRangeField
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.SinglePdfSection
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
+import io.github.wzehirx.bpdf.ui.components.OptionsCard
+import io.github.wzehirx.bpdf.ui.components.SecondaryButton
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberPageThumbnails
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
@@ -143,51 +147,52 @@ fun OcrScreenContent(
     val result = (state.operation as? OperationState.Success)?.value
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_ocr_title), onBack = onBack) {
-        Text(stringResource(R.string.ocr_instructions))
-        SinglePdfSection(file, state.pageCount, state.importing, busy, onPickFile, onRemoveFile)
+        ToolSection {
+            Text(stringResource(R.string.ocr_instructions))
+            SinglePdfSection(file, state.pageCount, state.importing, busy, onPickFile, onRemoveFile)
+        }
         if (file != null) {
-            ChoiceRow(
-                label = stringResource(R.string.ocr_language_label),
-                options = OcrLanguage.entries,
-                selected = state.language,
-                optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onLanguageChange,
-                enabled = !busy,
-            )
-            ChoiceRow(
-                label = stringResource(R.string.text_scope_label),
-                options = PageScope.entries,
-                selected = state.scope,
-                optionLabel = { resources.getString(it.labelRes()) },
-                onSelect = onScopeChange,
-                enabled = !busy,
-            )
-            if (state.scope == PageScope.SELECTED) {
-                PageRangeField(
-                    value = state.rangeText,
-                    onValueChange = onRangeChange,
-                    pageCount = state.pageCount,
-                    error = state.rangeError,
+            OptionsCard {
+                ChoiceRow(
+                    label = stringResource(R.string.ocr_language_label),
+                    options = OcrLanguage.entries,
+                    selected = state.language,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onLanguageChange,
                     enabled = !busy,
                 )
-                PageChooser(
-                    rangeText = state.rangeText,
-                    pageCount = state.pageCount,
-                    onRangeChange = onRangeChange,
-                    thumbnail = thumbnail,
+                ChoiceRow(
+                    label = stringResource(R.string.text_scope_label),
+                    options = PageScope.entries,
+                    selected = state.scope,
+                    optionLabel = { resources.getString(it.labelRes()) },
+                    onSelect = onScopeChange,
                     enabled = !busy,
                 )
+                if (state.scope == PageScope.SELECTED) {
+                    PageRangeField(
+                        value = state.rangeText,
+                        onValueChange = onRangeChange,
+                        pageCount = state.pageCount,
+                        error = state.rangeError,
+                        enabled = !busy,
+                    )
+                    PageChooser(
+                        rangeText = state.rangeText,
+                        pageCount = state.pageCount,
+                        onRangeChange = onRangeChange,
+                        thumbnail = thumbnail,
+                        enabled = !busy,
+                    )
+                }
             }
         }
-        Button(
+        PrimaryButton(
+            text = stringResource(R.string.ocr_button),
             onClick = onRecognize,
             enabled = file != null && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (file == null) stateDescription = needFile },
-        ) {
-            Text(stringResource(R.string.ocr_button))
-        }
+            disabledReason = if (file == null) needFile else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             runningLabel = state.progress?.let { resources.getString(R.string.ocr_progress, it.position, it.total) },
@@ -214,22 +219,12 @@ fun OcrScreenContent(
                                 modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                             )
                             LinearProgressIndicator(progress = { state.buildProgress.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
-                            OutlinedButton(onClick = onCancelBuild, modifier = Modifier.heightIn(min = 48.dp)) {
-                                Text(stringResource(R.string.cancel))
-                            }
+                            SecondaryButton(text = stringResource(R.string.cancel), onClick = onCancelBuild)
                         }
-                        Button(onClick = onSaveText, enabled = !state.saving, modifier = Modifier.heightIn(min = 48.dp)) {
-                            Text(stringResource(R.string.ocr_save_text))
-                        }
-                        OutlinedButton(onClick = onShareText, enabled = !state.saving, modifier = Modifier.heightIn(min = 48.dp)) {
-                            Text(stringResource(R.string.ocr_share_text))
-                        }
-                        OutlinedButton(onClick = onCopyAll, enabled = !state.saving, modifier = Modifier.heightIn(min = 48.dp)) {
-                            Text(stringResource(R.string.text_copy_all))
-                        }
-                        OutlinedButton(onClick = onSaveSearchablePdf, enabled = !state.saving, modifier = Modifier.heightIn(min = 48.dp)) {
-                            Text(stringResource(R.string.ocr_save_pdf))
-                        }
+                        PrimaryButton(text = stringResource(R.string.ocr_save_text), onClick = onSaveText, enabled = !state.saving)
+                        SecondaryButton(text = stringResource(R.string.ocr_share_text), onClick = onShareText, enabled = !state.saving)
+                        SecondaryButton(text = stringResource(R.string.text_copy_all), onClick = onCopyAll, enabled = !state.saving)
+                        SecondaryButton(text = stringResource(R.string.ocr_save_pdf), onClick = onSaveSearchablePdf, enabled = !state.saving)
                         Text(stringResource(R.string.ocr_pdf_note), style = MaterialTheme.typography.bodyMedium)
                         if (state.copyUnprotected) {
                             Text(stringResource(R.string.unprotected_output_note), style = MaterialTheme.typography.bodyMedium)

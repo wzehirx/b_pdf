@@ -1,6 +1,12 @@
 package io.github.wzehirx.bpdf.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -72,7 +78,7 @@ fun SelectedPdfCard(
     Card(modifier.fillMaxWidth()) {
         Row(
             Modifier
-                .padding(start = 16.dp, end = 4.dp)
+                .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp)
                 .semantics(mergeDescendants = true) {
                     if (enabled) {
                         customActions = listOf(CustomAccessibilityAction(removeActionLabel) { remove(); true })
@@ -80,10 +86,33 @@ fun SelectedPdfCard(
                 },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(summary, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f).padding(vertical = 12.dp))
+            PdfBadge()
+            Text(
+                summary,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f).padding(horizontal = 12.dp, vertical = 12.dp),
+            )
             IconButton(onClick = remove, enabled = enabled) {
                 Icon(Icons.Default.Close, contentDescription = removeButtonDescription)
             }
         }
+    }
+}
+
+/** The small tinted "PDF" tile shown at the start of a file card. Decorative: the card's text already names the file. */
+@Composable
+internal fun PdfBadge(modifier: Modifier = Modifier) {
+    Box(
+        modifier
+            .size(40.dp)
+            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(10.dp))
+            .clearAndSetSemantics { },
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            "PDF",
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
     }
 }

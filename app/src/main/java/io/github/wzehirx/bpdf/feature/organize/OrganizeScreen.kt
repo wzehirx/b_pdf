@@ -45,6 +45,8 @@ import io.github.wzehirx.bpdf.ui.components.PageGrid
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberPageThumbnails
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
@@ -206,78 +208,81 @@ fun OrganizeScreenContent(
         onBack = onBack,
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) {
-        Text(stringResource(R.string.organize_instructions))
-        PickFilesButton(
-            label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
-            mimeTypes = arrayOf("application/pdf"),
-            multiple = false,
-            onPicked = onPickFile,
-            enabled = !busy,
-        )
-        if (state.importing) {
-            Text(
-                stringResource(R.string.single_file_importing),
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-            )
-        }
-        if (file != null) {
-            SelectedPdfCard(
-                file = file,
-                pageCount = state.pageCount,
-                summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
-                removeActionLabel = stringResource(R.string.single_file_remove_action),
-                removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
+        ToolSection {
+            Text(stringResource(R.string.organize_instructions))
+            PickFilesButton(
+                label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
+                mimeTypes = arrayOf("application/pdf"),
+                multiple = false,
+                onPicked = onPickFile,
                 enabled = !busy,
-                onRemove = onRemoveFile,
             )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                OutlinedButton(
-                    onClick = onUndo,
-                    enabled = state.canUndo && !busy,
-                    modifier = Modifier.heightIn(min = 48.dp),
-                ) { Text(stringResource(R.string.organize_undo)) }
+            if (state.importing) {
                 Text(
-                    pluralStringResource(R.plurals.organize_summary, edits.size, edits.size),
-                    style = MaterialTheme.typography.bodyMedium,
+                    stringResource(R.string.single_file_importing),
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 )
             }
-            PageGrid(
-                pageCount = edits.size,
-                thumbnail = { i -> thumbnail(edits[i].sourceIndex) },
-                selected = emptySet(),
-                onToggle = null,
-                rotations = edits.withIndex().associate { (i, edit) -> i to edit.rotation },
-                pageActions = pageActions,
-                enabled = !busy,
-                overflowMenu = true,
-                // A cell keeps its picture when pages are reordered around it.
-                thumbnailKey = { i -> edits.getOrNull(i)?.sourceIndex ?: i },
-                gridHeight = 520.dp,
-                // Cells say which original page they hold, so the order can be checked after any edit.
-                cellLabel = { i ->
-                    val edit = edits[i]
-                    val isCopy = edits.take(i).any { it.sourceIndex == edit.sourceIndex }
-                    resources.getString(
-                        if (isCopy) R.string.organize_cell_copy else R.string.organize_cell,
-                        i + 1, edits.size, edit.sourceIndex + 1,
-                    )
-                },
-                focusIndex = state.focusIndex,
-                onFocusHandled = onFocusHandled,
-            )
+            if (file != null) {
+                SelectedPdfCard(
+                    file = file,
+                    pageCount = state.pageCount,
+                    summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
+                    removeActionLabel = stringResource(R.string.single_file_remove_action),
+                    removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
+                    enabled = !busy,
+                    onRemove = onRemoveFile,
+                )
+            }
         }
-        Button(
+        if (file != null) {
+            ToolSection {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    OutlinedButton(
+                        onClick = onUndo,
+                        enabled = state.canUndo && !busy,
+                        modifier = Modifier.heightIn(min = 48.dp),
+                    ) { Text(stringResource(R.string.organize_undo)) }
+                    Text(
+                        pluralStringResource(R.plurals.organize_summary, edits.size, edits.size),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+                PageGrid(
+                    pageCount = edits.size,
+                    thumbnail = { i -> thumbnail(edits[i].sourceIndex) },
+                    selected = emptySet(),
+                    onToggle = null,
+                    rotations = edits.withIndex().associate { (i, edit) -> i to edit.rotation },
+                    pageActions = pageActions,
+                    enabled = !busy,
+                    overflowMenu = true,
+                    // A cell keeps its picture when pages are reordered around it.
+                    thumbnailKey = { i -> edits.getOrNull(i)?.sourceIndex ?: i },
+                    gridHeight = 520.dp,
+                    // Cells say which original page they hold, so the order can be checked after any edit.
+                    cellLabel = { i ->
+                        val edit = edits[i]
+                        val isCopy = edits.take(i).any { it.sourceIndex == edit.sourceIndex }
+                        resources.getString(
+                            if (isCopy) R.string.organize_cell_copy else R.string.organize_cell,
+                            i + 1, edits.size, edit.sourceIndex + 1,
+                        )
+                    },
+                    focusIndex = state.focusIndex,
+                    onFocusHandled = onFocusHandled,
+                )
+            }
+        }
+        PrimaryButton(
+            text = stringResource(R.string.organize_button),
             onClick = onOrganize,
             enabled = file != null && edits.isNotEmpty() && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (file == null) stateDescription = needFile },
-        ) {
-            Text(stringResource(R.string.organize_button))
-        }
+            disabledReason = if (file == null) needFile else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { result ->

@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import io.github.wzehirx.bpdf.BuildConfig
 import io.github.wzehirx.bpdf.R
 import io.github.wzehirx.bpdf.core.a11y.rememberAnnouncer
+import io.github.wzehirx.bpdf.ui.components.SecondaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.openUrl
 
@@ -56,46 +58,36 @@ fun AboutScreenContent(
     onOpenUrl: (String) -> Unit,
 ) {
     ToolScaffold(title = stringResource(R.string.about_title), onBack = onBack) {
-        Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall)
-        Text(stringResource(R.string.about_version, versionName, versionCode))
-        Text(stringResource(R.string.about_tagline))
-        Text(stringResource(R.string.about_privacy))
-        Heading(R.string.about_license_heading)
-        Text(stringResource(R.string.about_license_text))
-        OutlinedButton(onClick = { onOpenUrl(LICENSE_URL) }, modifier = Modifier.heightIn(min = 48.dp)) {
-            Text(stringResource(R.string.about_license_open))
+        ToolSection {
+            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall)
+            Text(stringResource(R.string.about_version, versionName, versionCode), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.about_tagline))
+            Text(stringResource(R.string.about_privacy))
         }
-        Heading(R.string.about_source_heading)
-        OutlinedButton(onClick = { onOpenUrl(SOURCE_URL) }, modifier = Modifier.heightIn(min = 48.dp)) {
-            Text(stringResource(R.string.about_source_open))
+        ToolSection(title = stringResource(R.string.about_license_heading)) {
+            Text(stringResource(R.string.about_license_text))
+            SecondaryButton(text = stringResource(R.string.about_license_open), onClick = { onOpenUrl(LICENSE_URL) })
         }
-        Heading(R.string.about_third_party_heading)
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        ToolSection(title = stringResource(R.string.about_source_heading)) {
+            SecondaryButton(text = stringResource(R.string.about_source_open), onClick = { onOpenUrl(SOURCE_URL) })
+        }
+        ToolSection(title = stringResource(R.string.about_third_party_heading)) {
             licenses.forEach { entry -> LicenseRow(entry, onOpen = { onOpenUrl(entry.url) }) }
         }
     }
-}
-
-@Composable
-private fun Heading(title: Int) {
-    Text(
-        stringResource(title),
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.semantics { heading() },
-    )
 }
 
 /** One component: reads "name, license", opens its page. */
 @Composable
 private fun LicenseRow(entry: LicenseEntry, onOpen: () -> Unit) {
     val openLabel = stringResource(R.string.about_open_project_page)
-    Card(Modifier.fillMaxWidth()) {
+    OutlinedCard(Modifier.fillMaxWidth()) {
         Column(
             Modifier
                 .fillMaxWidth()
                 .heightIn(min = 48.dp)
                 .clickable(onClickLabel = openLabel, role = Role.Button, onClick = onOpen)
-                .padding(12.dp),
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             Text(entry.name, style = MaterialTheme.typography.titleSmall)

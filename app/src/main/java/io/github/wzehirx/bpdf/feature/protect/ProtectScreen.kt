@@ -45,6 +45,9 @@ import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SelectedPdfCard
 import io.github.wzehirx.bpdf.ui.components.SwitchRow
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
+import io.github.wzehirx.bpdf.ui.components.OptionsCard
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
 import io.github.wzehirx.bpdf.ui.components.shareFile
@@ -139,88 +142,91 @@ fun ProtectScreenContent(
     }
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_protect_title), onBack = onBack) {
-        Text(stringResource(R.string.protect_instructions))
-        PickFilesButton(
-            label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
-            mimeTypes = arrayOf("application/pdf"),
-            multiple = false,
-            onPicked = onPickFile,
-            enabled = !busy,
-        )
-        if (state.importing) {
-            Text(
-                stringResource(R.string.single_file_importing),
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        ToolSection {
+            Text(stringResource(R.string.protect_instructions))
+            PickFilesButton(
+                label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
+                mimeTypes = arrayOf("application/pdf"),
+                multiple = false,
+                onPicked = onPickFile,
+                enabled = !busy,
             )
+            if (state.importing) {
+                Text(
+                    stringResource(R.string.single_file_importing),
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                )
+            }
+            if (file != null) {
+                SelectedPdfCard(
+                    file = file,
+                    pageCount = state.pageCount,
+                    summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
+                    removeActionLabel = stringResource(R.string.single_file_remove_action),
+                    removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
+                    enabled = !busy,
+                    onRemove = onRemoveFile,
+                )
+            }
         }
         if (file != null) {
-            SelectedPdfCard(
-                file = file,
-                pageCount = state.pageCount,
-                summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
-                removeActionLabel = stringResource(R.string.single_file_remove_action),
-                removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
-                enabled = !busy,
-                onRemove = onRemoveFile,
-            )
-            PasswordField(
-                value = state.userPassword,
-                onValueChange = onUserPasswordChange,
-                label = stringResource(R.string.protect_password_label),
-                visible = showPasswords,
-                modifier = Modifier.focusRequester(userFocus),
-                enabled = !busy,
-                errorMessage = if (state.passwordError == ProtectError.EMPTY) resources.getString(R.string.protect_error_empty) else null,
-            )
-            PasswordField(
-                value = state.confirmPassword,
-                onValueChange = onConfirmPasswordChange,
-                label = stringResource(R.string.protect_confirm_label),
-                visible = showPasswords,
-                modifier = Modifier.focusRequester(confirmFocus),
-                enabled = !busy,
-                errorMessage = if (state.passwordError == ProtectError.MISMATCH) resources.getString(R.string.protect_error_mismatch) else null,
-            )
-            PasswordField(
-                value = state.ownerPassword,
-                onValueChange = onOwnerPasswordChange,
-                label = stringResource(R.string.protect_owner_label),
-                visible = showPasswords,
-                enabled = !busy,
-                hint = stringResource(R.string.protect_owner_hint),
-                imeAction = ImeAction.Done,
-            )
-            SwitchRow(
-                label = stringResource(R.string.protect_show_passwords),
-                checked = showPasswords,
-                stateText = stringResource(if (showPasswords) R.string.password_state_visible else R.string.password_state_hidden),
-                enabled = true,
-                onChange = { showPasswords = it },
-            )
-            Text(
-                stringResource(R.string.protect_permissions_label),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.semantics { heading() },
-            )
-            PermissionSwitch(R.string.protect_perm_print, state.permissions.print, !busy) {
-                onPermissionsChange(state.permissions.copy(print = it))
-            }
-            PermissionSwitch(R.string.protect_perm_copy, state.permissions.copy, !busy) {
-                onPermissionsChange(state.permissions.copy(copy = it))
-            }
-            PermissionSwitch(R.string.protect_perm_modify, state.permissions.modify, !busy) {
-                onPermissionsChange(state.permissions.copy(modify = it))
+            OptionsCard {
+                PasswordField(
+                    value = state.userPassword,
+                    onValueChange = onUserPasswordChange,
+                    label = stringResource(R.string.protect_password_label),
+                    visible = showPasswords,
+                    modifier = Modifier.focusRequester(userFocus),
+                    enabled = !busy,
+                    errorMessage = if (state.passwordError == ProtectError.EMPTY) resources.getString(R.string.protect_error_empty) else null,
+                )
+                PasswordField(
+                    value = state.confirmPassword,
+                    onValueChange = onConfirmPasswordChange,
+                    label = stringResource(R.string.protect_confirm_label),
+                    visible = showPasswords,
+                    modifier = Modifier.focusRequester(confirmFocus),
+                    enabled = !busy,
+                    errorMessage = if (state.passwordError == ProtectError.MISMATCH) resources.getString(R.string.protect_error_mismatch) else null,
+                )
+                PasswordField(
+                    value = state.ownerPassword,
+                    onValueChange = onOwnerPasswordChange,
+                    label = stringResource(R.string.protect_owner_label),
+                    visible = showPasswords,
+                    enabled = !busy,
+                    hint = stringResource(R.string.protect_owner_hint),
+                    imeAction = ImeAction.Done,
+                )
+                SwitchRow(
+                    label = stringResource(R.string.protect_show_passwords),
+                    checked = showPasswords,
+                    stateText = stringResource(if (showPasswords) R.string.password_state_visible else R.string.password_state_hidden),
+                    enabled = true,
+                    onChange = { showPasswords = it },
+                )
+                Text(
+                    stringResource(R.string.protect_permissions_label),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.semantics { heading() },
+                )
+                PermissionSwitch(R.string.protect_perm_print, state.permissions.print, !busy) {
+                    onPermissionsChange(state.permissions.copy(print = it))
+                }
+                PermissionSwitch(R.string.protect_perm_copy, state.permissions.copy, !busy) {
+                    onPermissionsChange(state.permissions.copy(copy = it))
+                }
+                PermissionSwitch(R.string.protect_perm_modify, state.permissions.modify, !busy) {
+                    onPermissionsChange(state.permissions.copy(modify = it))
+                }
             }
         }
-        Button(
+        PrimaryButton(
+            text = stringResource(R.string.protect_button),
             onClick = onProtect,
             enabled = file != null && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (file == null) stateDescription = needFile },
-        ) {
-            Text(stringResource(R.string.protect_button))
-        }
+            disabledReason = if (file == null) needFile else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { result ->

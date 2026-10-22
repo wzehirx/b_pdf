@@ -40,6 +40,10 @@ import io.github.wzehirx.bpdf.ui.Tool
 import io.github.wzehirx.bpdf.ui.components.ChoiceRow
 import io.github.wzehirx.bpdf.ui.components.ComposeWhenNear
 import io.github.wzehirx.bpdf.ui.components.HandOffEffect
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
+import io.github.wzehirx.bpdf.ui.components.OptionsCard
+import io.github.wzehirx.bpdf.ui.components.SecondaryButton
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PageChooser
@@ -142,31 +146,36 @@ fun PdfToTextScreenContent(
     val result = (state.operation as? OperationState.Success)?.value
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_pdf_to_text_title), onBack = onBack) {
-        Text(stringResource(R.string.text_instructions))
-        PickFilesButton(
+        ToolSection {
+            Text(stringResource(R.string.text_instructions))
+            PickFilesButton(
                 label = stringResource(if (file == null) R.string.single_file_choose else R.string.single_file_replace),
                 mimeTypes = arrayOf("application/pdf"),
                 multiple = false,
                 onPicked = onPickFile,
                 enabled = !busy,
             )
-        if (state.importing) {
-            Text(
+            if (state.importing) {
+                Text(
                     stringResource(R.string.single_file_importing),
                     modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 )
-        }
-        if (file != null) {
-            SelectedPdfCard(
-                file = file,
-                pageCount = state.pageCount,
+            }
+            if (file != null) {
+                SelectedPdfCard(
+                    file = file,
+                    pageCount = state.pageCount,
                     summary = pluralStringResource(R.plurals.single_file_summary, state.pageCount, file.displayName, state.pageCount),
                     removeActionLabel = stringResource(R.string.single_file_remove_action),
                     removeButtonDescription = stringResource(R.string.single_file_remove, file.displayName),
                     enabled = !busy,
                     onRemove = onRemoveFile,
                 )
-            ChoiceRow(
+            }
+        }
+        if (file != null) {
+            OptionsCard {
+                ChoiceRow(
                     label = stringResource(R.string.text_scope_label),
                     options = TextScope.entries,
                     selected = state.scope,
@@ -174,66 +183,60 @@ fun PdfToTextScreenContent(
                     onSelect = onScopeChange,
                     enabled = !busy,
                 )
-            if (state.scope == TextScope.SELECTED) {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        PageRangeField(
-                            value = state.rangeText,
-                            onValueChange = onRangeChange,
-                            pageCount = state.pageCount,
-                            error = state.rangeError,
-                            enabled = !busy,
-                        )
-                        PageChooser(
-                            rangeText = state.rangeText,
-                            pageCount = state.pageCount,
-                            onRangeChange = onRangeChange,
-                            thumbnail = thumbnail,
-                            enabled = !busy,
-                        )
-                    }
+                if (state.scope == TextScope.SELECTED) {
+                    PageRangeField(
+                        value = state.rangeText,
+                        onValueChange = onRangeChange,
+                        pageCount = state.pageCount,
+                        error = state.rangeError,
+                        enabled = !busy,
+                    )
+                    PageChooser(
+                        rangeText = state.rangeText,
+                        pageCount = state.pageCount,
+                        onRangeChange = onRangeChange,
+                        thumbnail = thumbnail,
+                        enabled = !busy,
+                    )
+                }
             }
         }
-        Button(
-                onClick = onExtract,
-                enabled = file != null && !busy,
-                modifier = Modifier
-                    .heightIn(min = 48.dp)
-                    .semantics { if (file == null) stateDescription = needFile },
-            ) {
-                Text(stringResource(R.string.text_button))
-            }
+        PrimaryButton(
+            text = stringResource(R.string.text_button),
+            onClick = onExtract,
+            enabled = file != null && !busy,
+            disabledReason = if (file == null) needFile else null,
+        )
         OperationStatusPanel(
-                state = state.operation,
-                successText = { r ->
-                    if (r.allBlank) {
-                        resources.getString(R.string.text_empty_message)
+            state = state.operation,
+            successText = { r ->
+                if (r.allBlank) {
+                    resources.getString(R.string.text_empty_message)
+                } else {
+                    val summary = resources.getQuantityString(R.plurals.text_success, r.pages.size, r.pages.size)
+                    if (r.blankCount == 0) {
+                        summary
                     } else {
-                        val summary = resources.getQuantityString(R.plurals.text_success, r.pages.size, r.pages.size)
-                        if (r.blankCount == 0) {
-                            summary
-                        } else {
-                            summary + " " + resources.getQuantityString(R.plurals.text_blank_pages, r.blankCount, r.blankCount)
-                        }
+                        summary + " " + resources.getQuantityString(R.plurals.text_blank_pages, r.blankCount, r.blankCount)
                     }
-                },
-                onSave = onSave,
-                onShare = onShare,
-                actionsEnabled = !state.saving,
-                onCancel = onCancel,
-                onRetry = onRetry,
-                successActions = {
-                    if (result?.allBlank == true) {
-                        OcrSuggestion(ocrAvailable, onOpenOcr)
-                    } else {
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            SaveResultActions(onSave = onSave, onShare = onShare, enabled = !state.saving)
-                            OutlinedButton(onClick = onCopyAll, modifier = Modifier.heightIn(min = 48.dp)) {
-                                Text(stringResource(R.string.text_copy_all))
-                            }
-                        }
+                }
+            },
+            onSave = onSave,
+            onShare = onShare,
+            actionsEnabled = !state.saving,
+            onCancel = onCancel,
+            onRetry = onRetry,
+            successActions = {
+                if (result?.allBlank == true) {
+                    OcrSuggestion(ocrAvailable, onOpenOcr)
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        SaveResultActions(onSave = onSave, onShare = onShare, enabled = !state.saving)
+                        SecondaryButton(text = stringResource(R.string.text_copy_all), onClick = onCopyAll)
                     }
-                },
-            )
+                }
+            },
+        )
         if (result != null && !result.allBlank) {
             PageTextList(result.pages)
         }
@@ -245,15 +248,12 @@ fun PdfToTextScreenContent(
 private fun OcrSuggestion(available: Boolean, onOpenOcr: () -> Unit) {
     val unavailable = stringResource(R.string.text_ocr_unavailable)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Button(
+        PrimaryButton(
+            text = stringResource(R.string.text_try_ocr),
             onClick = onOpenOcr,
             enabled = available,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (!available) stateDescription = unavailable },
-        ) {
-            Text(stringResource(R.string.text_try_ocr))
-        }
+            disabledReason = if (!available) unavailable else null,
+        )
         if (!available) Text(unavailable, style = MaterialTheme.typography.bodyMedium)
     }
 }

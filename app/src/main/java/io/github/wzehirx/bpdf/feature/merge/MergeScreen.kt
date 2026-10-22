@@ -26,6 +26,8 @@ import io.github.wzehirx.bpdf.ui.components.OperationStatusPanel
 import io.github.wzehirx.bpdf.ui.components.PasswordPromptDialog
 import io.github.wzehirx.bpdf.ui.components.PickFilesButton
 import io.github.wzehirx.bpdf.ui.components.SelectedFileList
+import io.github.wzehirx.bpdf.ui.components.PrimaryButton
+import io.github.wzehirx.bpdf.ui.components.ToolSection
 import io.github.wzehirx.bpdf.ui.components.ToolScaffold
 import io.github.wzehirx.bpdf.ui.components.rememberSaveDocumentLauncher
 import io.github.wzehirx.bpdf.ui.components.shareFile
@@ -91,30 +93,29 @@ fun MergeScreenContent(
     val busy = state.importing || state.saving || state.operation is OperationState.Running
     PasswordPromptDialog(state.passwordPrompt, onSubmitPassword, onDismissPassword)
     ToolScaffold(title = stringResource(R.string.tool_merge_title), onBack = onBack) {
-        Text(stringResource(R.string.merge_instructions))
-        PickFilesButton(
-            label = stringResource(R.string.merge_add_files),
-            mimeTypes = arrayOf("application/pdf"),
-            multiple = true,
-            onPicked = onAddFiles,
-            enabled = !busy,
-        )
-        if (state.importing) {
-            Text(
-                stringResource(R.string.merge_importing),
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        ToolSection {
+            Text(stringResource(R.string.merge_instructions))
+            PickFilesButton(
+                label = stringResource(R.string.merge_add_files),
+                mimeTypes = arrayOf("application/pdf"),
+                multiple = true,
+                onPicked = onAddFiles,
+                enabled = !busy,
             )
+            if (state.importing) {
+                Text(
+                    stringResource(R.string.merge_importing),
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                )
+            }
+            SelectedFileList(files = state.files, onMove = onMove, onRemove = onRemove, enabled = !busy)
         }
-        SelectedFileList(files = state.files, onMove = onMove, onRemove = onRemove, enabled = !busy)
-        Button(
+        PrimaryButton(
+            text = stringResource(R.string.merge_button),
             onClick = onMerge,
             enabled = !tooFew && !busy,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .semantics { if (tooFew) stateDescription = needTwo },
-        ) {
-            Text(stringResource(R.string.merge_button))
-        }
+            disabledReason = if (tooFew) needTwo else null,
+        )
         OperationStatusPanel(
             state = state.operation,
             successText = { result ->
