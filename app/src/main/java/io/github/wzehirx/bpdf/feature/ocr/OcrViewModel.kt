@@ -229,7 +229,7 @@ class OcrViewModel(
             var out: File? = null
             try {
                 val source = if (password != null || PdfLoader.isEncrypted(file.file)) {
-                    fileRepository.newOutputFile("pdf").also { decrypted = it }
+                    fileRepository.newScratchFile("pdf").also { decrypted = it }
                         .also { UnlockOperation.run(file.file, password.orEmpty(), it, isCancelled = { !context.isActive }) }
                 } else {
                     file.file

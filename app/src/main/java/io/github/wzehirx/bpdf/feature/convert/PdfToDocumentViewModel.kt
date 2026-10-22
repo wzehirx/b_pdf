@@ -232,6 +232,8 @@ class PdfToDocumentViewModel(
                 local.update { it.copy(error = e) }
             } finally {
                 local.update { it.copy(saving = false) }
+                // The screen was left mid-save: the result could not be deleted then, so do it now.
+                if (cleared) out.delete()
             }
         }
     }
@@ -254,11 +256,15 @@ class PdfToDocumentViewModel(
         local.update { it.copy(error = null) }
     }
 
+    /** Set in [onCleared]; a save still running then deletes its own source when it ends. */
+    @Volatile private var cleared = false
+
     override fun onCleared() {
+        cleared = true
         passwordGate.clear()
         val output = successValue()?.file
         runner.cancel()
-        output?.delete()
+        if (!local.value.saving) output?.delete()
         local.value.file?.file?.delete()
     }
 

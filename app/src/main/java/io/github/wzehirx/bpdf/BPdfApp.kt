@@ -12,8 +12,16 @@ class BPdfApp : Application() {
         super.onCreate()
         PdfBoxInit.ensure(this)
         container = AppContainer(this)
-        // Drop leftovers of earlier sessions (imports, unshared results) without blocking startup.
-        Thread { container.fileRepository.purgeStale(STALE_CACHE_MILLIS) }.start()
+        // Drop leftovers of earlier sessions without blocking startup: first anything that can hold
+        // unencrypted data (older than this process), then the 24 hour age purge for the rest.
+        val startedAt = System.currentTimeMillis()
+        val files = container.fileRepository
+        Thread({
+            runCatching {
+                files.purgeLeftovers(startedAt)
+                files.purgeStale(STALE_CACHE_MILLIS)
+            }
+        }, "bpdf-cache-purge").start()
     }
 
     private companion object {

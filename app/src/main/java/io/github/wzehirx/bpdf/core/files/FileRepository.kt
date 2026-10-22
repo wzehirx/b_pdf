@@ -3,6 +3,7 @@ package io.github.wzehirx.bpdf.core.files
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
@@ -19,8 +20,10 @@ class FileRepository(context: Context) {
     private val sharedDir get() = File(context.cacheDir, "shared").apply { mkdirs() }
     private val cameraDir get() = File(context.cacheDir, "camera").apply { mkdirs() }
 
-    // Decrypted copies PdfRenderer reads from (thumbnails, viewer); normally deleted when closed,
-    // purged here when the app was killed first.
+    // Unencrypted copies of protected files: render copies PdfRenderer reads from (thumbnails, viewer)
+    // and decrypted work copies (scratch). They are deleted when closed. If the process was killed
+    // first, [purgeLeftovers] removes them at the next app start; [purgeStale] is only the age backstop.
+    private val scratchDir get() = File(context.cacheDir, "scratch").apply { mkdirs() }
     private val renderDirs get() = listOf("thumbnails", "viewer").map { File(context.cacheDir, it) }
 
     /** Copies the content behind [uri] into the app cache under a unique name. */
@@ -86,11 +89,21 @@ class FileRepository(context: Context) {
         return fromProvider ?: uri.lastPathSegment?.takeIf { it.isNotBlank() }
     }
 
+    /**
+     * Copies [file] to [target], a fresh Uri from the system "create document" picker. When the copy
+     * fails or is cancelled the empty or partial document is deleted again, so no 0-byte file is
+     * left where the user chose to save, and the error is rethrown.
+     */
     suspend fun export(file: File, target: Uri) = withContext(Dispatchers.IO) {
-        val out = requireNotNull(context.contentResolver.openOutputStream(target, "wt")) {
-            "Cannot open $target"
+        try {
+            val out = requireNotNull(context.contentResolver.openOutputStream(target, "wt")) {
+                "Cannot open $target"
+            }
+            out.use { o -> file.inputStream().use { it.copyTo(o) } }
+        } catch (t: Throwable) {
+            runCatching { DocumentsContract.deleteDocument(context.contentResolver, target) }
+            throw t
         }
-        out.use { o -> file.inputStream().use { it.copyTo(o) } }
     }
 
     /**
@@ -120,12 +133,34 @@ class FileRepository(context: Context) {
     /** A fresh, unique output file in the shareable `shared/` directory. */
     fun newOutputFile(ext: String): File = File(sharedDir, "${UUID.randomUUID()}.$ext")
 
+    /**
+     * A fresh file for an unencrypted working copy (never shared: not under a FileProvider path).
+     * Removed at the next app start if the process dies first, see [purgeLeftovers].
+     */
+    fun newScratchFile(ext: String): File = File(scratchDir, "${UUID.randomUUID()}.$ext")
+
     /** A fresh, empty directory under `shared/` for tools that produce several files. */
     fun newOutputDir(): File = File(sharedDir, UUID.randomUUID().toString()).apply { mkdirs() }
 
+    /**
+     * Deletes what an earlier process left behind: render copies, scratch copies, camera files and
+     * PdfBox's own temp files (`PDFBox*.tmp`) last modified before [startedAt], the start of this
+     * process. Nothing of this process can be older, and these can hold unencrypted data.
+     */
+    fun purgeLeftovers(startedAt: Long) {
+        for (dir in listOf(cameraDir, scratchDir) + renderDirs) {
+            dir.listFiles().orEmpty().filter { it.lastModified() < startedAt }.forEach { it.deleteRecursively() }
+        }
+        // "Exact look" conversions keep an unprotected copy of a protected input in <result>.work.
+        sharedDir.listFiles().orEmpty()
+            .filter { it.isDirectory && it.name.endsWith(".work") && it.lastModified() < startedAt }
+            .forEach { it.deleteRecursively() }
+        pdfBoxTempFiles().filter { it.lastModified() < startedAt }.forEach { it.delete() }
+    }
+
     /** Deletes cache entries older than [maxAgeMillis]. */
     fun purgeStale(maxAgeMillis: Long, now: Long = System.currentTimeMillis()) {
-        for (dir in listOf(importsDir, sharedDir, cameraDir) + renderDirs) {
+        for (dir in listOf(importsDir, sharedDir, cameraDir, scratchDir) + renderDirs) {
             dir.listFiles().orEmpty()
                 .filter { now - it.lastModified() > maxAgeMillis }
                 .forEach { it.deleteRecursively() }
@@ -133,14 +168,19 @@ class FileRepository(context: Context) {
     }
 
     /** Bytes currently held in the working directories (imports, results, camera, render copies). */
-    fun cacheSize(): Long = workDirs().sumOf { dir -> dir.walkBottomUp().filter { it.isFile }.sumOf { it.length() } }
+    fun cacheSize(): Long =
+        workDirs().sumOf { dir -> dir.walkBottomUp().filter { it.isFile }.sumOf { it.length() } } + pdfBoxTempFiles().sumOf { it.length() }
 
     /** Deletes every working copy and returns how many bytes that freed. */
     fun clearCache(): Long {
         val freed = cacheSize()
         workDirs().forEach { it.deleteRecursively() }
+        pdfBoxTempFiles().forEach { it.delete() }
         return freed
     }
 
-    private fun workDirs() = listOf(importsDir, sharedDir, cameraDir) + renderDirs
+    private fun workDirs() = listOf(importsDir, sharedDir, cameraDir, scratchDir) + renderDirs
+
+    private fun pdfBoxTempFiles() =
+        context.cacheDir.listFiles().orEmpty().filter { it.isFile && it.name.startsWith("PDFBox") && it.name.endsWith(".tmp") }
 }

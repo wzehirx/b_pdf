@@ -178,6 +178,43 @@ class FileRepositoryTest {
     }
 
     @Test
+    fun purgeLeftovers_removesUnencryptedCopiesAndPdfBoxTempFilesOfEarlierProcesses() {
+        val startedAt = System.currentTimeMillis()
+        val old = startedAt - 60_000
+        val cache = context.cacheDir
+        fun oldFile(dir: String, name: String) =
+            File(cache, dir).apply { mkdirs() }.let { File(it, name) }.apply { writeBytes(byteArrayOf(1)); setLastModified(old) }
+        val leftovers = listOf(
+            oldFile("thumbnails", "thumb-1.pdf"), oldFile("viewer", "thumb-2.pdf"),
+            oldFile("camera", "c.jpg"), File(cache, "PDFBox123.tmp").apply { writeBytes(byteArrayOf(1)); setLastModified(old) },
+        )
+        val scratch = repo.newScratchFile("pdf").apply { writeBytes(byteArrayOf(1)); setLastModified(old) }
+        val work = File(File(cache, "shared"), "r.docx.work").apply { mkdirs(); File(this, "unprotected.pdf").writeBytes(byteArrayOf(1)); setLastModified(old) }
+        val result = File(File(cache, "shared").apply { mkdirs() }, "result.pdf").apply { writeBytes(byteArrayOf(1)); setLastModified(old) }
+        val fresh = File(cache, "PDFBox999.tmp").apply { writeBytes(byteArrayOf(1)); setLastModified(startedAt + 1_000) }
+        val freshScratch = repo.newScratchFile("pdf").apply { writeBytes(byteArrayOf(1)); setLastModified(startedAt + 1_000) }
+
+        repo.purgeLeftovers(startedAt)
+
+        leftovers.forEach { assertFalse(it.path, it.exists()) }
+        assertFalse(scratch.exists())
+        assertFalse(work.exists())
+        assertTrue("results are only purged by age", result.exists())
+        assertTrue("files of this process stay", fresh.exists() && freshScratch.exists())
+        fresh.delete(); freshScratch.delete()
+    }
+
+    @Test
+    fun clearCache_countsAndDeletesScratchAndPdfBoxTempFiles() {
+        val scratch = repo.newScratchFile("pdf").apply { writeBytes(ByteArray(10)) }
+        val tmp = File(context.cacheDir, "PDFBox42.tmp").apply { writeBytes(ByteArray(5)) }
+        assertTrue(repo.cacheSize() >= 15)
+        assertTrue(repo.clearCache() >= 15)
+        assertFalse(scratch.exists())
+        assertFalse(tmp.exists())
+    }
+
+    @Test
     fun tryPersistReadPermission_neverThrows_andRefusesWhatCannotBeKept() {
         // A file: Uri and an intent without the persistable flag are refused without touching the system.
         assertFalse(repo.tryPersistReadPermission(Uri.fromFile(File("/tmp/x.pdf"))))

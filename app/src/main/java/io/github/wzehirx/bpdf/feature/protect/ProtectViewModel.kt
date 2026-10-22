@@ -221,6 +221,8 @@ class ProtectViewModel(
                 local.update { it.copy(error = e) }
             } finally {
                 local.update { it.copy(saving = false) }
+                // The screen was left mid-save: the result could not be deleted then, so do it now.
+                if (cleared) result.file.delete()
             }
         }
     }
@@ -244,14 +246,19 @@ class ProtectViewModel(
         local.update { it.copy(error = null) }
     }
 
+    /** Set in [onCleared]; a save still running then deletes its own source when it ends. */
+    @Volatile private var cleared = false
+
     override fun onCleared() {
+        cleared = true
         passwordGate.clear()
         val input = local.value.file?.file
+        val saving = local.value.saving
         // Typed passwords never outlive the screen.
         local.value = Local()
         val output = successValue()?.file
         runner.cancel()
-        output?.delete()
+        if (!saving) output?.delete()
         input?.delete()
     }
 
