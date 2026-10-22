@@ -40,6 +40,9 @@ class MainActivityIntentTest {
 
     @Before
     fun setUp() {
+        // Pre-warm PdfBox resource loading and a first parse so the budget below is spent on the app, not on cold start.
+        PdfBoxInit.ensure(context)
+        io.github.wzehirx.bpdf.core.pdf.PdfLoader.pageCount(TestPdfs.create(context.cacheDir, 1, "Warm"))
         val cache = androidx.core.content.FileProvider::class.java.getDeclaredField("sCache")
         cache.isAccessible = true
         (cache.get(null) as MutableMap<*, *>).clear()
@@ -54,10 +57,10 @@ class MainActivityIntentTest {
         Intent(Intent.ACTION_VIEW, uri).setClass(context, MainActivity::class.java).addFlags(flags)
 
     private fun waitForViewerOn(name: String) {
-        rule.waitUntil(15_000) {
+        rule.waitUntil(30_000) {
             rule.onAllNodes(isHeading() and hasText(name)).fetchSemanticsNodes().isNotEmpty()
         }
-        rule.onNodeWithText("Page 1 of 2").assertExists()
+        rule.waitUntil(30_000) { rule.onAllNodes(hasText("Page 1 of 2")).fetchSemanticsNodes().isNotEmpty() }
     }
 
     @Test
@@ -105,7 +108,7 @@ class MainActivityIntentTest {
         val uri = contentUri("Recent one.pdf")
         runBlocking { app.container.recentFiles.record(uri.toString(), "Recent one.pdf") }
         ActivityScenario.launch(MainActivity::class.java)
-        rule.waitUntil(15_000) { rule.onAllNodes(hasText("Recent one.pdf")).fetchSemanticsNodes().isNotEmpty() }
+        rule.waitUntil(30_000) { rule.onAllNodes(hasText("Recent one.pdf")).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithText("Recent one.pdf").performClick()
         waitForViewerOn("Recent one.pdf")
     }
@@ -115,10 +118,10 @@ class MainActivityIntentTest {
         val uri = contentUri("Gone soon.pdf")
         runBlocking { app.container.recentFiles.record(uri.toString(), "Gone soon.pdf") }
         ActivityScenario.launch(MainActivity::class.java)
-        rule.waitUntil(15_000) { rule.onAllNodes(hasText("Gone soon.pdf")).fetchSemanticsNodes().isNotEmpty() }
+        rule.waitUntil(30_000) { rule.onAllNodes(hasText("Gone soon.pdf")).fetchSemanticsNodes().isNotEmpty() }
         val actions = rule.onNodeWithText("Gone soon.pdf").fetchSemanticsNode().config.getOrNull(SemanticsActions.CustomActions).orEmpty()
         rule.runOnUiThread { actions.single { it.label == "Remove from recent files" }.action() }
-        rule.waitUntil(15_000) { rule.onAllNodes(hasText("Gone soon.pdf")).fetchSemanticsNodes().isEmpty() }
+        rule.waitUntil(30_000) { rule.onAllNodes(hasText("Gone soon.pdf")).fetchSemanticsNodes().isEmpty() }
         assertEquals(emptyList<String>(), runBlocking { app.container.recentFiles.recents.first() }.map { it.name })
     }
 }

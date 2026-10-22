@@ -231,6 +231,8 @@ class OcrViewModelTest {
         release.countDown()
         while (!engine.closed && System.currentTimeMillis() < deadline) Thread.sleep(5)
         assertTrue("engine released", engine.closed)
+        // the worker closes the engine first and the rasterizer right after, on another thread
+        while (!rasterizer.closed && System.currentTimeMillis() < deadline) Thread.sleep(5)
         assertEquals(OperationState.Idle, vm.settled { it.operation == OperationState.Idle }.operation)
         assertEquals("no page after the cancelled one", listOf(0, 1), rasterizer.rendered)
         assertTrue(rasterizer.closed)
@@ -326,7 +328,7 @@ class OcrViewModelTest {
         val result = vm.success()
         // The build runs inline on the test dispatcher; cancel it from inside, at the font load.
         var buildingWhenCancelled: Boolean? = null
-        fontHook = { buildingWhenCancelled = vm.state.value.buildingPdf; vm.cancelBuild() }
+        fontHook = { buildingWhenCancelled = runBlocking { withTimeout(5_000) { vm.state.first { it.buildingPdf } } }.buildingPdf; vm.cancelBuild() }
         val target = File(dir, "cancelled.pdf")
         vm.saveSearchablePdf(Uri.fromFile(target))
         vm.settled { !it.saving && !it.buildingPdf }

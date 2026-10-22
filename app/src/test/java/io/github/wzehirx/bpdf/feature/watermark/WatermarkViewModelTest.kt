@@ -82,8 +82,10 @@ class WatermarkViewModelTest {
 
     private fun WatermarkViewModel.settled(condition: (WatermarkUiState) -> Boolean) = await { state.first(condition) }
 
-    private fun WatermarkViewModel.success(): WatermarkResult {
-        if (state.value.text.isBlank()) setText("WM")
+    private fun WatermarkViewModel.success(text: String = "WM"): WatermarkResult {
+        // Always set the text explicitly and wait for it; never infer it from a possibly stale combined state.
+        setText(text)
+        settled { it.text == text }
         addWatermark()
         val op = await { state.first { it.operation is OperationState.Success || it.operation is OperationState.Failed } }.operation
         return (op as OperationState.Success).value
@@ -124,9 +126,8 @@ class WatermarkViewModelTest {
     fun watermarkAllPages_stampsTurkishText() {
         val vm = newVm()
         vm.pick(3)
-        vm.setText("GİZLİ ŞİRKET")
         vm.setRotation(0)
-        val result = vm.success()
+        val result = vm.success("GİZLİ ŞİRKET")
         assertEquals(3, result.markedCount)
         assertEquals(3, result.pageCount)
         assertEquals("book_watermarked.pdf", result.suggestedName)
@@ -137,11 +138,10 @@ class WatermarkViewModelTest {
     fun selectedPages_onlyThose() {
         val vm = newVm()
         vm.pick(4)
-        vm.setText("MARK")
         vm.setRotation(0)
         vm.setScope(PageScope.SELECTED)
         vm.setRangeText("2,4")
-        val result = vm.success()
+        val result = vm.success("MARK")
         assertEquals(2, result.markedCount)
         assertEquals(listOf(false, true, false, true), texts(result.file).map { it.contains("MARK") })
     }

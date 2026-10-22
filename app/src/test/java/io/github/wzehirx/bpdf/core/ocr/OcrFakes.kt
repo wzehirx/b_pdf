@@ -4,15 +4,16 @@ import android.graphics.Bitmap
 import io.github.wzehirx.bpdf.core.pdf.PageRasterizer
 import java.io.Closeable
 import java.io.File
+import java.util.concurrent.CopyOnWriteArrayList
 
 /** Draws a tiny bitmap per page and remembers which pages were asked for and which bitmaps it gave out. */
 class FakeRasterizer(private val failOnPage: Int? = null) : PageRasterizer, Closeable {
-    val rendered = mutableListOf<Int>()
-    val files = mutableListOf<File>()
-    val encryptedWhenRendered = mutableListOf<Boolean>()
-    val dpis = mutableListOf<Int>()
-    val bitmaps = mutableListOf<Bitmap>()
-    var closed = false
+    val rendered: MutableList<Int> = CopyOnWriteArrayList()
+    val files: MutableList<File> = CopyOnWriteArrayList()
+    val encryptedWhenRendered: MutableList<Boolean> = CopyOnWriteArrayList()
+    val dpis: MutableList<Int> = CopyOnWriteArrayList()
+    val bitmaps: MutableList<Bitmap> = CopyOnWriteArrayList()
+    @Volatile var closed = false
 
     override fun render(file: File, pageIndex: Int, dpi: Int): Bitmap {
         if (pageIndex == failOnPage) throw IllegalStateException("cannot draw")
@@ -33,10 +34,10 @@ class FakeOcrEngine(
     private val onRecognize: (callNumber: Int) -> Unit = {},
     private val textFor: (pageIndex: Int) -> String = { "text of page ${it + 1}" },
 ) : OcrEngine {
-    val languages = mutableListOf<String>()
-    val recycledWhenCalled = mutableListOf<Boolean>()
-    var stopped = false
-    var closed = false
+    val languages: MutableList<String> = CopyOnWriteArrayList()
+    val recycledWhenCalled: MutableList<Boolean> = CopyOnWriteArrayList()
+    @Volatile var stopped = false
+    @Volatile var closed = false
 
     override fun recognize(bitmap: Bitmap, languages: String): String {
         check(!closed) { "engine was closed" }
