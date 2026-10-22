@@ -79,7 +79,7 @@ export ANDROID_HOME=$HOME/android-sdk
 ./gradlew assembleDebug             # APK in app/build/outputs/apk/debug/
 ```
 
-Release builds are signed in CI from four repository secrets: `SIGNING_KEYSTORE_BASE64`, `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS` and `SIGNING_KEY_PASSWORD`. The release workflow fails with an error message when one is missing, because a release signed with a throwaway key could never be updated. Optionally set the repository variable `BPDF_CERT_SHA256` to the SHA-256 of your release certificate and the workflow checks it. A local `assembleRelease` without them uses the debug key.
+Release builds are signed in CI from four repository secrets: `SIGNING_KEYSTORE_BASE64`, `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS` and `SIGNING_KEY_PASSWORD`. Until they are set, releases are signed with a debug key kept in the Actions cache, so releases still install over each other; switching to the real key later needs one uninstall. Optionally set the repository variable `BPDF_CERT_SHA256` to the SHA-256 of your release certificate and the workflow checks it. A local `assembleRelease` without them uses the debug key.
 
 Release workflow notes: a push to `main` or any `ccr-*` branch that raises `bpdf.versionName` publishes that version, so keep release branches to branches you trust; the actions are pinned by major version, not by commit.
 
@@ -200,7 +200,7 @@ export ANDROID_HOME=$HOME/android-sdk
 ./gradlew assembleDebug             # APK: app/build/outputs/apk/debug/
 ```
 
-Yayın sürümleri CI'da dört depo gizli anahtarıyla imzalanır: `SIGNING_KEYSTORE_BASE64`, `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS` ve `SIGNING_KEY_PASSWORD`. Biri eksikse yayın iş akışı hata verir, çünkü geçici bir anahtarla imzalanan sürüm bir daha güncellenemez. İsterseniz `BPDF_CERT_SHA256` depo değişkenine sertifikanızın SHA-256 değerini yazın, iş akışı bunu da denetler. Yerelde gizli anahtarsız `assembleRelease` hata ayıklama anahtarını kullanır.
+Yayın sürümleri CI'da dört depo gizli anahtarıyla imzalanır: `SIGNING_KEYSTORE_BASE64`, `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS` ve `SIGNING_KEY_PASSWORD`. Bunlar eklenene kadar sürümler Actions önbelleğinde saklanan bir hata ayıklama (debug) anahtarıyla imzalanır; böylece sürümler birbirinin üstüne kurulur. Sonradan gerçek anahtara geçmek bir kez kaldırıp yeniden kurmayı gerektirir. İsterseniz `BPDF_CERT_SHA256` depo değişkenine sertifikanızın SHA-256 değerini yazın, iş akışı bunu da denetler. Yerelde gizli anahtarsız `assembleRelease` hata ayıklama anahtarını kullanır.
 
 ### Mimari
 

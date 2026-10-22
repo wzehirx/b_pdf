@@ -34,7 +34,7 @@ Tools: Merge, Split, Remove pages, Extract pages, Organize pages, Rotate, Images
 - A damaged settings or recent files store is replaced instead of crashing the app on the next change.
 - Word and Excel files: documents with a DOCTYPE or that unpack to more than 64 MB are refused as unreadable, and very large pictures in a PDF are decoded at reduced size when converting to Word or HTML.
 - The Word, Excel and text to PDF picker now offers .csv, .md, .log and files whose type the provider does not know.
-- Release pipeline: secrets no longer pass through the script text, a release without the four signing secrets fails with a clear message instead of publishing a debug-signed APK, and a pushed tag must match the version.
+- Release pipeline: secrets no longer pass through the script text, without the four signing secrets the APK is signed with one debug key kept in the Actions cache (with a warning), so releases install over each other, and a pushed tag must match the version.
 
 ## [0.7.0] - 2026-10-21
 

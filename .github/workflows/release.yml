@@ -56,19 +56,26 @@ jobs:
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: |
-          # A release signed with a throwaway debug key could never be updated: the next release would
-          # have another key and Android would refuse to install it over this one. Refuse to publish.
+          # Without the secrets the APK is signed with the debug key kept in the Actions cache (next step),
+          # so consecutive releases share one key and install over each other. Set the four secrets
+          # (Settings > Secrets and variables > Actions) to sign with the real release key instead.
           missing=""
           [ -n "$SIGNING_KEYSTORE_BASE64" ] || missing="$missing SIGNING_KEYSTORE_BASE64"
           [ -n "$SIGNING_STORE_PASSWORD" ] || missing="$missing SIGNING_STORE_PASSWORD"
           [ -n "$SIGNING_KEY_ALIAS" ] || missing="$missing SIGNING_KEY_ALIAS"
           [ -n "$SIGNING_KEY_PASSWORD" ] || missing="$missing SIGNING_KEY_PASSWORD"
           if [ -n "$missing" ]; then
-            echo "::error::Release signing is not configured. Set these four repository secrets (Settings > Secrets and variables > Actions) and run the workflow again: SIGNING_KEYSTORE_BASE64 (the keystore file, base64 encoded), SIGNING_STORE_PASSWORD, SIGNING_KEY_ALIAS, SIGNING_KEY_PASSWORD. Missing:${missing}. Publishing a debug-signed release is refused because users could never update from it."
-            exit 1
+            echo "::warning::Release signing secrets missing:${missing}. Signing with the cached debug key."
+            exit 0
           fi
           printf '%s' "$SIGNING_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
           echo "BPDF_KEYSTORE_FILE=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+      - name: Keep one debug key across releases
+        if: steps.tag.outputs.skip != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: bpdf-debug-keystore-v1
       - uses: actions/setup-java@v4
         if: steps.tag.outputs.skip != 'true'
         with:
