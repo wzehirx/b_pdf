@@ -21,6 +21,7 @@
     <string name="working">İşleniyor…</string>
     <string name="working_percent">İşleniyor… %%%1$d</string>
     <string name="error_generic">Bir şeyler ters gitti</string>
+    <string name="err_out_of_memory">Bu dosya kullanılabilir bellek için çok büyük. Daha az sayfa veya daha düşük çözünürlük deneyin.</string>
     <string name="err_password_required">Bu PDF parola korumalı. Devam etmek için parolayı girin.</string>
     <string name="err_wrong_password">Parola yanlış. Yeniden deneyin.</string>
     <string name="err_corrupt">Bu PDF hasarlı veya okunamıyor.</string>

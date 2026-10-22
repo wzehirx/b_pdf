@@ -21,6 +21,7 @@
     <string name="working">Working…</string>
     <string name="working_percent">Working… %1$d%%</string>
     <string name="error_generic">Something went wrong</string>
+    <string name="err_out_of_memory">This file is too large for the memory available. Try fewer pages or a lower resolution.</string>
     <string name="err_password_required">This PDF is password protected. Enter the password to continue.</string>
     <string name="err_wrong_password">That password is incorrect. Try again.</string>
     <string name="err_corrupt">This PDF is damaged or cannot be read.</string>

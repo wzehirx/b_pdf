@@ -48,6 +48,14 @@ class ErrorMessagesTest {
         assertEquals("Metin tanıma başlatılamadı. Boş depolama alanını kontrol edip yeniden deneyin.", error.toUserMessage(resources(Locale("tr"))))
     }
 
+    @Test fun outOfMemory_hasItsOwnMessage_inBothLanguages() {
+        assertEquals(
+            "This file is too large for the memory available. Try fewer pages or a lower resolution.",
+            OutOfMemoryError().toUserMessage(resources(Locale.ENGLISH)),
+        )
+        assertTrue(OutOfMemoryError().toUserMessage(resources(Locale("tr"))).startsWith("Bu dosya"))
+    }
+
     @Test fun turkishMessage_isActuallyTurkish() {
         val tr = PdfError.WrongPassword().toMessage(resources(Locale("tr")))
         assertEquals("Parola yanlış. Yeniden deneyin.", tr)

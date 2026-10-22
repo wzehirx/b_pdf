@@ -32,5 +32,6 @@ fun Throwable.toUserMessage(res: Resources): String = when (this) {
     is OcrFailed -> res.getString(R.string.err_ocr_failed)
     is ExportFailed -> res.getString(R.string.err_export_failed)
     is SourceUnavailable -> res.getString(R.string.err_source_unavailable)
+    is OutOfMemoryError -> res.getString(R.string.err_out_of_memory)
     else -> res.getString(R.string.error_generic)
 }
