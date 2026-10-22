@@ -5,7 +5,7 @@
 
 English | [Türkçe](#türkçe)
 
-**b PDF** is a free, open-source, offline PDF toolkit for Android, built accessibility-first. Every tool works with TalkBack, with no gesture-only interaction, and nothing ever leaves your device: the app has no network permission. Version 1.0.0 is the first stable release: all 19 tools are in, and every screen has been audited against the accessibility checklist.
+**b PDF** is a free, open-source, offline PDF toolkit for Android, built accessibility-first. Every tool works with TalkBack, with no gesture-only interaction, and nothing ever leaves your device: the app has no network permission. Version 1.0.0 is the first stable release: all 21 tools are in, and every screen has been audited against the accessibility checklist.
 
 ## Features
 
@@ -20,6 +20,8 @@ English | [Türkçe](#türkçe)
 - **Images to PDF**: turn photos and pictures (from the gallery or the camera) into a PDF with page size, orientation and margin options.
 - **PDF to images**: save pages as JPEG or PNG pictures at a resolution you choose.
 - **PDF to text**: read or save the text of all or selected pages, one "Page N" heading per page.
+- **PDF to Word, Excel or HTML**: offline; "Text and pictures" keeps text editable with one heading per page and pictures with alt text, "Exact look" also keeps drawings and shapes by inserting each page as a picture. Excel output is basic (columns are guessed from spacing).
+- **Word, Excel or text to PDF**: offline; headings, bold, lists, tables (as text) and pictures are kept; fonts, colours and non-picture shapes are not.
 - **Text recognition (OCR)**: read scanned pages in Turkish, English or both, on the device, and save the text or a searchable PDF.
 
 **Security**
@@ -122,7 +124,7 @@ Third-party components:
 
 ## Türkçe
 
-**b PDF**, Android için ücretsiz, açık kaynaklı ve çevrimdışı çalışan, erişilebilirliği önceleyen bir PDF araç takımıdır. Her araç TalkBack ile kullanılabilir, hiçbir işlem yalnızca harekete bağlı değildir ve hiçbir veri cihazınızdan çıkmaz: uygulamanın ağ izni yoktur. 1.0.0 ilk kararlı sürümdür: 19 aracın hepsi hazırdır ve her ekran erişilebilirlik denetim listesine göre denetlenmiştir.
+**b PDF**, Android için ücretsiz, açık kaynaklı ve çevrimdışı çalışan, erişilebilirliği önceleyen bir PDF araç takımıdır. Her araç TalkBack ile kullanılabilir, hiçbir işlem yalnızca harekete bağlı değildir ve hiçbir veri cihazınızdan çıkmaz: uygulamanın ağ izni yoktur. 1.0.0 ilk kararlı sürümdür: 21 aracın hepsi hazırdır ve her ekran erişilebilirlik denetim listesine göre denetlenmiştir.
 
 ### Özellikler
 
@@ -137,6 +139,8 @@ Third-party components:
 - **Görselden PDF'e**: galeriden ya da kameradan fotoğrafları sayfa boyutu, yön ve kenar boşluğu seçenekleriyle PDF yapar.
 - **PDF'den görsele**: sayfaları seçtiğiniz çözünürlükte JPEG ya da PNG olarak kaydeder.
 - **PDF'den metne**: tüm sayfaların ya da seçtiklerinizin metnini, her sayfa kendi "Sayfa N" başlığı altında, okur veya kaydeder.
+- **PDF'den Word, Excel veya HTML'ye**: çevrimdışı; "Metin ve resimler" metni düzenlenebilir bırakır, her sayfa için bir başlık ve açıklamalı resimler ekler; "Birebir görünüm" her sayfayı resim olarak da ekleyerek çizim ve şekilleri korur. Excel çıktısı basittir (sütunlar boşluklardan tahmin edilir).
+- **Word, Excel veya metinden PDF'ye**: çevrimdışı; başlıklar, kalın yazı, listeler, tablolar (metin olarak) ve resimler korunur; yazı tipleri, renkler ve resim olmayan şekiller korunmaz.
 - **Metin tanıma (OCR)**: taranmış sayfaları cihazda Türkçe, İngilizce veya ikisi birden okur; metni ya da aranabilir PDF'yi kaydeder.
 
 **Güvenlik**

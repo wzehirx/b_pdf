@@ -7,11 +7,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [1.0.0] - 2026-10-21
 
-First stable release: all 19 tools, audited for accessibility.
+First stable release: all 21 tools, audited for accessibility.
 
-Tools: Merge, Split, Remove pages, Extract pages, Organize pages, Rotate, Images to PDF, PDF to images, PDF to text, Text recognition (OCR), Protect, Unlock, Sign (visual, not cryptographic), Compress, Watermark, Page numbers, Document info, Repair and the accessible reader. Everything works offline, in English and Turkish, with TalkBack custom actions instead of gestures.
+Tools: Merge, Split, Remove pages, Extract pages, Organize pages, Rotate, Images to PDF, PDF to images, PDF to text, Text recognition (OCR), Protect, Unlock, Sign (visual, not cryptographic), Compress, Watermark, Page numbers, Document info, Repair, the accessible reader, PDF to Word, Excel or HTML, and Word, Excel or text to PDF. Everything works offline, in English and Turkish, with TalkBack custom actions instead of gestures.
 
 ### Added
+- PDF to Word (.docx), Excel (.xlsx, basic) or HTML, offline. Layout "Text and pictures" keeps the text editable with page headings and pictures (with alt text); "Exact look" also inserts each page as a picture so drawings and shapes are kept.
+- Word (.docx), Excel (.xlsx) and text (.txt) to PDF, offline: headings, bold, lists, tables as text, inline pictures, Turkish characters. Fonts, colours and non-picture shapes are not kept.
 - Settings: theme (follow system, light, dark), high contrast (text contrast of at least 7 to 1 in light and dark), app language (English, Turkish or follow the system; Android 13 and newer, older versions follow the system language), default save behavior (ask each time, or Share first) and Clear cache, which says how much space it freed.
 - About: version, Apache-2.0 license, source link and the list of open-source licenses with links.
 - Settings action on the home screen.
