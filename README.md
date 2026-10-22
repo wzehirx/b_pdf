@@ -7,11 +7,11 @@ English | [Türkçe](#türkçe)
 
 ## İndir / Download
 
-**[b PDF 1.0.0 APK'yı indir / Download the APK](https://github.com/wzehirx/b_pdf/raw/ccr-b3c31da5-4het63/apk/b-pdf-v1.0.0.apk)** (44 MB, Android 8.0+)
+**[b PDF 1.0.1 APK'yı indir / Download the APK](https://github.com/wzehirx/b_pdf/raw/ccr-b3c31da5-4het63/apk/b-pdf-v1.0.1.apk)** (44 MB, Android 8.0+)
 
 - TR: Bu APK, projenin kalıcı release anahtarıyla imzalıdır; sonraki sürümler bunun üstüne kurulur. Releases sayfasındaki APK'lar ise debug anahtarıyla imzalıdır; ikisi birbirinin üstüne kurulmaz, birinden diğerine geçerken önce uygulamayı kaldırın.
 - EN: This APK is signed with the project's permanent release key, so later versions install over it. The APKs on the Releases page are debug-signed; the two cannot be installed over each other, so uninstall first when switching.
-- SHA-256: `b0c05835e97c066cfead1952bb41f0148a57cda745fd7f664f0bc8a175d83b74`
+- SHA-256: `460011ea10f4e21e97d2e7ed216d0c40f2325c79f140ecc27df1f5dbe82c30c5`
 
 **b PDF** is a free, open-source, offline PDF toolkit for Android, built accessibility-first. Every tool works with TalkBack, with no gesture-only interaction, and nothing ever leaves your device: the app has no network permission. Version 1.0.0 is the first stable release: all 21 tools are in, and every screen has been audited against the accessibility checklist.
 
