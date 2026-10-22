@@ -5,6 +5,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-22
+
+### Fixed
+- TalkBack no longer reads every tool, and some choices, twice: merged rows now speak their visible text once. A test walks the semantics of every screen and fails on repeated speech.
+
+### Changed
+- Cleaner, consistent layout: Home lists tools as rows grouped by category (two columns on wide screens), all tool screens share the same spacing, option cards, file card and full-width primary button, and the app uses one brand color scheme (deep red, light and dark) instead of wallpaper colors.
+
 ## [1.0.0] - 2026-10-22
 
 First stable release: all 21 tools, audited for accessibility.
@@ -102,7 +110,7 @@ Tools: Merge, Split, Remove pages, Extract pages, Organize pages, Rotate, Images
 - GitHub Actions CI (unit tests, lint, debug build) and a tag-triggered release workflow that publishes the APK with these notes.
 - README, CONTRIBUTING, and accessibility guide (English and Turkish).
 
-[Unreleased]: https://github.com/wzehirx/b_pdf/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/wzehirx/b_pdf/compare/v1.0.1...HEAD
 [0.3.0]: https://github.com/wzehirx/b_pdf/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/wzehirx/b_pdf/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/wzehirx/b_pdf/releases/tag/v0.1.0
